@@ -1,0 +1,98 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    image: entre-sabores-app:latest
+    container_name: entre_sabores_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    env_file:
+      - .env
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-entre_sabores}
+      DB_USERNAME: ${DB_USERNAME:-entre_sabores}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - entre_sabores
+
+  nginx:
+    image: nginx:alpine
+    container_name: entre_sabores_nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - entre_sabores
+
+  mysql:
+    image: mysql:8.0
+    container_name: entre_sabores_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_DATABASE:-entre_sabores}
+      MYSQL_USER: ${DB_USERNAME:-entre_sabores}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      - "${DB_PORT_EXPOSED:-3307}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${DB_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks:
+      - entre_sabores
+
+  phpmyadmin:
+    image: phpmyadmin:apache
+    container_name: entre_sabores_pma
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "${PMA_PORT:-8081}:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - entre_sabores
+
+  redis:
+    image: redis:7-alpine
+    container_name: entre_sabores_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT_EXPOSED:-6380}:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - entre_sabores
+
+networks:
+  entre_sabores:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
