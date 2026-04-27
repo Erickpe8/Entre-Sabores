@@ -12,16 +12,19 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+    @php($isProfileEdit = request()->routeIs('profile.edit'))
+    <body class="font-sans antialiased {{ $isProfileEdit ? 'bg-slate-950' : '' }}">
+        <div class="min-h-screen {{ $isProfileEdit ? '' : 'bg-gray-100' }}">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white shadow">
+                <header class="{{ $isProfileEdit ? 'bg-white/5 border-b border-white/10 backdrop-blur' : 'bg-white shadow' }}">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
@@ -29,9 +32,16 @@
             @endisset
 
             <!-- Page Content -->
-            <main>
+            <main class="{{ $isProfileEdit ? 'text-slate-100' : '' }}">
                 {{ $slot }}
             </main>
         </div>
+
+        <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+        <script>
+            if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+                lucide.createIcons();
+            }
+        </script>
     </body>
 </html>

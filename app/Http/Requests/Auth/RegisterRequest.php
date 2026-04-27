@@ -9,6 +9,20 @@ use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
 {
+    /** @var list<string> */
+    private const COUNTRIES = [
+        'Colombia',
+        'México',
+        'Argentina',
+        'Chile',
+        'Perú',
+        'Ecuador',
+        'Venezuela',
+        'Bolivia',
+        'Paraguay',
+        'Uruguay',
+    ];
+
     public function authorize(): bool
     {
         return true;
@@ -21,7 +35,7 @@ class RegisterRequest extends FormRequest
             'last_name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class, 'email')],
             'password' => ['required', 'confirmed', 'min:8', Password::defaults()],
-            'country' => ['required', 'string', 'max:100'],
+            'country' => ['required', 'string', Rule::in(self::COUNTRIES)],
             'profile_photo' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'description' => ['nullable', 'string', 'max:500'],
         ];
@@ -39,6 +53,7 @@ class RegisterRequest extends FormRequest
             'password.confirmed' => 'Las contraseñas no coinciden.',
             'password.min' => 'Tu contraseña debe tener al menos 8 caracteres.',
             'country.required' => 'Debes seleccionar un país.',
+            'country.in' => 'Selecciona un país válido de la lista.',
             'profile_photo.required' => 'La foto de perfil es obligatoria.',
             'profile_photo.image' => 'La foto de perfil debe ser una imagen válida.',
             'profile_photo.mimes' => 'La foto de perfil debe estar en formato JPG o PNG.',

@@ -27,11 +27,30 @@ class UserFactory extends Factory
         return [
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
+            'username' => fn (array $attributes) => User::generateUniqueUsername(
+                $attributes['first_name'],
+                $attributes['last_name']
+            ),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-            'country' => fake()->country(),
-            'profile_photo' => 'profiles/default.png',
+            'country' => fake()->randomElement([
+                'Colombia',
+                'México',
+                'Argentina',
+                'Chile',
+                'Perú',
+                'Ecuador',
+                'Venezuela',
+                'Bolivia',
+                'Paraguay',
+                'Uruguay',
+            ]),
+            'profile_photo' => null,
+            'instagram' => null,
+            'linkedin' => null,
+            'birthdate' => null,
+            'preferences' => null,
             'description' => fake()->optional()->sentence(),
             'remember_token' => Str::random(10),
         ];

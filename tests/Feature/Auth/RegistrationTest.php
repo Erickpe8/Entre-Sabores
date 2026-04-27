@@ -47,15 +47,20 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
 
+        $user = User::query()->where('email', 'test@example.com')->first();
+        $this->assertNotNull($user);
+
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
             'first_name' => 'Test',
             'last_name' => 'Apellido',
+            'username' => $user->username,
             'country' => 'Colombia',
             'description' => 'Bio de prueba',
         ]);
 
-        $photoPath = (string) User::query()->where('email', 'test@example.com')->value('profile_photo');
+        $photoPath = (string) $user->profile_photo;
+        $this->assertStringContainsString('profiles/'.$user->username.'/', $photoPath);
         Storage::disk('public')->assertExists($photoPath);
     }
 

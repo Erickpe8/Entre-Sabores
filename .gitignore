@@ -32,6 +32,8 @@ auth.json
 .php-cs-fixer.cache
 .phpstan-baseline.neon
 
+/database/seeders/DevUserSeeder.php
+
 # --- Logs ---
 *.log
 logs/

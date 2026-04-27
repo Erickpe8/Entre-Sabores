@@ -9,6 +9,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -27,11 +28,21 @@ class RegisteredUserController extends Controller
     public function store(RegisterRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        $photoPath = $request->file('profile_photo')->store('profiles', 'public');
+
+        $username = User::generateUniqueUsername($validated['first_name'], $validated['last_name']);
+
+        $file = $request->file('profile_photo');
+        $filename = 'avatar_'.time().'.jpg';
+        $photoPath = Storage::disk('public')->putFileAs(
+            'profiles/'.$username,
+            $file,
+            $filename
+        );
 
         $user = User::create([
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
+            'username' => $username,
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'country' => $validated['country'],
