@@ -55,6 +55,11 @@ class ProfileUpdateRequest extends FormRequest
             $data['linkedin'] = $linkedin;
         }
 
+        if (array_key_exists('username', $input)) {
+            $un = $this->input('username');
+            $data['username'] = is_string($un) ? strtolower(trim($un)) : $un;
+        }
+
         if (array_key_exists('profile_edit_form', $input)) {
             $bd = $this->input('birthdate');
             $data['birthdate'] = ($bd === null || $bd === '') ? null : $bd;
@@ -76,6 +81,15 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'username' => [
+                'required',
+                'string',
+                'lowercase',
+                'alpha_dash',
+                'min:3',
+                'max:30',
+                Rule::unique(User::class, 'username')->ignore($this->user()->id),
+            ],
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],
             'email' => [
@@ -125,6 +139,12 @@ class ProfileUpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'username.required' => 'El nombre de usuario es obligatorio.',
+            'username.lowercase' => 'El nombre de usuario debe estar en minúsculas.',
+            'username.alpha_dash' => 'Solo letras, números, guiones y guiones bajos.',
+            'username.min' => 'El nombre de usuario debe tener al menos :min caracteres.',
+            'username.max' => 'El nombre de usuario no puede superar :max caracteres.',
+            'username.unique' => 'Ese nombre de usuario ya está en uso.',
             'first_name.required' => 'Escribe tu nombre.',
             'last_name.required' => 'Escribe tu apellido.',
             'email.required' => 'Necesitamos tu correo electrónico.',

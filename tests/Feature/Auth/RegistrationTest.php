@@ -62,6 +62,9 @@ class RegistrationTest extends TestCase
         $photoPath = (string) $user->profile_photo;
         $this->assertStringContainsString('profiles/'.$user->username.'/', $photoPath);
         Storage::disk('public')->assertExists($photoPath);
+
+        $this->assertNotSame('testapellido', $user->username, 'El username no debe ser el slug de nombre+apellido; debe ser creativo o desde Instagram.');
+        $this->assertStringStartsWith('test', $user->username);
     }
 
     public function test_profile_photo_is_required_to_register(): void

@@ -27,6 +27,20 @@
                                 {{ $user->first_name }} {{ $user->last_name }}
                             </h3>
 
+                            <p class="text-gray-400 text-sm">
+                                {{ '@'.$user->username }}
+                            </p>
+
+                            <a
+                                href="{{ route('user.profile', $user->username) }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-1.5 text-xs text-green-400 hover:text-green-300 hover:underline"
+                            >
+                                <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0" aria-hidden="true"></i>
+                                Ver perfil público
+                            </a>
+
                             <div class="flex items-center justify-center gap-2 text-gray-400 text-sm">
                                 <i data-lucide="map-pin" class="w-4 h-4 text-green-400 shrink-0" aria-hidden="true"></i>
                                 <span>{{ $user->country ?? '—' }}</span>
@@ -131,6 +145,37 @@
                         <h2 class="text-white text-lg font-semibold">
                             Información personal
                         </h2>
+
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-300 mb-1">
+                                Nombre de usuario
+                            </label>
+                            <input
+                                id="username"
+                                name="username"
+                                type="text"
+                                class="input font-mono"
+                                value="{{ old('username', $user->username) }}"
+                                required
+                                autocomplete="nickname"
+                                minlength="3"
+                                maxlength="30"
+                                pattern="[a-z0-9_-]+"
+                                title="Solo minúsculas, números, guiones y guiones bajos"
+                                data-check-url="{{ route('username.availability') }}"
+                                data-initial-username="{{ $user->username }}"
+                            >
+                            <x-input-error class="mt-2" :messages="$errors->get('username')" />
+                            <p
+                                id="username-availability"
+                                class="mt-1 text-xs min-h-[1.25rem]"
+                                role="status"
+                                aria-live="polite"
+                            ></p>
+                            <p class="mt-0.5 text-xs text-gray-500">
+                                URL pública: <span class="text-gray-400">{{ url('/user/') }}</span><span id="username-url-preview" class="text-green-400/90">{{ old('username', $user->username) }}</span>
+                            </p>
+                        </div>
 
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
@@ -341,5 +386,76 @@
             crop-image-id="cropperImage"
             modal-id="avatarCropModal"
         />
+
+        <script>
+            (function () {
+                const input = document.getElementById('username');
+                const status = document.getElementById('username-availability');
+                const preview = document.getElementById('username-url-preview');
+                if (!input || !status) return;
+                const checkUrl = input.getAttribute('data-check-url');
+                if (!checkUrl) return;
+                const debounceMs = 450;
+                let timer = null;
+
+                function setStatus(message, className) {
+                    status.textContent = message;
+                    status.className = 'mt-1 text-xs min-h-[1.25rem] ' + (className || 'text-gray-500');
+                }
+
+                async function check() {
+                    const raw = (input.value || '').trim();
+                    if (preview) {
+                        preview.textContent = raw || input.dataset.initialUsername || '';
+                    }
+                    if (raw.length < 3) {
+                        setStatus('Mínimo 3 caracteres.', 'text-amber-400/90');
+                        return;
+                    }
+                    if (raw.length > 30) {
+                        setStatus('Máximo 30 caracteres.', 'text-red-400');
+                        return;
+                    }
+                    if (!/^[a-zA-Z0-9_-]+$/.test(raw)) {
+                        setStatus('Solo letras, números, guiones y guion bajo.', 'text-amber-400/90');
+                        return;
+                    }
+                    setStatus('Comprobando…', 'text-gray-500');
+                    try {
+                        const url = checkUrl + (checkUrl.includes('?') ? '&' : '?') + 'username=' + encodeURIComponent(raw);
+                        const r = await fetch(url, {
+                            headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                            credentials: 'same-origin',
+                        });
+                        if (r.status === 422) {
+                            setStatus('Formato no válido.', 'text-red-400');
+                            return;
+                        }
+                        if (!r.ok) {
+                            setStatus('No se pudo comprobar. Reintenta.', 'text-amber-400/90');
+                            return;
+                        }
+                        const data = await r.json();
+                        if (data.available) {
+                            setStatus('Disponible', 'text-green-400');
+                        } else {
+                            setStatus('No disponible', 'text-red-400');
+                        }
+                    } catch (e) {
+                        setStatus('Sin conexión. Reintenta.', 'text-amber-400/90');
+                    }
+                }
+
+                function scheduleCheck() {
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(check, debounceMs);
+                }
+
+                input.addEventListener('input', scheduleCheck);
+                if ((input.value || '').trim().length >= 3) {
+                    scheduleCheck();
+                }
+            })();
+        </script>
     </div>
 </x-app-layout>

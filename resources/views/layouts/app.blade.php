@@ -17,7 +17,7 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    @php($isProfileEdit = request()->routeIs('profile.edit'))
+    @php($isProfileEdit = request()->routeIs('profile.edit') || request()->routeIs('user.profile'))
     <body class="font-sans antialiased {{ $isProfileEdit ? 'bg-slate-950' : '' }}">
         <div class="min-h-screen {{ $isProfileEdit ? '' : 'bg-gray-100' }}">
             @include('layouts.navigation')

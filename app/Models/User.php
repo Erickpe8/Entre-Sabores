@@ -47,11 +47,68 @@ class User extends Authenticatable
     }
 
     /**
-     * Genera un username único tipo slug a partir del nombre (para rutas /user/{username} y carpetas en storage).
+     * Normaliza un handle de Instagram para derivar username (sin @).
      */
-    public static function generateUniqueUsername(string $firstName, string $lastName): string
+    public static function normalizeInstagramHandle(?string $handle): ?string
     {
-        $base = Str::slug($firstName.$lastName, '');
+        if ($handle === null || $handle === '') {
+            return null;
+        }
+
+        $handle = trim($handle);
+        $handle = ltrim($handle, '@/');
+        $handle = trim($handle);
+
+        return $handle !== '' ? $handle : null;
+    }
+
+    /** @var list<string> */
+    private const CREATIVE_FOODS = [
+        'arepa', 'taco', 'empanada', 'ajiaco', 'tamal', 'ceviche', 'pozole', 'sancocho',
+        'mole', 'paella', 'gazpacho', 'churro', 'torta', 'burrito', 'quesadilla', 'pupusa',
+        'enchilada', 'hallaca', 'asado', 'patacon', 'cazuela', 'horchata',
+    ];
+
+    /**
+     * Base creativa para username: primer nombre + comida en español + número.
+     */
+    public static function creativeUsernameBase(string $firstName): string
+    {
+        $firstToken = trim((string) Str::of($firstName)->explode(' ')->first());
+        $namePart = Str::slug($firstToken, '');
+        $food = self::CREATIVE_FOODS[array_rand(self::CREATIVE_FOODS)];
+        $salt = (string) random_int(10, 99);
+
+        $raw = $namePart.$food.$salt;
+        $base = Str::slug($raw, '');
+
+        if ($base === '') {
+            $base = 'usuario'.self::CREATIVE_FOODS[array_rand(self::CREATIVE_FOODS)].(string) random_int(10, 99);
+        }
+
+        if (strlen($base) > 24) {
+            $base = substr($base, 0, 24);
+        }
+
+        return $base;
+    }
+
+    /**
+     * Genera un username único (minúsculas, slug): prioriza Instagram si viene informado;
+     * si no, usa primer nombre + comida + número para un alias divertido.
+     */
+    public static function generateUniqueUsername(string $firstName, string $lastName, ?string $instagramHandle = null): string
+    {
+        // $lastName se mantiene por compatibilidad (registro/factory) aunque no se use para el fallback creativo.
+        unset($lastName);
+        $instagramHandle = self::normalizeInstagramHandle($instagramHandle);
+
+        if ($instagramHandle !== null) {
+            $base = Str::slug($instagramHandle, '');
+        } else {
+            $base = self::creativeUsernameBase($firstName);
+        }
+
         if ($base === '') {
             $base = 'user';
         }

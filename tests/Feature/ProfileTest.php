@@ -28,10 +28,12 @@ class ProfileTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
+                'username' => $user->username,
                 'first_name' => 'Test',
                 'last_name' => 'User',
                 'email' => 'test@example.com',
                 'country' => $user->country,
+                'profile_edit_form' => '1',
             ]);
 
         $response
@@ -53,10 +55,12 @@ class ProfileTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
+                'username' => $user->username,
                 'first_name' => 'Test',
                 'last_name' => 'User',
                 'email' => $user->email,
                 'country' => $user->country,
+                'profile_edit_form' => '1',
             ]);
 
         $response
@@ -100,5 +104,24 @@ class ProfileTest extends TestCase
             ->assertRedirect('/profile');
 
         $this->assertNotNull($user->fresh());
+    }
+
+    public function test_public_profile_page_is_displayed_by_username(): void
+    {
+        $user = User::factory()->create([
+            'username' => 'testuserpub',
+            'description' => 'Hola mundo',
+        ]);
+
+        $response = $this->get(route('user.profile', 'testuserpub'));
+
+        $response->assertOk();
+        $response->assertSee('@testuserpub', false);
+        $response->assertSee('Hola mundo', false);
+    }
+
+    public function test_public_profile_returns_not_found_for_unknown_username(): void
+    {
+        $this->get(route('user.profile', 'usuario_inexistente_xyz'))->assertNotFound();
     }
 }

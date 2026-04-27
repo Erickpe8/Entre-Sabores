@@ -6,6 +6,7 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -32,6 +33,29 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        $previousUsername = $user->username;
+        $targetUsername = $validated['username'] ?? $previousUsername;
+
+        if ($targetUsername !== $previousUsername) {
+            $disk = Storage::disk('public');
+            $oldDir = 'profiles/'.$previousUsername;
+            $newDir = 'profiles/'.$targetUsername;
+
+            if ($disk->exists($oldDir)) {
+                $from = $disk->path($oldDir);
+                $to = $disk->path($newDir);
+
+                if (! File::isDirectory($to)) {
+                    File::moveDirectory($from, $to);
+                }
+
+                $photo = $user->profile_photo;
+                if (is_string($photo) && $photo !== '' && str_contains($photo, $oldDir.'/')) {
+                    $validated['profile_photo'] = str_replace($oldDir.'/', $newDir.'/', $photo);
+                }
+            }
+        }
+
         $base64 = $validated['profile_photo_base64'] ?? null;
         unset($validated['profile_photo_base64']);
 
@@ -54,13 +78,13 @@ class ProfileController extends Controller
                 ]);
             }
 
-            $directory = 'profiles/'.$user->username;
+            $directory = 'profiles/'.$targetUsername;
             $fileName = 'avatar_'.time().'.jpg';
             $path = $directory.'/'.$fileName;
 
             Storage::disk('public')->put($path, $imageDecoded);
 
-            $previousPath = $user->profile_photo;
+            $previousPath = $validated['profile_photo'] ?? $user->profile_photo;
             if ($previousPath && $previousPath !== $path && Storage::disk('public')->exists($previousPath)) {
                 Storage::disk('public')->delete($previousPath);
             }

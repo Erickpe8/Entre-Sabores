@@ -29,7 +29,11 @@ class RegisteredUserController extends Controller
     {
         $validated = $request->validated();
 
-        $username = User::generateUniqueUsername($validated['first_name'], $validated['last_name']);
+        $username = User::generateUniqueUsername(
+            $validated['first_name'],
+            $validated['last_name'],
+            User::normalizeInstagramHandle($validated['instagram'] ?? null)
+        );
 
         $file = $request->file('profile_photo');
         $filename = 'avatar_'.time().'.jpg';
@@ -38,6 +42,8 @@ class RegisteredUserController extends Controller
             $file,
             $filename
         );
+
+        $instagramProfile = User::normalizeInstagramHandle($validated['instagram'] ?? null);
 
         $user = User::create([
             'first_name' => $validated['first_name'],
@@ -48,6 +54,7 @@ class RegisteredUserController extends Controller
             'country' => $validated['country'],
             'profile_photo' => $photoPath,
             'description' => $validated['description'] ?? null,
+            'instagram' => $instagramProfile,
         ]);
 
         event(new Registered($user));
