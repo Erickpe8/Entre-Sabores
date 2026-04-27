@@ -57,3 +57,7 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 # Entre-Sabores
+
+## Docker
+
+Desarrollo con PHP, Nginx, MySQL, phpMyAdmin y Redis: consulta [DOCKER.md](DOCKER.md) y levanta el stack con `docker compose up -d` desde la raíz del proyecto.
