@@ -1,4 +1,13 @@
-# PHP-FPM 8.4 + Nginx (supervisord) — Laravel 13, HTTP en el puerto 80 (CapRover / producción).
+FROM node:22-bookworm-slim AS assets
+WORKDIR /app
+
+COPY package.json ./
+RUN npm install
+
+COPY . .
+ENV NODE_ENV=production
+RUN npm run build
+
 FROM php:8.4-fpm-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -43,12 +52,14 @@ WORKDIR /var/www/html
 
 COPY . .
 
+COPY --from=assets /app/public/build ./public/build
+
 RUN mkdir -p storage/app/public storage/logs storage/framework/sessions storage/framework/views storage/framework/cache/data bootstrap/cache
 
 RUN cp .env.example .env \
     && composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader \
     && rm -f .env \
-    && chown -R www-data:www-data storage bootstrap/cache vendor database \
+    && chown -R www-data:www-data storage bootstrap/cache vendor database public/build \
     && chmod -R ug+rwX database
 
 RUN nginx -t
