@@ -21,4 +21,8 @@ if [ -f artisan ]; then
   php artisan storage:link --force >/dev/null 2>&1 || true
 fi
 
+if [ -f artisan ]; then
+  php artisan storage:link --force >/dev/null 2>&1 || true
+fi
+
 exec docker-php-entrypoint "$@"
