@@ -1,4 +1,4 @@
-# PHP-FPM 8.4+ (composer.json: ^8.4, Laravel 13)
+# PHP-FPM 8.4 + Nginx (supervisord) — Laravel 13, HTTP en el puerto 80 (CapRover / producción).
 FROM php:8.4-fpm-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2-dev \
     libzip-dev \
     libicu-dev \
+    nginx \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-configure intl \
@@ -31,6 +33,12 @@ COPY docker/php/local.ini $PHP_INI_DIR/conf.d/99-local.ini
 COPY docker/php/docker-app-entrypoint.sh /usr/local/bin/docker-app-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-app-entrypoint.sh
 
+COPY docker/nginx/web.conf /etc/nginx/sites-available/laravel
+RUN ln -sf /etc/nginx/sites-available/laravel /etc/nginx/sites-enabled/laravel \
+    && rm -f /etc/nginx/sites-enabled/default
+
+COPY docker/php/supervisord-laravel.conf /etc/supervisor/conf.d/laravel.conf
+
 WORKDIR /var/www/html
 
 COPY . .
@@ -42,5 +50,9 @@ RUN cp .env.example .env \
     && rm -f .env \
     && chown -R www-data:www-data storage bootstrap/cache vendor
 
+RUN nginx -t
+
+EXPOSE 80
+
 ENTRYPOINT ["/usr/local/bin/docker-app-entrypoint.sh"]
-CMD ["php-fpm"]
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
