@@ -8,11 +8,13 @@
     "require": {
         "php": "^8.4",
         "laravel/framework": "^13.0",
-        "laravel/tinker": "^3.0"
+        "laravel/tinker": "^3.0",
+        "sllh/composer-lint": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "laravel/boost": "^2.4",
+        "laravel/breeze": "^2.4",
         "laravel/pail": "^1.2.5",
         "laravel/pint": "^1.27",
         "mockery/mockery": "^1.6",
@@ -48,6 +50,12 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "lint": [
+            "@php ./vendor/bin/pint --test"
+        ],
+        "format": [
+            "@php ./vendor/bin/pint"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
@@ -78,7 +86,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "sllh/composer-lint": true
         }
     },
     "minimum-stability": "stable",
