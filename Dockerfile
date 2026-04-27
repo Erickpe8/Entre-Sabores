@@ -48,9 +48,14 @@ RUN mkdir -p storage/app/public storage/logs storage/framework/sessions storage/
 RUN cp .env.example .env \
     && composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader \
     && rm -f .env \
-    && chown -R www-data:www-data storage bootstrap/cache vendor
+    && chown -R www-data:www-data storage bootstrap/cache vendor database \
+    && chmod -R ug+rwX database
 
 RUN nginx -t
+
+ENV SESSION_DRIVER=file \
+    CACHE_STORE=file \
+    QUEUE_CONNECTION=sync
 
 EXPOSE 80
 

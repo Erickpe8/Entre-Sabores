@@ -19,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Sesiones en tabla + SQLite en solo lectura (típico en Docker) rompe cada request.
+        if (config('session.driver') === 'database' && config('database.default') === 'sqlite') {
+            config(['session.driver' => 'file']);
+        }
     }
 }

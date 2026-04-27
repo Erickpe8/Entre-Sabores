@@ -8,8 +8,14 @@ if [ ! -d vendor ] || [ ! -f vendor/autoload.php ]; then
   chown -R www-data:www-data vendor
 fi
 
-chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
-chmod -R ug+rwX storage bootstrap/cache 2>/dev/null || true
+chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
+chmod -R ug+rwX storage bootstrap/cache database 2>/dev/null || true
+
+if [ -f database/database.sqlite ]; then
+  chown www-data:www-data database/database.sqlite 2>/dev/null || true
+  chmod ug+rw database/database.sqlite 2>/dev/null || true
+fi
+
 
 if [ -f artisan ]; then
   php artisan storage:link --force >/dev/null 2>&1 || true
