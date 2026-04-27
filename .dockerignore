@@ -8,6 +8,7 @@ bootstrap/cache/*
 !bootstrap/cache/.gitignore
 public/build
 public/hot
+public/storage
 .phpunit.cache
 docs/
 docker/mysql/
