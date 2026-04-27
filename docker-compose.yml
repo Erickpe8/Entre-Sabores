@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
+      dockerfile: Dockerfile
     image: entre-sabores-app:latest
     container_name: entre_sabores_app
     restart: unless-stopped

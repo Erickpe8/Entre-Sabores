@@ -1,4 +1,4 @@
-# PHP-FPM 8.4+ (alineado con composer.lock / vendor: Laravel 13 y dependencias)
+# PHP-FPM 8.4+ (composer.json: ^8.4, Laravel 13)
 FROM php:8.4-fpm-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
