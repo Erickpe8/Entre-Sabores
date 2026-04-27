@@ -93,7 +93,7 @@
                 <img
                     src="{{ asset('images/image-hero.png') }}"
                     alt="Hero Entre Sabores"
-                    class="w-[700px] object-contain drop-shadow-[0_30px_80px_rgba(0,0,0,0.6)] md:w-[730px] xl:w-[880px] 2xl:w-[980px] animate-float"
+                    class="w-[660px] object-contain drop-shadow-[0_30px_80px_rgba(0,0,0,0.6)] md:w-[730px] xl:w-[880px] 2xl:w-[980px] animate-float"
                 />
             </div>
         </main>
