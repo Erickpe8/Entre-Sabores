@@ -33,5 +33,14 @@ RUN chmod +x /usr/local/bin/docker-app-entrypoint.sh
 
 WORKDIR /var/www/html
 
+COPY . .
+
+RUN mkdir -p storage/app/public storage/logs storage/framework/sessions storage/framework/views storage/framework/cache/data bootstrap/cache
+
+RUN cp .env.example .env \
+    && composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader \
+    && rm -f .env \
+    && chown -R www-data:www-data storage bootstrap/cache vendor
+
 ENTRYPOINT ["/usr/local/bin/docker-app-entrypoint.sh"]
 CMD ["php-fpm"]
