@@ -67,6 +67,13 @@ function esc(s) {
     return d.innerHTML;
 }
 
+function onEnterOrSpace(event, callback) {
+    if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        callback();
+    }
+}
+
 function formatStory(text) {
     return esc(String(text)).replace(/\n/g, '<br>');
 }
@@ -103,6 +110,8 @@ export function initWall() {
 
     const config = JSON.parse(cfgEl.textContent);
     const feedEl = document.getElementById('posts-container');
+    const scrollAnchor = document.getElementById('feed-scroll-anchor');
+    const feedStatus = document.getElementById('feed-status');
     const skeleton = document.getElementById('wall-skeleton');
     const modal = document.getElementById('wall-modal');
     const modalBody = document.getElementById('wall-modal-body');
@@ -117,6 +126,18 @@ export function initWall() {
     };
     let fetchDebounceTimer = null;
     let activeRequestController = null;
+    const pagination = {
+        page: 1,
+        perPage: 12,
+        hasMore: true,
+        loadingMore: false,
+    };
+
+    function setFeedStatus(message) {
+        if (feedStatus) {
+            feedStatus.textContent = message;
+        }
+    }
 
     function syncFeedQueryParam() {
         const url = new URL(window.location.href);
@@ -143,7 +164,7 @@ export function initWall() {
         });
     }
 
-    function buildQuery() {
+    function buildQuery(page = 1) {
         const p = new URLSearchParams();
         if (state.country_id) {
             p.set('country_id', String(state.country_id));
@@ -160,24 +181,34 @@ export function initWall() {
         if (state.sort) {
             p.set('sort', state.sort);
         }
+        p.set('page', String(page));
+        p.set('per_page', String(pagination.perPage));
 
         return p.toString();
     }
 
-    async function fetchBoard() {
-        if (activeRequestController) {
+    async function fetchBoard({ append = false } = {}) {
+        if (!append && activeRequestController) {
             activeRequestController.abort();
         }
-        activeRequestController = new AbortController();
+        const currentController = new AbortController();
+        activeRequestController = currentController;
 
-        skeleton?.classList.remove('hidden');
-        feedEl?.classList.add('opacity-40', 'pointer-events-none');
+        if (!append) {
+            skeleton?.classList.remove('hidden');
+            feedEl?.classList.add('opacity-40', 'pointer-events-none');
+            setFeedStatus('Cargando publicaciones...');
+        } else {
+            pagination.loadingMore = true;
+            setFeedStatus('Cargando más publicaciones...');
+        }
 
         try {
-            const qs = buildQuery();
+            const targetPage = append ? pagination.page + 1 : 1;
+            const qs = buildQuery(targetPage);
             const url = qs ? `${config.filterUrl}?${qs}` : config.filterUrl;
-            const { data } = await axios.get(url, { signal: activeRequestController.signal });
-            renderFeed(data.posts || [], data.meta);
+            const { data } = await axios.get(url, { signal: currentController.signal });
+            renderFeed(data.posts || [], data.meta, { append });
         } catch (e) {
             if (e?.name === 'CanceledError' || e?.name === 'AbortError') {
                 return;
@@ -188,8 +219,12 @@ export function initWall() {
                     '<p class="text-red-400 col-span-full py-14 text-center text-sm">No se pudo cargar el muro. Intenta de nuevo.</p>';
             }
         } finally {
-            skeleton?.classList.add('hidden');
-            feedEl?.classList.remove('opacity-40', 'pointer-events-none');
+            if (!append) {
+                skeleton?.classList.add('hidden');
+                feedEl?.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                pagination.loadingMore = false;
+            }
             syncFeedQueryParam();
         }
     }
@@ -200,16 +235,21 @@ export function initWall() {
         }
 
         fetchDebounceTimer = window.setTimeout(() => {
-            fetchBoard();
+            pagination.page = 1;
+            pagination.hasMore = true;
+            setFeedStatus('Actualizando publicaciones...');
+            fetchBoard({ append: false });
         }, delayMs);
     }
 
-    function renderFeed(posts, meta) {
+    function renderFeed(posts, meta, { append = false } = {}) {
         if (!feedEl) {
             return;
         }
 
-        feedEl.innerHTML = '';
+        if (!append) {
+            feedEl.innerHTML = '';
+        }
 
         if (meta?.guest_following) {
             feedEl.innerHTML = `
@@ -217,27 +257,70 @@ export function initWall() {
                     <a href="${esc(config.loginUrl)}" class="font-medium text-emerald-400 hover:text-emerald-300 underline underline-offset-2">Inicia sesión</a> para ver publicaciones de quienes sigues.
                 </p>
             `;
+            pagination.hasMore = false;
+            setFeedStatus('Inicia sesión para ver publicaciones de quienes sigues.');
 
             return;
         }
 
-        if (!posts.length) {
+        if (!posts.length && !append) {
             feedEl.innerHTML =
                 '<p class="col-span-full text-center text-slate-500 py-16 text-sm">No hay publicaciones con estos filtros.</p>';
+            pagination.hasMore = false;
+            setFeedStatus('No hay publicaciones con los filtros actuales.');
 
+            return;
+        }
+
+        if (!posts.length && append) {
+            pagination.hasMore = false;
+            setFeedStatus('No hay más publicaciones para cargar.');
             return;
         }
 
         posts.forEach((post) => {
             feedEl.appendChild(renderCard(post));
         });
+
+        pagination.page = Number(meta?.current_page || pagination.page || 1);
+        pagination.hasMore = Boolean(meta?.has_more);
+        setFeedStatus(
+            pagination.hasMore
+                ? 'Publicaciones cargadas. Sigue desplazándote para ver más.'
+                : 'Publicaciones cargadas. Fin del feed.',
+        );
+    }
+
+    function setupInfiniteScroll() {
+        if (!scrollAnchor || !('IntersectionObserver' in window)) {
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            async (entries) => {
+                const entry = entries[0];
+                if (!entry?.isIntersecting) {
+                    return;
+                }
+                if (pagination.loadingMore || !pagination.hasMore) {
+                    return;
+                }
+                await fetchBoard({ append: true });
+            },
+            { rootMargin: '400px 0px 200px 0px', threshold: 0.01 },
+        );
+
+        observer.observe(scrollAnchor);
     }
 
     function renderCard(post) {
         const el = document.createElement('article');
         el.className =
-            'group relative flex flex-col overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/80 shadow-sm shadow-black/30 transition duration-200 ease-out hover:z-[1] hover:scale-[1.02] hover:shadow-lg hover:shadow-black/40 hover:border-slate-600 cursor-pointer backdrop-blur-sm';
+            'group relative flex flex-col overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/80 shadow-sm shadow-black/30 transition duration-200 ease-out hover:z-[1] hover:scale-[1.02] active:scale-[0.99] hover:shadow-lg hover:shadow-black/40 hover:border-slate-600 cursor-pointer backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70';
         el.dataset.postId = String(post.id);
+        el.setAttribute('role', 'button');
+        el.setAttribute('tabindex', '0');
+        el.setAttribute('aria-label', `Abrir publicación: ${post.title}`);
 
         const countryName = post.country?.name ?? '—';
         const flag = post.country?.flag_emoji ?? '';
@@ -275,6 +358,7 @@ export function initWall() {
             }
             openModal(post.id);
         });
+        el.addEventListener('keydown', (e) => onEnterOrSpace(e, () => openModal(post.id)));
 
         return el;
     }
@@ -302,7 +386,7 @@ export function initWall() {
                     (c) => `
                 <div class="rounded-xl bg-slate-800/80 border border-slate-700/80 p-3 text-sm">
                     <div class="flex items-center gap-2 mb-1">
-                        <img src="${c.user.avatar}" alt="" class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600" />
+                        <img src="${c.user.avatar}" alt="Avatar de ${esc(c.user.name)}" loading="lazy" class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600" />
                         <div>
                             <div class="font-medium text-slate-100">${esc(c.user.name)}</div>
                             <div class="text-xs text-slate-500">@${esc(c.user.username)}</div>
@@ -332,7 +416,7 @@ export function initWall() {
                         ${countryLine}
                     </div>
                     <div class="flex items-center gap-3">
-                        <img src="${p.user.avatar}" alt="" class="h-12 w-12 rounded-full object-cover border border-slate-600" />
+                        <img src="${p.user.avatar}" alt="Avatar de ${esc(p.user.name)}" loading="lazy" class="h-12 w-12 rounded-full object-cover border border-slate-600" />
                         <div>
                             <div class="font-semibold text-slate-100">${esc(p.user.name)}</div>
                             <a href="${esc(p.user.profile_url)}" class="text-sm text-emerald-400 hover:text-emerald-300 hover:underline">@${esc(p.user.username)}</a>
@@ -370,7 +454,7 @@ export function initWall() {
                                 'rounded-xl bg-slate-800/80 border border-slate-700/80 p-3 text-sm';
                             block.innerHTML = `
                                 <div class="flex items-center gap-2 mb-1">
-                                    <img src="${c.user.avatar}" alt="" class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600" />
+                                    <img src="${c.user.avatar}" alt="Avatar de ${esc(c.user.name)}" loading="lazy" class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600" />
                                     <div>
                                         <div class="font-medium text-slate-100">${esc(c.user.name)}</div>
                                         <div class="text-xs text-slate-500">@${esc(c.user.username)}</div>
@@ -400,6 +484,11 @@ export function initWall() {
 
     document.getElementById('wall-modal-close')?.addEventListener('click', closeModal);
     modalBackdrop?.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+            closeModal();
+        }
+    });
 
     document.querySelectorAll('[data-navbar-feed]').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -494,5 +583,6 @@ export function initWall() {
     }
 
     updateFilterUi();
+    setupInfiniteScroll();
     scheduleFetch(0);
 }

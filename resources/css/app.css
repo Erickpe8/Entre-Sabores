@@ -8,7 +8,7 @@
     }
 
     .toggle-container {
-        @apply relative flex w-[220px] h-10 bg-white/5 rounded-full p-1 backdrop-blur ring-1 ring-white/10;
+        @apply relative flex w-[190px] sm:w-[220px] h-11 bg-white/5 rounded-full p-1 backdrop-blur ring-1 ring-white/10;
     }
 
     .toggle-slider {
@@ -16,7 +16,7 @@
     }
 
     .toggle-btn {
-        @apply relative z-10 w-1/2 text-sm font-medium text-slate-400 transition-colors duration-300 hover:text-slate-200;
+        @apply relative z-10 w-1/2 min-h-[44px] text-sm font-medium text-slate-400 transition-colors duration-300 hover:text-slate-200 active:scale-95;
     }
 
     .toggle-btn.active {
@@ -26,6 +26,10 @@
     .toggle-btn:active {
         transform: scale(0.97);
     }
+}
+
+.wall-chip {
+    min-height: 44px;
 }
 
 /* Avatar Cropper (global, compilado por Vite) */
@@ -52,6 +56,33 @@
 .avatar-cropper-modal .cropper-canvas,
 .avatar-cropper-modal .cropper-wrap-box {
     background: transparent !important;
+}
+
+/* Safe areas (notch / barras del sistema) */
+.safe-top {
+    padding-top: max(env(safe-area-inset-top), 0px);
+}
+
+.safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+.safe-left {
+    padding-left: max(env(safe-area-inset-left), 0px);
+}
+
+.safe-right {
+    padding-right: max(env(safe-area-inset-right), 0px);
+}
+
+.safe-nav-offset {
+    padding-top: calc(3.5rem + max(env(safe-area-inset-top), 0px));
+}
+
+@media (min-width: 640px) {
+    .safe-nav-offset {
+        padding-top: calc(4rem + max(env(safe-area-inset-top), 0px));
+    }
 }
 
 /* Barra de filtros del muro: scroll horizontal sin barra visible */

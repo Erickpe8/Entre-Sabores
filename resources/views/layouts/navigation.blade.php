@@ -6,15 +6,15 @@
     ? 'inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium text-slate-400 transition hover:bg-white/8 hover:text-slate-100'
     : 'inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium text-stone-500 transition hover:bg-stone-50 hover:text-stone-800')
 
-<nav x-data="{ open: false }" class="{{ $navDark ? 'bg-[#0b1120]/95 border-b border-white/10 backdrop-blur-md' : 'bg-white border-b border-stone-100' }} fixed top-0 inset-x-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-2">
+<nav x-data="{ open: false }" class="{{ $navDark ? 'bg-[#0b1120]/95 border-b border-white/10 backdrop-blur-md' : 'bg-white border-b border-stone-100' }} safe-top safe-left safe-right fixed top-0 inset-x-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center gap-2">
         {{-- Izquierda: marca --}}
         <div class="flex items-center gap-2 min-w-0 flex-1 justify-start">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-2 shrink-0 min-w-0">
                 <img
                     src="{{ asset('favicon.png') }}"
                     alt="Logo Entre Sabores"
-                    class="h-7 sm:h-8 w-auto object-contain"
+                    class="h-6 sm:h-8 w-auto object-contain"
                 >
                 <span class="{{ $navDark ? 'text-white' : 'text-stone-800' }} hidden sm:inline font-semibold text-sm tracking-tight truncate">Entre Sabores</span>
             </a>
@@ -114,7 +114,7 @@
             </div>
 
             <div class="-me-2 flex items-center sm:hidden">
-                <button type="button" @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-lg transition duration-150 ease-in-out {{ $navDark ? 'text-slate-200 hover:text-white hover:bg-white/10' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-100' }}" aria-expanded="false" aria-label="Menú">
+                <button type="button" @click="open = ! open" class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-lg transition duration-150 ease-in-out {{ $navDark ? 'text-slate-200 hover:text-white hover:bg-white/10 active:scale-95' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-100 active:scale-95' }}" aria-expanded="false" aria-label="Menú">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

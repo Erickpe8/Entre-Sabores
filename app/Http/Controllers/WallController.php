@@ -29,7 +29,8 @@ class WallController extends Controller
 
     public function filter(FilterPostsRequest $request): JsonResponse
     {
-        $perPage = 30;
+        $perPage = $request->integer('per_page', 12);
+        $page = $request->integer('page', 1);
 
         $query = Post::query()
             ->with(['user:id,first_name,last_name,username,profile_photo', 'country:id,name,flag_emoji'])
@@ -39,7 +40,7 @@ class WallController extends Controller
             if (! auth()->check()) {
                 return response()->json([
                     'posts' => [],
-                    'meta' => ['guest_following' => true],
+                    'meta' => ['guest_following' => true, 'has_more' => false],
                 ]);
             }
 
@@ -70,13 +71,16 @@ class WallController extends Controller
             $query->latest();
         }
 
-        $posts = $query->limit($perPage)->get();
+        $posts = $query->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
-            'posts' => $posts->map(fn (Post $post) => $this->serializePost($post))->values()->all(),
+            'posts' => collect($posts->items())->map(fn (Post $post) => $this->serializePost($post))->values()->all(),
             'meta' => [
-                'total_posts' => $posts->count(),
+                'total_posts' => $posts->total(),
                 'limit' => $perPage,
+                'current_page' => $posts->currentPage(),
+                'next_page' => $posts->currentPage() < $posts->lastPage() ? $posts->currentPage() + 1 : null,
+                'has_more' => $posts->hasMorePages(),
             ],
         ]);
     }

@@ -6,7 +6,6 @@ import Alpine from 'alpinejs';
 
 window.Cropper = Cropper;
 window.Alpine = Alpine;
-
 Alpine.start();
 
 if (document.getElementById('posts-container')) {

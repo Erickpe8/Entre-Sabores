@@ -24,6 +24,8 @@ class FilterPostsRequest extends FormRequest
             'experience_type' => ['nullable', 'string', Rule::in(Post::EXPERIENCE_TYPES)],
             'drink_type' => ['nullable', 'string', Rule::in(Post::DRINK_TYPES)],
             'sort' => ['nullable', 'string', Rule::in(['recent', 'popular'])],
+            'page' => ['nullable', 'integer', 'min:1'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:30'],
         ];
     }
 }
