@@ -14,11 +14,11 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-['Inter'] text-slate-100 antialiased">
-        <main class="h-screen flex items-center justify-center overflow-hidden px-6 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
-            <div class="grid lg:grid-cols-2 gap-10 w-full max-w-6xl items-center h-full">
-                <section class="flex items-center justify-center h-full">
+        <main class="min-h-[100dvh] px-4 py-6 sm:px-6 sm:py-8 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 overflow-y-auto">
+            <div class="grid lg:grid-cols-2 gap-8 lg:gap-10 w-full max-w-6xl mx-auto items-start lg:items-center min-h-[100dvh] lg:min-h-0">
+                <section class="flex items-start lg:items-center justify-center w-full">
                     <div class="w-full max-w-lg">
-                        <a href="/" class="mb-8 inline-flex items-center gap-3">
+                        <a href="/" class="mb-6 sm:mb-8 inline-flex items-center gap-3">
                             <img
                                 src="{{ asset('favicon.png') }}"
                                 alt="Logo Entre Sabores"
@@ -32,7 +32,7 @@
                     </div>
                 </section>
 
-                <aside class="hidden lg:flex items-center justify-center relative">
+                <aside class="hidden lg:flex items-center justify-center relative min-h-[560px]">
                     <div class="relative z-10 flex items-center justify-center w-full">
                         <img
                             src="{{ asset('images/hero-gallery.png') }}"

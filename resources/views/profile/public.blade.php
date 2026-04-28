@@ -1,5 +1,5 @@
 <x-app-layout title="{{ '@'.$user->username }} — {{ config('app.name') }}">
-    <div class="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#022c22] pb-16">
+    <div class="min-h-[100dvh] bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#022c22] pb-16">
         <div class="max-w-7xl mx-auto px-6 py-10 grid lg:grid-cols-3 gap-8">
             <aside class="space-y-6 lg:self-start lg:sticky lg:top-24">
                 <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">

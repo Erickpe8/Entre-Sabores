@@ -1,7 +1,7 @@
 <x-app-layout title="Entre Sabores — Muro de maridajes">
     <script type="application/json" id="wall-config">@json($wallConfig)</script>
 
-    <div class="min-h-screen bg-slate-950 text-slate-100">
+    <div class="min-h-[100dvh] bg-slate-950 text-slate-100">
         {{-- Filtros: misma fila, scroll horizontal, estética daily.dev / oscuro --}}
         <div class="sticky top-14 sm:top-16 z-30 border-b border-slate-800/90 bg-slate-900/95 shadow-sm shadow-black/20 backdrop-blur-md">
             <div class="overflow-x-auto overscroll-x-contain wall-scroll-x">

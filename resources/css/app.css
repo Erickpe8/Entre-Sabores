@@ -2,9 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        min-height: 100dvh;
+        overflow-x: hidden;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
 @layer components {
     .input {
         @apply w-full rounded-xl bg-gray-800 border border-gray-700 px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-400 outline-none transition;
+    }
+
+    .btn {
+        @apply inline-flex h-12 items-center justify-center rounded-xl px-5 text-sm font-medium leading-none transition active:scale-95;
+    }
+
+    .btn-primary {
+        @apply bg-gradient-to-r from-green-400 to-blue-500 text-white shadow-lg shadow-emerald-900/25 hover:opacity-95;
+    }
+
+    .btn-outline {
+        @apply border border-white/20 bg-white/5 text-white hover:bg-white/10;
     }
 
     .toggle-container {

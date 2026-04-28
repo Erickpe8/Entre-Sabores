@@ -38,18 +38,18 @@
     </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-[90vh] bg-slate-950 font-['Inter'] text-white antialiased">
-    <section class="relative flex min-h-screen h-full flex-col overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/95">
+<body class="min-h-[100dvh] bg-slate-950 font-['Inter'] text-white antialiased">
+    <section class="relative flex min-h-[100dvh] flex-col overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/95">
 
         <header class="relative z-20">
-            <div class="mx-auto flex w-full max-w-[1400px] items-center justify-between px-8 py-6 md:py-7">
-                <a href="/" class="flex items-center gap-3">
+            <div class="mx-auto flex w-full max-w-[1400px] items-center gap-3 px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-7">
+                <a href="/" class="flex shrink-0 items-center gap-2 sm:gap-3 whitespace-nowrap">
                     <img
                         src="{{ asset('favicon.png') }}"
                         alt="Logo Entre Sabores"
-                        class="h-10 w-10 object-contain"
+                        class="h-9 w-9 object-contain sm:h-10 sm:w-10"
                     >
-                    <span class="text-lg font-extrabold tracking-tight">Entre Sabores</span>
+                    <span class="hidden sm:inline text-lg font-extrabold tracking-tight">Entre Sabores</span>
                 </a>
 
                 <nav class="hidden items-center gap-8 text-base font-semibold text-white/90 lg:flex">
@@ -58,9 +58,9 @@
                     <a href="#como-funciona" class="transition hover:text-cyan-300">Cómo funciona</a>
                 </nav>
 
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('login') }}" class="rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-base font-semibold transition hover:bg-white/10">Iniciar sesión</a>
-                    <a href="{{ route('register') }}" class="rounded-xl bg-gradient-to-r from-cyan-300 to-emerald-300 px-6 py-3 text-base font-bold text-slate-900 shadow-md shadow-cyan-500/20 transition hover:brightness-110">Registrarse</a>
+                <div class="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+                    <a href="{{ route('login') }}" class="btn h-10 sm:h-12 btn-outline px-3 sm:px-6 text-sm sm:text-base">Iniciar sesión</a>
+                    <a href="{{ route('register') }}" class="btn h-10 sm:h-12 bg-gradient-to-r from-cyan-300 to-emerald-300 px-3 sm:px-6 text-sm sm:text-base font-bold text-slate-900 shadow-md shadow-cyan-500/20 hover:brightness-110">Registrarse</a>
                 </div>
             </div>
         </header>
@@ -80,10 +80,10 @@
                 </p>
 
                 <div class="mt-6 flex flex-col items-center gap-6 sm:flex-row lg:items-start">
-                    <a href="{{ route('register') }}" class="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-emerald-300 via-cyan-300 to-indigo-300 px-8 py-4 text-lg font-bold text-slate-900 shadow-lg shadow-emerald-500/20 transition hover:brightness-110 sm:w-auto">
+                    <a href="{{ route('register') }}" class="btn inline-flex w-full bg-gradient-to-r from-emerald-300 via-cyan-300 to-indigo-300 px-8 text-lg font-bold text-slate-900 shadow-lg shadow-emerald-500/20 hover:brightness-110 sm:w-auto">
                         Comenzar ahora
                     </a>
-                    <a href="{{ route('login') }}" class="inline-flex w-full items-center justify-center rounded-xl border border-white/30 bg-transparent px-8 py-4 text-lg font-medium text-white transition hover:bg-white/10 sm:w-auto">
+                    <a href="{{ route('login') }}" class="btn inline-flex w-full border border-white/30 bg-transparent px-8 text-lg font-medium text-white hover:bg-white/10 sm:w-auto">
                         Ya tengo cuenta
                     </a>
                 </div>

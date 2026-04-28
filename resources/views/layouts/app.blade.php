@@ -19,7 +19,7 @@
     </head>
     @php($isProfileEdit = request()->routeIs('profile.edit') || request()->routeIs('user.profile'))
     <body class="font-sans antialiased {{ $isProfileEdit ? 'bg-slate-950 text-slate-100' : 'bg-gray-100 text-slate-900' }}">
-        <div class="min-h-screen {{ $isProfileEdit ? '' : 'bg-gray-100' }}">
+        <div class="min-h-[100dvh] flex flex-col {{ $isProfileEdit ? '' : 'bg-gray-100' }}">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
@@ -32,7 +32,7 @@
             @endisset
 
             <!-- Page Content -->
-            <main class="safe-nav-offset safe-bottom safe-left safe-right {{ $isProfileEdit ? 'text-slate-100' : '' }}">
+            <main class="safe-nav-offset safe-bottom safe-left safe-right flex-1 {{ $isProfileEdit ? 'text-slate-100' : '' }}">
                 {{ $slot }}
             </main>
         </div>
