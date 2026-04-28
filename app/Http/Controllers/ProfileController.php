@@ -60,6 +60,11 @@ class ProfileController extends Controller
         unset($validated['profile_photo_base64']);
 
         if (is_string($base64) && $base64 !== '') {
+            $mime = null;
+            if (preg_match('#^data:image/(jpeg|jpg|png);base64,#i', $base64, $matches) === 1) {
+                $mime = strtolower($matches[1]);
+            }
+
             $image = $base64;
             $image = (string) preg_replace('/^data:image\/\w+;base64,/', '', $image);
             $image = str_replace(' ', '+', $image);
@@ -79,7 +84,8 @@ class ProfileController extends Controller
             }
 
             $directory = 'profiles/'.$targetUsername;
-            $fileName = 'avatar_'.time().'.jpg';
+            $extension = $mime === 'png' ? 'png' : 'jpg';
+            $fileName = 'avatar_'.time().'.'.$extension;
             $path = $directory.'/'.$fileName;
 
             Storage::disk('public')->put($path, $imageDecoded);

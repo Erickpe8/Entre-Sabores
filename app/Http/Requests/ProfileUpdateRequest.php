@@ -116,8 +116,8 @@ class ProfileUpdateRequest extends FormRequest
 
                     return;
                 }
-                if (! preg_match('#^data:image/(jpeg|jpg);base64,#i', $value)) {
-                    $fail('La imagen del avatar debe ser JPEG.');
+                if (! preg_match('#^data:image/(jpeg|jpg|png);base64,#i', $value)) {
+                    $fail('La imagen del avatar debe ser PNG o JPEG.');
 
                     return;
                 }

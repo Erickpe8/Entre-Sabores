@@ -31,8 +31,8 @@
                 </header>
             @endisset
 
-            <!-- Page Content -->
-            <main class="{{ $isProfileEdit ? 'text-slate-100' : '' }}">
+            <!-- Page Content (pt-16 compensa navbar fija) -->
+            <main class="pt-16 {{ $isProfileEdit ? 'text-slate-100' : '' }}">
                 {{ $slot }}
             </main>
         </div>

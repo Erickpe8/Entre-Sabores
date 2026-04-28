@@ -10,7 +10,7 @@ services:
     ports:
       - "${APP_PORT:-8080}:80"
     volumes:
-      - ./:/var/www/html
+      - ./:/var/www/html:delegated
     env_file:
       - .env
     environment:

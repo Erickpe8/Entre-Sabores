@@ -1,22 +1,4 @@
-<link href="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.css" rel="stylesheet">
 <style>
-    .cropper-view-box,
-    .cropper-face {
-        border-radius: 50%;
-    }
-
-    .cropper-view-box {
-        outline: 2px solid #22c55e;
-    }
-
-    .cropper-modal {
-        background: rgba(0, 0, 0, 0.7);
-    }
-
-    .cropper-canvas {
-        background: #000;
-    }
-
     .custom-scroll {
         overflow-y: auto;
         scrollbar-width: none;
@@ -27,14 +9,37 @@
     .custom-scroll::-webkit-scrollbar {
         display: none;
     }
+
+    /* Refuerzo local (v1) para asegurar máscara circular visible */
+    .avatar-cropper-modal .cropper-crop-box,
+    .avatar-cropper-modal .cropper-view-box,
+    .avatar-cropper-modal .cropper-face {
+        border-radius: 50% !important;
+    }
+
+    .avatar-cropper-modal .cropper-view-box {
+        outline: 2px solid #22c55e !important;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55) !important;
+    }
+
+    .avatar-cropper-modal .cropper-face {
+        background-color: transparent !important;
+    }
+
+    .avatar-cropper-modal .cropper-dashed,
+    .avatar-cropper-modal .cropper-center,
+    .avatar-cropper-modal .cropper-line,
+    .avatar-cropper-modal .cropper-point {
+        display: none !important;
+    }
 </style>
 
-<div id="{{ $modalId }}" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-    <div class="bg-[#0f172a] rounded-2xl w-full max-w-4xl p-6 shadow-2xl border border-white/10">
+<div id="{{ $modalId }}" class="avatar-cropper-modal fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+    <div class="bg-[#0f172a] rounded-2xl w-full max-w-3xl p-6 shadow-2xl border border-white/10">
         <h2 class="text-white text-xl mb-4">Ajusta tu foto</h2>
 
-        <div class="w-full h-[400px] bg-black rounded-xl overflow-hidden flex items-center justify-center">
-            <img id="{{ $cropImageId }}" alt="Editor de avatar" class="max-w-full max-h-full object-contain">
+        <div class="w-full h-[320px] sm:h-[360px] bg-slate-950/60 rounded-xl overflow-hidden flex items-center justify-center">
+            <img id="{{ $cropImageId }}" alt="Editor de avatar" class="max-w-full">
         </div>
 
         <div class="flex justify-end gap-4 mt-6">
@@ -53,7 +58,6 @@
     </div>
 </div>
 
-<script src="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.js"></script>
 @php
     $cropperClientConfig = [
         'mode' => $mode,
@@ -126,7 +130,8 @@
 
         let cropper = null;
         let objectUrl = null;
-        const CropperConstructor = window.Cropper?.default || window.Cropper;
+
+        const resolveCropperConstructor = () => window.Cropper?.default || window.Cropper;
 
         const destroyCropper = () => {
             if (cropper) {
@@ -152,7 +157,7 @@
             modal.classList.remove('flex');
         };
 
-        const applyCoverScale = (extraMargin = 0.2) => {
+        const applyCoverScale = (extraMargin = 0.05) => {
             const coverScale = getCoverScaleFromImage();
             if (!coverScale) return null;
             const targetScale = coverScale + extraMargin;
@@ -186,29 +191,22 @@
 
             imageToEdit.onload = () => {
                 destroyCropper();
-                if (!CropperConstructor) return;
+                const CropperConstructor = resolveCropperConstructor();
+                if (!CropperConstructor) {
+                    console.error('CropperJS no está disponible en window.Cropper');
+                    return;
+                }
 
                 cropper = new CropperConstructor(imageToEdit, {
                     aspectRatio: 1,
-                    viewMode: 3,
-                    dragMode: 'move',
+                    viewMode: 1,
                     autoCropArea: 1,
                     responsive: true,
                     background: false,
-                    guides: false,
-                    highlight: false,
-                    cropBoxMovable: false,
-                    cropBoxResizable: false,
-                    movable: true,
-                    zoomable: true,
-                    zoomOnWheel: true,
-                    rotatable: false,
-                    scalable: false,
-                    minCropBoxWidth: 200,
-                    minCropBoxHeight: 200,
+                    ready() {
+                        applyCoverScale(0.05);
+                    },
                 });
-
-                applyCoverScale(0.2);
             };
         };
 
@@ -256,9 +254,24 @@
         }
 
         resetBtn.addEventListener('click', () => {
-            if (!cropper) return;
-            cropper.reset();
-            applyCoverScale(0.2);
+            destroyCropper();
+            cleanupObjectUrl();
+
+            if (cropSource === 'persistent' && cropSourceInput) {
+                cropSourceInput.click();
+                return;
+            }
+
+            if (cropSource === 'dynamic') {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = (event) => {
+                    const [file] = event.target.files || [];
+                    loadFileIntoCropper(file);
+                };
+                input.click();
+            }
         });
 
         applyBtn.addEventListener('click', () => {
@@ -271,7 +284,23 @@
             });
             if (!canvas) return;
 
-            const base64 = canvas.toDataURL('image/jpeg', 0.9);
+            const size = 300;
+            const circleCanvas = document.createElement('canvas');
+            circleCanvas.width = size;
+            circleCanvas.height = size;
+            const ctx = circleCanvas.getContext('2d');
+            if (!ctx) return;
+
+            ctx.clearRect(0, 0, size, size);
+            ctx.drawImage(canvas, 0, 0, size, size);
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+
+            const base64 = circleCanvas.toDataURL('image/png');
             base64Input.value = base64;
             preview.src = base64;
             preview.classList.remove('hidden');
@@ -283,10 +312,10 @@
                 return;
             }
 
-            canvas.toBlob((blob) => {
+            circleCanvas.toBlob((blob) => {
                 if (!blob || !dataTransferInput) return;
 
-                const file = new File([blob], 'profile-cropped.jpg', { type: 'image/jpeg' });
+                const file = new File([blob], 'profile-cropped.png', { type: 'image/png' });
                 const dt = new DataTransfer();
                 dt.items.add(file);
                 dataTransferInput.files = dt.files;
@@ -294,7 +323,7 @@
                 closeImageModal();
                 destroyCropper();
                 cleanupObjectUrl();
-            }, 'image/jpeg', 0.9);
+            }, 'image/png');
         });
 
         cancelBtn.addEventListener('click', () => {
