@@ -41,6 +41,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY docker/php/local.ini $PHP_INI_DIR/conf.d/99-local.ini
 COPY docker/php/docker-app-entrypoint.sh /usr/local/bin/docker-app-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-app-entrypoint.sh
+COPY docker/start.sh /start.sh
+RUN chmod +x /start.sh
 
 COPY docker/nginx/web.conf /etc/nginx/sites-available/laravel
 RUN ln -sf /etc/nginx/sites-available/laravel /etc/nginx/sites-enabled/laravel \
@@ -71,4 +73,4 @@ ENV SESSION_DRIVER=file \
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/docker-app-entrypoint.sh"]
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+CMD ["/start.sh"]

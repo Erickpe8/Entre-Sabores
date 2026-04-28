@@ -9,20 +9,16 @@ if [ ! -d vendor ] || [ ! -f vendor/autoload.php ]; then
 fi
 
 chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
-chmod -R ug+rwX storage bootstrap/cache database 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache database 2>/dev/null || true
 
-if [ -f database/database.sqlite ]; then
+if [ "${DB_CONNECTION}" = "sqlite" ]; then
+  mkdir -p database
+  if [ ! -f database/database.sqlite ]; then
+    echo "[docker] Creando database/database.sqlite..."
+    touch database/database.sqlite
+  fi
   chown www-data:www-data database/database.sqlite 2>/dev/null || true
-  chmod ug+rw database/database.sqlite 2>/dev/null || true
-fi
-
-
-if [ -f artisan ]; then
-  php artisan storage:link --force >/dev/null 2>&1 || true
-fi
-
-if [ -f artisan ]; then
-  php artisan storage:link --force >/dev/null 2>&1 || true
+  chmod 775 database/database.sqlite 2>/dev/null || true
 fi
 
 exec docker-php-entrypoint "$@"

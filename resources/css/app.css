@@ -8,15 +8,15 @@
     }
 
     .toggle-container {
-        @apply relative flex w-[190px] sm:w-[220px] h-11 bg-white/5 rounded-full p-1 backdrop-blur ring-1 ring-white/10;
+        @apply relative flex w-[200px] sm:w-[220px] h-10 sm:h-11 items-stretch rounded-full p-1 bg-white/5 backdrop-blur ring-1 ring-white/10;
     }
 
     .toggle-slider {
-        @apply absolute top-1 left-1 w-[calc(50%-4px)] h-8 bg-white rounded-full shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)];
+        @apply absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full bg-white shadow transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)];
     }
 
     .toggle-btn {
-        @apply relative z-10 w-1/2 min-h-[44px] text-sm font-medium text-slate-400 transition-colors duration-300 hover:text-slate-200 active:scale-95;
+        @apply relative z-10 flex h-full w-1/2 items-center justify-center rounded-full text-center leading-none text-xs sm:text-sm font-medium text-slate-400 transition-colors duration-300 hover:text-slate-200 active:scale-95;
     }
 
     .toggle-btn.active {

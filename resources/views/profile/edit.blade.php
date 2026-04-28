@@ -163,7 +163,7 @@
                                 pattern="[a-z0-9_-]+"
                                 title="Solo minúsculas, números, guiones y guiones bajos"
                                 data-check-url="{{ route('username.availability') }}"
-                                data-initial-username="{{ $user->username }}"
+                                data-original="{{ $user->username }}"
                             >
                             <x-input-error class="mt-2" :messages="$errors->get('username')" />
                             <p
@@ -395,19 +395,50 @@
                 if (!input || !status) return;
                 const checkUrl = input.getAttribute('data-check-url');
                 if (!checkUrl) return;
-                const debounceMs = 450;
+                const debounceMs = 500;
+                const originalUsername = (input.dataset.original || '').trim().toLowerCase();
                 let timer = null;
+                let lastChecked = null;
+                let abortController = null;
 
                 function setStatus(message, className) {
                     status.textContent = message;
                     status.className = 'mt-1 text-xs min-h-[1.25rem] ' + (className || 'text-gray-500');
                 }
 
-                async function check() {
-                    const raw = (input.value || '').trim();
-                    if (preview) {
-                        preview.textContent = raw || input.dataset.initialUsername || '';
+                function showDefaultState() {
+                    setStatus('', 'text-gray-500');
+                }
+
+                function showLoading() {
+                    setStatus('Comprobando...', 'text-gray-500');
+                }
+
+                function showAvailable() {
+                    setStatus('Disponible', 'text-green-400');
+                }
+
+                function showTaken() {
+                    setStatus('No disponible', 'text-red-400');
+                }
+
+                function showError() {
+                    setStatus('No se pudo comprobar. Reintenta.', 'text-amber-400/90');
+                }
+
+                async function validateUsername(raw) {
+                    const normalized = raw.toLowerCase();
+
+                    if (normalized === originalUsername) {
+                        showDefaultState();
+                        lastChecked = null;
+                        return;
                     }
+
+                    if (normalized === lastChecked) {
+                        return;
+                    }
+
                     if (raw.length < 3) {
                         setStatus('Mínimo 3 caracteres.', 'text-amber-400/90');
                         return;
@@ -416,45 +447,59 @@
                         setStatus('Máximo 30 caracteres.', 'text-red-400');
                         return;
                     }
-                    if (!/^[a-zA-Z0-9_-]+$/.test(raw)) {
-                        setStatus('Solo letras, números, guiones y guion bajo.', 'text-amber-400/90');
+                    if (!/^[a-z0-9_-]+$/.test(raw)) {
+                        setStatus('Solo minúsculas, números, guiones y guion bajo.', 'text-amber-400/90');
                         return;
                     }
-                    setStatus('Comprobando…', 'text-gray-500');
+
+                    if (abortController) {
+                        abortController.abort();
+                    }
+                    abortController = new AbortController();
+
+                    showLoading();
                     try {
-                        const url = checkUrl + (checkUrl.includes('?') ? '&' : '?') + 'username=' + encodeURIComponent(raw);
-                        const r = await fetch(url, {
-                            headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                            credentials: 'same-origin',
+                        const response = await axios.get(checkUrl, {
+                            params: { username: raw },
+                            signal: abortController.signal,
+                            headers: {
+                                Accept: 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
                         });
-                        if (r.status === 422) {
+
+                        lastChecked = normalized;
+                        if (response.data?.available) {
+                            showAvailable();
+                            return;
+                        }
+
+                        showTaken();
+                    } catch (error) {
+                        if (error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED') {
+                            return;
+                        }
+
+                        if (error?.response?.status === 422) {
                             setStatus('Formato no válido.', 'text-red-400');
                             return;
                         }
-                        if (!r.ok) {
-                            setStatus('No se pudo comprobar. Reintenta.', 'text-amber-400/90');
-                            return;
-                        }
-                        const data = await r.json();
-                        if (data.available) {
-                            setStatus('Disponible', 'text-green-400');
-                        } else {
-                            setStatus('No disponible', 'text-red-400');
-                        }
-                    } catch (e) {
-                        setStatus('Sin conexión. Reintenta.', 'text-amber-400/90');
+
+                        showError();
                     }
                 }
 
-                function scheduleCheck() {
+                function scheduleValidation() {
+                    const raw = (input.value || '').trim();
+                    if (preview) {
+                        preview.textContent = raw || originalUsername;
+                    }
+
                     if (timer) clearTimeout(timer);
-                    timer = setTimeout(check, debounceMs);
+                    timer = setTimeout(() => validateUsername(raw), debounceMs);
                 }
 
-                input.addEventListener('input', scheduleCheck);
-                if ((input.value || '').trim().length >= 3) {
-                    scheduleCheck();
-                }
+                input.addEventListener('input', scheduleValidation);
             })();
         </script>
     </div>
