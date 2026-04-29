@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Country;
 use App\Models\Post;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,18 +19,32 @@ class PostFactory extends Factory
      */
     public function definition(): array
     {
-        $foods = ['Arepa con hogao', 'Tacos al pastor', 'Bandeja paisa', 'Mole poblano', 'Ceviche', 'Empanadas'];
-        $drinks = ['Café de origen', 'Vino tinto reserva', 'Cerveza artesanal', 'Aguardiente', 'Tequila reposado', 'Chocolate caliente'];
-
         return [
             'user_id' => User::factory(),
-            'country_id' => Country::factory(),
             'title' => fake()->sentence(4),
-            'story' => fake()->paragraphs(3, true),
-            'food_label' => fake()->randomElement($foods),
-            'drink_label' => fake()->randomElement($drinks),
-            'experience_type' => fake()->randomElement(Post::EXPERIENCE_TYPES),
-            'drink_type' => fake()->randomElement(Post::DRINK_TYPES),
+            'description' => fake()->paragraphs(3, true),
+            'image_path' => null,
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Post $post): void {
+            $country = Tag::query()->where('type', Tag::TYPE_COUNTRY)->inRandomOrder()->first();
+            $food = Tag::query()->where('type', Tag::TYPE_FOOD_TYPE)->inRandomOrder()->first();
+            $experience = Tag::query()->where('type', Tag::TYPE_EXPERIENCE)->inRandomOrder()->first();
+            $drink = Tag::query()->where('type', Tag::TYPE_DRINK)->inRandomOrder()->first();
+
+            $ids = array_filter([
+                $country?->id,
+                $food?->id,
+                $experience?->id,
+                $drink?->id,
+            ]);
+
+            if ($ids !== []) {
+                $post->tags()->sync($ids);
+            }
+        });
     }
 }

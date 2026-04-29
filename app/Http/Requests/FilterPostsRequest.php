@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Post;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -19,11 +18,12 @@ class FilterPostsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'country_id' => ['nullable', 'integer', 'exists:countries,id'],
+            'tag_ids' => ['nullable', 'array'],
+            'tag_ids.*' => ['integer', 'exists:tags,id'],
             'following' => ['sometimes', 'boolean'],
-            'experience_type' => ['nullable', 'string', Rule::in(Post::EXPERIENCE_TYPES)],
-            'drink_type' => ['nullable', 'string', Rule::in(Post::DRINK_TYPES)],
-            'sort' => ['nullable', 'string', Rule::in(['recent', 'popular'])],
+            'sort' => ['nullable', 'string', Rule::in(['recent', 'popular', 'trending'])],
+            'q' => ['nullable', 'string', 'max:200'],
+            'search' => ['nullable', 'string', 'max:200'],
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:30'],
         ];

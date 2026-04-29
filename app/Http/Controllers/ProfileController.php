@@ -19,7 +19,17 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
+        return view('settings.profile', [
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
+     * Cuenta y seguridad (contraseña, borrar cuenta).
+     */
+    public function account(Request $request): View
+    {
+        return view('settings.account', [
             'user' => $request->user(),
         ]);
     }
@@ -106,7 +116,7 @@ class ProfileController extends Controller
 
         $user->save();
 
-        return Redirect::route('profile.edit')
+        return Redirect::route('settings.profile')
             ->with('status', 'profile-updated')
             ->with('success', 'Perfil actualizado correctamente');
     }

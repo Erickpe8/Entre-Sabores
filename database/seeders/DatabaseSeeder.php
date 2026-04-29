@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call(CountrySeeder::class);
+        $this->call(TagSeeder::class);
 
         if (file_exists(database_path('seeders/DevUserSeeder.php'))) {
             $this->call(DevUserSeeder::class);

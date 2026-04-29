@@ -1,5 +1,5 @@
 @php($isWall = request()->routeIs('dashboard'))
-@php($isProfileArea = request()->routeIs('profile.edit') || request()->routeIs('user.profile'))
+@php($isProfileArea = request()->routeIs('settings.profile') || request()->routeIs('settings.account') || request()->routeIs('profile.show'))
 @php($navDark = $isWall || $isProfileArea)
 @php($feedFollowing = $isWall && request()->boolean('following'))
 @php($centerInactive = $navDark
@@ -69,6 +69,9 @@
 
         {{-- Derecha: avatar / auth --}}
         <div class="flex items-center justify-end gap-2 flex-1 min-w-0">
+            @auth
+                @include('layouts.partials.nav-notifications')
+            @endauth
             <div class="hidden md:flex md:items-center shrink-0">
                 @auth
                     <x-dropdown
@@ -96,9 +99,14 @@
                             >Ir al muro</x-dropdown-link>
 
                             <x-dropdown-link
-                                :href="route('profile.edit')"
+                                :href="route('profile.show', Auth::user()->username)"
                                 class="{{ $navDark ? 'text-slate-200 hover:bg-slate-800 focus:bg-slate-800' : '' }}"
-                            >Perfil</x-dropdown-link>
+                            >Mi perfil</x-dropdown-link>
+
+                            <x-dropdown-link
+                                :href="route('settings.profile')"
+                                class="{{ $navDark ? 'text-slate-200 hover:bg-slate-800 focus:bg-slate-800' : '' }}"
+                            >Configuración</x-dropdown-link>
 
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -193,7 +201,8 @@
                     </div>
                     <div class="px-4 pb-4 space-y-1">
                         <x-responsive-nav-link :href="route('dashboard')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Ir al muro</x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('profile.edit')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Perfil</x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('profile.show', Auth::user()->username)" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Mi perfil</x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('settings.profile')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Configuración</x-responsive-nav-link>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Cerrar sesión</x-responsive-nav-link>

@@ -16,9 +16,19 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->get('/profile');
+            ->get('/settings/profile');
 
         $response->assertOk();
+    }
+
+    public function test_authenticated_profile_root_redirects_to_settings(): void
+    {
+        $user = User::factory()->create();
+
+        $this
+            ->actingAs($user)
+            ->get('/profile')
+            ->assertRedirect(route('settings.profile'));
     }
 
     public function test_profile_information_can_be_updated(): void
@@ -27,7 +37,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->patch('/settings/profile', [
                 'username' => $user->username,
                 'first_name' => 'Test',
                 'last_name' => 'User',
@@ -38,7 +48,7 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/settings/profile');
 
         $user->refresh();
 
@@ -54,7 +64,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->patch('/settings/profile', [
                 'username' => $user->username,
                 'first_name' => 'Test',
                 'last_name' => 'User',
@@ -65,7 +75,7 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect('/settings/profile');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
@@ -76,7 +86,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->delete('/profile', [
+            ->delete('/settings/profile', [
                 'password' => 'password',
             ]);
 
@@ -94,16 +104,25 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from('/profile')
-            ->delete('/profile', [
+            ->from('/settings/profile')
+            ->delete('/settings/profile', [
                 'password' => 'wrong-password',
             ]);
 
         $response
             ->assertSessionHasErrorsIn('userDeletion', 'password')
-            ->assertRedirect('/profile');
+            ->assertRedirect('/settings/profile');
 
         $this->assertNotNull($user->fresh());
+    }
+
+    public function test_legacy_user_url_redirects_to_profile_show(): void
+    {
+        $user = User::factory()->create(['username' => 'legacyuser']);
+
+        $this
+            ->get('/user/legacyuser')
+            ->assertRedirect(route('profile.show', ['username' => 'legacyuser']));
     }
 
     public function test_public_profile_page_is_displayed_by_username(): void
@@ -113,7 +132,7 @@ class ProfileTest extends TestCase
             'description' => 'Hola mundo',
         ]);
 
-        $response = $this->get(route('user.profile', 'testuserpub'));
+        $response = $this->get(route('profile.show', 'testuserpub'));
 
         $response->assertOk();
         $response->assertSee('@testuserpub', false);
@@ -122,6 +141,6 @@ class ProfileTest extends TestCase
 
     public function test_public_profile_returns_not_found_for_unknown_username(): void
     {
-        $this->get(route('user.profile', 'usuario_inexistente_xyz'))->assertNotFound();
+        $this->get(route('profile.show', 'usuario_inexistente_xyz'))->assertNotFound();
     }
 }
