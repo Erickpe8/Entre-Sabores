@@ -878,8 +878,9 @@ export function initWall() {
             const p = data.post;
             const whenModal = relativeTimeEs(p.created_at);
             const metaPieces = [];
-            if (p.country != null) {
-                metaPieces.push(countryPreviewMetaHtml(p.country));
+            const userCountry = p.user?.country ?? p.country;
+            if (userCountry != null) {
+                metaPieces.push(countryPreviewMetaHtml(userCountry));
             }
             if (whenModal) {
                 metaPieces.push(`<span class="shrink-0 text-slate-500">${esc(whenModal)}</span>`);

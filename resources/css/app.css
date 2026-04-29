@@ -124,6 +124,64 @@
     animation: wall-like-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Modal "Compartir perfil" */
+@keyframes profile-share-gradient-flow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes profile-share-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+.profile-share-modal[data-state='open'] #profile-share-backdrop {
+    opacity: 1;
+}
+
+.profile-share-modal[data-state='closed'] #profile-share-backdrop {
+    opacity: 0;
+}
+
+.profile-share-panel {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+    transition:
+        opacity 220ms ease,
+        transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.profile-share-panel[data-state='open'] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.profile-share-panel[data-state='closed'] {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+}
+
+.profile-share-qr-gradient {
+    background-size: 350% 350%;
+    animation: profile-share-gradient-flow 7s ease infinite;
+}
+
+.profile-share-qr {
+    animation: profile-share-float 3.2s ease-in-out infinite;
+}
+
 /* Avatar Cropper (global, compilado por Vite) */
 .avatar-cropper-modal .cropper-view-box,
 .avatar-cropper-modal .cropper-face {

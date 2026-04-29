@@ -14,7 +14,7 @@ class NewCommentNotification extends Notification
     use Queueable;
 
     /**
-     * @param  'on_post'|'reply'  $kind
+     * @param  'on_post'|'reply'|'mention'  $kind
      */
     public function __construct(
         public Post $post,
@@ -38,12 +38,18 @@ class NewCommentNotification extends Notification
     {
         $preview = Str::limit(trim((string) $this->comment->body), 120);
 
-        $title = $this->kind === 'reply'
-            ? $this->actor->first_name.' respondió tu comentario'
-            : $this->actor->first_name.' comentó en tu publicación';
+        $title = match ($this->kind) {
+            'reply' => $this->actor->first_name.' respondió tu comentario',
+            'mention' => $this->actor->first_name.' te mencionó en un comentario',
+            default => $this->actor->first_name.' comentó en tu publicación',
+        };
 
         return [
-            'event' => $this->kind === 'reply' ? 'comment_reply' : 'comment',
+            'event' => match ($this->kind) {
+                'reply' => 'comment_reply',
+                'mention' => 'comment_mention',
+                default => 'comment',
+            },
             'kind' => $this->kind,
             'title' => $title,
             'body' => $preview,

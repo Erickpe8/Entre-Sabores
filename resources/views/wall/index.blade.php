@@ -125,8 +125,8 @@
             {{-- Panel etiquetas: búsqueda y selección --}}
             <div id="create-post-tag-panel" class="hidden absolute inset-0 z-[70] flex flex-col justify-end sm:justify-center sm:p-5" aria-hidden="true">
                 <div id="create-post-tag-panel-dismiss" class="absolute inset-0 bg-black/55 backdrop-blur-[2px] pointer-events-auto"></div>
-                <div class="pointer-events-none relative mx-auto flex w-full max-w-lg flex-col justify-end sm:max-h-[min(72vh,560px)] sm:justify-center">
-                    <div class="pointer-events-auto flex max-h-[min(78vh,620px)] flex-col overflow-hidden rounded-t-[1.35rem] border border-white/[0.08] bg-zinc-900/98 shadow-2xl ring-1 ring-white/[0.04] sm:rounded-2xl">
+                <div class="pointer-events-none relative mx-auto flex w-full max-w-2xl flex-col justify-end sm:max-h-[min(84vh,760px)] sm:justify-center">
+                    <div class="pointer-events-auto flex max-h-[min(88vh,820px)] flex-col overflow-hidden rounded-t-[1.35rem] border border-white/[0.08] bg-zinc-900/98 shadow-2xl ring-1 ring-white/[0.04] sm:rounded-2xl">
                         <div class="flex shrink-0 items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3">
                             <div>
                                 <p class="text-base font-semibold text-white">Etiquetas</p>
@@ -155,7 +155,7 @@
                                 <ul
                                     id="create-post-tag-dropdown"
                                     role="listbox"
-                                    class="scrollbar-none hidden absolute left-0 right-0 z-30 mt-2 max-h-52 overflow-y-auto rounded-xl border border-zinc-600/90 bg-zinc-950 py-1 shadow-2xl ring-1 ring-white/10"
+                                    class="scrollbar-none hidden relative z-30 mt-2 max-h-72 overflow-y-auto rounded-xl border border-zinc-600/90 bg-zinc-950 py-1 shadow-2xl ring-1 ring-white/10"
                                 ></ul>
                             </div>
                         </div>

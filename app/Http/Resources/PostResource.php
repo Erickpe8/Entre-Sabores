@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Support\CountryNameIsoMap;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
@@ -64,6 +65,7 @@ class PostResource extends JsonResource
                 'username' => $user->username,
                 'avatar' => $user->profile_photo_url,
                 'profile_url' => route('profile.show', ['username' => $user->username]),
+                'country' => self::userCountryMeta($user->country),
             ],
         ];
 
@@ -145,5 +147,23 @@ class PostResource extends JsonResource
         }
 
         return asset($relative);
+    }
+
+    /**
+     * @return array{name: string, iso_code: string|null, flag_url: string|null}|null
+     */
+    private static function userCountryMeta(?string $countryName): ?array
+    {
+        $countryName = is_string($countryName) ? trim($countryName) : '';
+        if ($countryName === '') {
+            return null;
+        }
+        $iso = CountryNameIsoMap::isoForCountryName($countryName);
+
+        return [
+            'name' => $countryName,
+            'iso_code' => $iso,
+            'flag_url' => self::resolvedCountryFlagUrl($iso),
+        ];
     }
 }
