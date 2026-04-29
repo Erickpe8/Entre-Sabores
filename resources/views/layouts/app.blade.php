@@ -6,6 +6,21 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ $title ?? config('app.name', 'Entre Sabores') }}</title>
+        @if (filled($metaDescription))
+            <meta name="description" content="{{ $metaDescription }}">
+        @endif
+        @if (filled($metaDescription) || filled($ogImage) || filled($ogUrl))
+            <meta property="og:title" content="{{ $title ?? config('app.name') }}">
+            <meta property="og:type" content="article">
+            @if (filled($metaDescription))
+                <meta property="og:description" content="{{ $metaDescription }}">
+            @endif
+            @if (filled($ogImage))
+                <meta property="og:image" content="{{ $ogImage }}">
+            @endif
+            <meta property="og:url" content="{{ $ogUrl ?? url()->current() }}">
+            <meta name="twitter:card" content="summary_large_image">
+        @endif
         <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
         <!-- Fonts -->
@@ -17,7 +32,7 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    @php($isProfileEdit = request()->routeIs('profile.edit') || request()->routeIs('user.profile'))
+    @php($isProfileEdit = request()->routeIs('settings.profile') || request()->routeIs('settings.account') || request()->routeIs('profile.show'))
     <body class="font-sans antialiased {{ $isProfileEdit ? 'bg-slate-950 text-slate-100' : 'bg-gray-100 text-slate-900' }}">
         <div class="min-h-[100dvh] flex flex-col {{ $isProfileEdit ? '' : 'bg-gray-100' }}">
             @include('layouts.navigation')

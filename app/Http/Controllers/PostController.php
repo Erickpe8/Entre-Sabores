@@ -2,74 +2,90 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UpdatePostCountryRequest;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class PostController extends Controller
 {
-    public function show(Post $post): JsonResponse
+    public function store(StorePostRequest $request): JsonResponse
     {
+        $this->authorize('create', Post::class);
+
+        $validated = $request->validated();
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('posts', 'public');
+        }
+
+        $post = $request->user()->posts()->create([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'image_path' => $imagePath,
+        ]);
+
+        $post->tags()->sync(array_values(array_unique($validated['tags'])));
+
         $post->load([
             'user:id,first_name,last_name,username,profile_photo',
-            'country:id,name,slug,flag_emoji',
+            'tags' => fn ($q) => $q->orderBy('type')->orderBy('sort_order'),
         ]);
-
-        $comments = $post->comments()->with('user:id,first_name,last_name,username,profile_photo')->latest()->get()->map(fn ($c) => [
-            'id' => $c->id,
-            'body' => $c->body,
-            'created_at' => $c->created_at?->toIso8601String(),
-            'user' => [
-                'id' => $c->user->id,
-                'name' => trim($c->user->first_name.' '.$c->user->last_name),
-                'username' => $c->user->username,
-                'avatar' => $c->user->profile_photo_url,
-            ],
-        ]);
-
-        $user = $post->user;
+        $post->loadCount(['comments', 'likes']);
 
         return response()->json([
-            'post' => [
-                'id' => $post->id,
-                'title' => $post->title,
-                'story' => $post->story,
-                'food_label' => $post->food_label,
-                'drink_label' => $post->drink_label,
-                'experience_type' => $post->experience_type,
-                'drink_type' => $post->drink_type,
-                'comments_count' => $post->comments()->count(),
-                'created_at' => $post->created_at?->toIso8601String(),
-                'country_id' => $post->country_id,
-                'country' => $post->country ? [
-                    'id' => $post->country->id,
-                    'name' => $post->country->name,
-                    'slug' => $post->country->slug,
-                    'flag_emoji' => $post->country->flag_emoji,
-                ] : null,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => trim($user->first_name.' '.$user->last_name),
-                    'username' => $user->username,
-                    'avatar' => $user->profile_photo_url,
-                    'profile_url' => route('user.profile', ['username' => $user->username]),
-                ],
-                'comments' => $comments,
+            'post' => (new PostResource($post))->resolve(),
+        ], 201);
+    }
+
+    public function show(Request $request, Post $post): JsonResponse|View
+    {
+        $post = $this->hydratePostForShow($post);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'post' => (new PostResource($post))->resolve(),
+            ]);
+        }
+
+        $payload = (new PostResource($post))->resolve();
+
+        return view('posts.show', [
+            'post' => $post,
+            'postPayload' => $payload,
+            'pageTitle' => $post->title.' — '.config('app.name'),
+            'metaDescription' => $payload['excerpt'] !== '' ? $payload['excerpt'] : $post->title,
+            'ogImage' => $post->image_url ? url($post->image_url) : null,
+            'ogUrl' => route('posts.show', $post),
+            'postShowConfig' => [
+                'postBaseUrl' => '/posts',
+                'commentStoreUrl' => route('posts.comments.store', ['post' => $post], false),
+                'loginUrl' => route('login', [], false),
+                'isAuthenticated' => auth()->check(),
             ],
         ]);
     }
 
-    public function updateCountry(UpdatePostCountryRequest $request, Post $post): JsonResponse
+    private function hydratePostForShow(Post $post): Post
     {
-        $this->authorize('update', $post);
-
-        $post->update([
-            'country_id' => $request->integer('country_id'),
+        $post->load([
+            'user:id,first_name,last_name,username,profile_photo',
+            'tags' => fn ($q) => $q->orderBy('type')->orderBy('sort_order'),
+            'comments' => fn ($q) => $q->with('user:id,first_name,last_name,username,profile_photo')
+                ->orderBy('created_at'),
         ]);
+        $post->loadCount(['comments', 'likes']);
 
-        return response()->json([
-            'ok' => true,
-            'country_id' => $post->country_id,
-        ]);
+        if (auth()->check()) {
+            $post->setAttribute(
+                'liked_by_me',
+                $post->likes()->where('user_id', auth()->id())->exists(),
+            );
+        }
+
+        return $post;
     }
 }

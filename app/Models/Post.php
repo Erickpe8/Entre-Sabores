@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Database\Factories\PostFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Post extends Model
@@ -14,40 +17,30 @@ class Post extends Model
     /** @use HasFactory<PostFactory> */
     use HasFactory;
 
-    public const EXPERIENCE_TYPES = [
-        'tradicional',
-        'callejero',
-        'gourmet',
-        'dulce',
-        'salado',
-    ];
-
-    public const DRINK_TYPES = [
-        'cafe',
-        'vino',
-        'cerveza',
-        'tradicional',
-    ];
-
     protected $fillable = [
         'user_id',
-        'country_id',
         'title',
-        'story',
-        'food_label',
-        'drink_label',
-        'experience_type',
-        'drink_type',
+        'description',
+        'image_path',
     ];
+
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->image_path !== null
+                ? Storage::disk('public')->url($this->image_path)
+                : null,
+        );
+    }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function country(): BelongsTo
+    public function tags(): BelongsToMany
     {
-        return $this->belongsTo(Country::class);
+        return $this->belongsToMany(Tag::class);
     }
 
     public function comments(): HasMany
@@ -55,8 +48,17 @@ class Post extends Model
         return $this->hasMany(Comment::class);
     }
 
+    public function likes(): HasMany
+    {
+        return $this->hasMany(Like::class);
+    }
+
     public function excerpt(): string
     {
-        return Str::limit(trim(strip_tags($this->story)), 80);
+        if ($this->description === null || $this->description === '') {
+            return '';
+        }
+
+        return Str::limit(trim(strip_tags($this->description)), 80);
     }
 }

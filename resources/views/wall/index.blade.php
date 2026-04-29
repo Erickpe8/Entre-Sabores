@@ -1,76 +1,72 @@
 <x-app-layout title="Entre Sabores — Muro de maridajes">
     <script type="application/json" id="wall-config">@json($wallConfig)</script>
 
+    <div id="wall-toast-root" class="fixed top-20 left-1/2 z-[60] flex -translate-x-1/2 flex-col gap-2 pointer-events-none px-4 w-full max-w-md" aria-live="polite"></div>
+
     <div class="min-h-[100dvh] bg-slate-950 text-slate-100">
-        {{-- Filtros: misma fila, scroll horizontal, estética daily.dev / oscuro --}}
         <div class="sticky top-14 sm:top-16 z-30 border-b border-slate-800/90 bg-slate-900/95 shadow-sm shadow-black/20 backdrop-blur-md">
-            <div class="overflow-x-auto overscroll-x-contain wall-scroll-x">
-                <div
-                    class="flex flex-nowrap items-center gap-x-2 py-2 px-4 sm:px-6 min-w-max text-sm whitespace-nowrap"
-                    id="wall-filter-bar"
-                    aria-label="Filtros del muro"
-                >
-                    @foreach ($countries as $country)
-                        <button
-                            type="button"
-                            data-country-chip="{{ $country->id }}"
-                            class="wall-chip shrink-0 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium transition bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70 inline-flex items-center gap-1"
-                            aria-label="Filtrar por país {{ $country->name }}"
-                        >
-                            <span>{{ $country->flag_emoji }}</span>
-                            <span>{{ $country->name }}</span>
-                        </button>
-                    @endforeach
+            <div
+                class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-5 sm:px-6"
+                id="wall-filter-bar"
+                aria-label="Explorar el muro"
+            >
+                <div class="min-w-0 flex-1">
+                    <label class="sr-only" for="wall-search-q">Buscar publicaciones y etiquetas</label>
+                    <div class="relative">
+                        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-500" aria-hidden="true">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                        </span>
+                        <input
+                            id="wall-search-q"
+                            type="search"
+                            enterkeyhint="search"
+                            autocomplete="off"
+                            placeholder="Buscar..."
+                            class="w-full rounded-full border border-slate-700/90 bg-slate-800/85 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-500 shadow-inner shadow-black/20 transition focus:border-emerald-500/80 focus:outline-none focus:ring-2 focus:ring-emerald-500/25 sm:py-2.5"
+                        />
+                    </div>
+                </div>
 
-                    <span class="mx-2 h-5 w-px shrink-0 bg-slate-600" aria-hidden="true"></span>
-
-                    @foreach (['tradicional' => 'Tradicional', 'callejero' => 'Callejero', 'gourmet' => 'Gourmet', 'dulce' => 'Dulce', 'salado' => 'Salado'] as $val => $label)
-                        <button
-                            type="button"
-                            data-adv-experience="{{ $val }}"
-                            class="wall-chip shrink-0 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium transition bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
-                            aria-label="Filtrar experiencia {{ $label }}"
-                        >
-                            {{ $label }}
-                        </button>
-                    @endforeach
-
-                    <span class="mx-2 h-5 w-px shrink-0 bg-slate-600" aria-hidden="true"></span>
-
-                    @foreach (['cafe' => 'Café', 'vino' => 'Vino', 'cerveza' => 'Cerveza', 'tradicional' => 'Bebidas tradicionales'] as $val => $label)
-                        <button
-                            type="button"
-                            data-adv-drink="{{ $val }}"
-                            class="wall-chip shrink-0 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium transition bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
-                            aria-label="Filtrar bebida {{ $label }}"
-                        >
-                            {{ $label }}
-                        </button>
-                    @endforeach
-
-                    <span class="mx-2 h-5 w-px shrink-0 bg-slate-600" aria-hidden="true"></span>
-
-                    <button
-                        type="button"
-                        data-sort="recent"
-                        class="wall-chip wall-chip-sort shrink-0 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium transition bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/35 hover:bg-emerald-500/25 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
-                        aria-label="Ordenar por más recientes"
+                <div class="w-full sm:w-auto sm:max-w-full sm:flex sm:justify-end">
+                    <div
+                        class="w-full overflow-x-auto scrollbar-none pb-0.5 sm:w-auto"
+                        role="tablist"
+                        aria-label="Orden del feed"
                     >
-                        Más recientes
-                    </button>
-                    <button
-                        type="button"
-                        data-sort="popular"
-                        class="wall-chip wall-chip-sort shrink-0 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium transition bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
-                        aria-label="Ordenar por más populares"
-                    >
-                        Más populares
-                    </button>
+                        <div class="inline-flex min-w-max items-center gap-1.5 rounded-full border border-slate-700/80 bg-slate-900/80 p-1 shadow-inner shadow-black/20">
+                            <button
+                                type="button"
+                                data-sort="recent"
+                                class="wall-chip wall-chip-sort shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition sm:px-4 sm:text-sm bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/35 hover:bg-emerald-500/25 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+                                aria-label="Ordenar por más recientes"
+                                role="tab"
+                            >
+                                Más recientes
+                            </button>
+                            <button
+                                type="button"
+                                data-sort="popular"
+                                class="wall-chip wall-chip-sort shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition sm:px-4 sm:text-sm bg-slate-800/90 text-slate-300 ring-1 ring-slate-700/80 hover:bg-slate-700 hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+                                aria-label="Ordenar por más populares"
+                                role="tab"
+                            >
+                                Más populares
+                            </button>
+                            <button
+                                type="button"
+                                data-sort="trending"
+                                class="wall-chip wall-chip-sort shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition sm:px-4 sm:text-sm bg-slate-800/90 text-slate-300 ring-1 ring-slate-700/80 hover:bg-slate-700 hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+                                aria-label="Tendencia"
+                                role="tab"
+                            >
+                                Tendencia
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- Skeleton alineado al grid --}}
         <div id="wall-skeleton" class="px-4 sm:px-6 py-8">
             <div
                 class="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
@@ -94,23 +90,228 @@
             </div>
         </div>
 
-        {{-- Feed: grid responsive, densidad alta, sin columnas por país --}}
         <div class="px-4 sm:px-6 pb-12 pt-2">
             <div
                 id="posts-container"
-                class="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 min-h-[200px]"
+                class="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 min-h-[200px] opacity-100 transition-opacity duration-300 ease-out"
             ></div>
+            <div id="feed-loading-more" class="hidden w-full flex justify-center py-6 items-center" aria-hidden="true">
+                <span class="inline-block h-8 w-8 animate-spin rounded-full border-2 border-emerald-500/25 border-t-emerald-500" aria-hidden="true"></span>
+            </div>
             <div id="feed-scroll-anchor" class="h-8" aria-hidden="true"></div>
             <div id="feed-status" class="sr-only" aria-live="polite"></div>
         </div>
     </div>
 
-    {{-- Modal detalle (tema oscuro, mismo lenguaje visual) --}}
+    {{-- FAB tipo Flowbite / Twitter: un clic abre el modal (sin menú intermedio) --}}
+    <div class="fixed end-6 bottom-24 sm:bottom-28 z-40">
+        <button
+            type="button"
+            id="wall-fab-create-post"
+            class="flex h-14 w-14 items-center justify-center rounded-full text-white bg-emerald-600 shadow-lg shadow-emerald-900/40 hover:bg-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-400/45 active:scale-95"
+            aria-label="Nueva publicación"
+        >
+            <svg class="h-6 w-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28"/>
+            </svg>
+        </button>
+    </div>
+
+    {{-- Modal crear publicación: compositor tipo Twitter / Instagram (sin formulario clásico) --}}
+    <div id="create-post-modal" class="hidden fixed inset-0 z-50 flex items-end justify-center sm:items-center p-0 sm:p-5" role="dialog" aria-modal="true" aria-labelledby="create-post-title">
+        <div id="create-post-backdrop" class="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity"></div>
+
+        <div class="relative flex h-[100dvh] max-h-[100dvh] w-full max-w-3xl flex-col overflow-hidden rounded-none border-x-0 border-y border-white/[0.06] bg-zinc-950 shadow-[0_25px_80px_-12px_rgba(0,0,0,0.65)] sm:h-auto sm:max-h-[min(94dvh,920px)] sm:rounded-[1.75rem] sm:border sm:border-white/[0.08]">
+            {{-- Panel etiquetas: búsqueda y selección --}}
+            <div id="create-post-tag-panel" class="hidden absolute inset-0 z-[70] flex flex-col justify-end sm:justify-center sm:p-5" aria-hidden="true">
+                <div id="create-post-tag-panel-dismiss" class="absolute inset-0 bg-black/55 backdrop-blur-[2px] pointer-events-auto"></div>
+                <div class="pointer-events-none relative mx-auto flex w-full max-w-lg flex-col justify-end sm:max-h-[min(72vh,560px)] sm:justify-center">
+                    <div class="pointer-events-auto flex max-h-[min(78vh,620px)] flex-col overflow-hidden rounded-t-[1.35rem] border border-white/[0.08] bg-zinc-900/98 shadow-2xl ring-1 ring-white/[0.04] sm:rounded-2xl">
+                        <div class="flex shrink-0 items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3">
+                            <div>
+                                <p class="text-base font-semibold text-white">Etiquetas</p>
+                            </div>
+                            <button type="button" id="create-post-tag-panel-close" class="rounded-full p-2 text-zinc-400 transition hover:bg-white/10 hover:text-white" aria-label="Cerrar panel de etiquetas">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                        <div class="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 pt-3">
+                            <p id="create-post-smart-hints-label" class="hidden mb-2 text-[11px] font-medium text-emerald-400/95">Sugerencias según tu texto</p>
+                            <div id="create-post-smart-hints" class="hidden mb-4 flex flex-wrap gap-2"></div>
+                            <div id="create-post-selected-chips-bar" class="mb-4 flex min-h-[36px] flex-wrap gap-2"></div>
+                            <label class="sr-only" for="create-post-tag-input">Buscar etiqueta</label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-zinc-500" aria-hidden="true">
+                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                                </span>
+                                <input
+                                    type="text"
+                                    id="create-post-tag-input"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                    placeholder="Buscar etiquetas..."
+                                    class="create-post-tag-search-input w-full rounded-2xl border border-zinc-600/90 bg-zinc-950/80 py-3 pl-10 pr-4 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-emerald-500/55 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                                />
+                                <ul
+                                    id="create-post-tag-dropdown"
+                                    role="listbox"
+                                    class="scrollbar-none hidden absolute left-0 right-0 z-30 mt-2 max-h-52 overflow-y-auto rounded-xl border border-zinc-600/90 bg-zinc-950 py-1 shadow-2xl ring-1 ring-white/10"
+                                ></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Cabecera minimal (tipo Twitter) --}}
+            <div class="grid shrink-0 grid-cols-[minmax(0,auto)_1fr_minmax(0,auto)] items-center gap-2 px-4 pb-2 pt-3 sm:px-6 sm:pt-5">
+                <button type="button" id="create-post-close" class="rounded-full p-2 text-zinc-400 transition hover:bg-white/[0.06] hover:text-white active:scale-95" aria-label="Cerrar">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                <h2 id="create-post-title" class="truncate text-center text-base font-bold tracking-tight text-white">Nueva publicación</h2>
+                <span class="w-10 shrink-0" aria-hidden="true"></span>
+            </div>
+
+            <form id="create-post-form" class="flex min-h-0 flex-1 flex-col" enctype="multipart/form-data">
+                <input type="hidden" name="title" id="create-post-field-title" value="" autocomplete="off" />
+                <input type="hidden" name="description" id="create-post-field-description" value="" />
+
+                <div class="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-2 sm:px-7">
+                    <div id="create-post-errors" class="mb-4 hidden rounded-2xl border border-red-500/30 bg-red-950/50 px-4 py-3 text-sm text-red-100"></div>
+
+                    {{-- Vista previa en vivo: una sola superficie de composición --}}
+                    <div id="create-post-editable-card" class="group/create-card overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-b from-zinc-900/95 to-zinc-950/98 shadow-lg shadow-black/40 ring-1 ring-white/[0.04]">
+                        <label class="sr-only" for="create-post-field-image">Imagen opcional</label>
+                        <input id="create-post-field-image" name="image" type="file" accept="image/*" class="sr-only" tabindex="-1" />
+
+                        <div
+                            id="create-post-image-zone"
+                            class="create-post-image-zone relative w-full overflow-hidden transition-[box-shadow] duration-200 ring-0 ring-emerald-500/0 data-[drag=active]:bg-emerald-500/[0.07] data-[drag=active]:ring-2 data-[drag=active]:ring-inset data-[drag=active]:ring-emerald-400/35"
+                            data-drag="inactive"
+                        >
+                            <div id="create-post-image-empty" class="flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-2 bg-zinc-900/80 px-6 py-10 transition duration-200 hover:bg-zinc-800/50">
+                                <span class="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-800/90 shadow-inner ring-1 ring-white/[0.08]" aria-hidden="true">
+                                    <svg class="h-9 w-9 text-zinc-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.622-.58 1.35-.58 2.111v6.5a2.25 2.25 0 002.25 2.25h9.5a2.25 2.25 0 002.25-2.25v-6.5c0-.76-.2-1.49-.58-2.11a2.31 2.31 0 00-1.64-1.055l-1.64-.31a2.25 2.25 0 00-1.86.64l-.6.6a1.5 1.5 0 01-1.06.44H8.9a1.5 1.5 0 01-1.06-.44l-.6-.6a2.25 2.25 0 00-1.86-.64l-1.64.31z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.25 10.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                                    </svg>
+                                    <span class="pointer-events-none absolute left-1/2 top-[44%] h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-400 shadow-[0_0_0_2px_rgb(24_24_27/0.95)]" aria-hidden="true"></span>
+                                </span>
+                                <span class="text-base font-semibold text-zinc-100">Agregar imagen</span>
+                                <span class="max-w-[240px] text-center text-sm leading-relaxed text-zinc-500">Arrastra o haz clic para subir</span>
+                            </div>
+
+                            <div id="create-post-image-filled" class="relative hidden aspect-[16/10] max-h-[min(38vh,320px)] w-full sm:aspect-[21/9] sm:max-h-[340px]">
+                                <img id="create-post-image-preview" src="" alt="" class="h-full w-full object-cover" />
+                                <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-zinc-950/75 via-transparent to-zinc-950/20"></div>
+                                <button
+                                    type="button"
+                                    id="create-post-remove-image"
+                                    class="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-black/55 text-white shadow-lg backdrop-blur-md transition hover:scale-105 hover:bg-red-600/95"
+                                    aria-label="Quitar imagen"
+                                >
+                                    <span class="sr-only">Quitar</span>
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-3 px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
+                            <div
+                                id="create-post-editable-title"
+                                contenteditable="true"
+                                role="textbox"
+                                aria-multiline="false"
+                                aria-label="Título"
+                                data-placeholder="Escribe el título..."
+                                class="create-post-ce create-post-ce--title ce-empty text-xl font-bold leading-snug tracking-tight text-white outline-none sm:text-2xl focus-visible:ring-2 focus-visible:ring-emerald-500/35 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded-sm"
+                            ></div>
+
+                            <div class="flex items-center gap-3">
+                                @auth
+                                    <img
+                                        src="{{ auth()->user()->profile_photo_url }}"
+                                        alt=""
+                                        width="40"
+                                        height="40"
+                                        class="h-10 w-10 shrink-0 rounded-full border border-white/[0.08] object-cover ring-1 ring-white/[0.06]"
+                                    />
+                                    <div class="min-w-0 text-sm leading-tight">
+                                        <span class="font-semibold text-zinc-100">{{ '@'.auth()->user()->username }}</span>
+                                        <span class="text-zinc-600"> · </span>
+                                        <span class="text-zinc-500">ahora</span>
+                                    </div>
+                                @else
+                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-zinc-800 text-zinc-500" aria-hidden="true">
+                                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                    </div>
+                                    <div class="text-sm text-zinc-500"><span class="font-medium text-zinc-400">invitado</span> · ahora</div>
+                                @endauth
+                            </div>
+
+                            <div
+                                id="create-post-editable-description"
+                                contenteditable="true"
+                                role="textbox"
+                                aria-multiline="true"
+                                aria-label="Descripción"
+                                data-placeholder="¿Qué estás compartiendo hoy?"
+                                class="create-post-ce create-post-ce--body ce-empty min-h-[6.5rem] text-[15px] leading-relaxed text-zinc-300 outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/35 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded-xl"
+                            ></div>
+
+                            <div id="create-post-card-tag-pills" class="flex min-h-[28px] flex-wrap gap-x-2 gap-y-1.5 text-sm"></div>
+
+                            <button
+                                type="button"
+                                id="create-post-open-tags"
+                                class="inline-flex w-fit items-center gap-2 rounded-full border border-zinc-600/80 bg-zinc-800/40 px-4 py-2 text-sm font-medium text-emerald-300/95 ring-1 ring-white/[0.04] transition hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-200 active:scale-[0.98]"
+                            >
+                                <svg class="h-4 w-4 text-emerald-400/90" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                Agregar etiquetas
+                            </button>
+
+                            <div class="pointer-events-none flex items-center gap-5 border-t border-white/[0.06] pt-4 select-none text-zinc-500">
+                                <span class="inline-flex items-center gap-1.5 text-sm font-medium tabular-nums">
+                                    <svg class="h-4 w-4 text-zinc-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                    <span>0</span>
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 text-sm font-medium tabular-nums">
+                                    <svg class="h-4 w-4 text-zinc-500 opacity-85" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    <span>0</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p id="create-post-validation-hint" class="mt-3 text-center text-[11px] text-amber-400/90"></p>
+                </div>
+
+                <div class="safe-bottom shrink-0 border-t border-white/[0.07] bg-zinc-950/95 px-4 py-4 backdrop-blur-xl sm:rounded-b-[1.75rem] sm:px-7">
+                    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                        <button type="button" id="create-post-cancel" class="inline-flex min-h-[48px] w-full items-center justify-center rounded-full border border-zinc-600/90 bg-transparent px-6 text-sm font-medium text-zinc-300 transition hover:bg-zinc-800/80 sm:w-auto">
+                            Cancelar
+                        </button>
+                        <button type="submit" id="create-post-submit" class="inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 px-8 text-sm font-bold text-white shadow-lg shadow-emerald-950/40 transition hover:brightness-110 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45 sm:w-auto">
+                            Publicar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Modal detalle publicación --}}
     <div id="wall-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true" aria-label="Detalle de publicación">
         <div id="wall-modal-backdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
         <div
             id="wall-modal-panel"
-            class="relative w-full h-full sm:h-auto sm:max-w-2xl sm:max-h-[90vh] overflow-y-auto sm:rounded-2xl rounded-none bg-slate-900 shadow-2xl shadow-black/50 border-0 sm:border border-slate-700"
+            class="scrollbar-none relative w-full h-full sm:h-auto sm:max-w-2xl sm:max-h-[90vh] overflow-y-auto sm:rounded-2xl rounded-none bg-slate-900 shadow-2xl shadow-black/50 border-0 sm:border border-slate-700"
         >
             <div class="sticky top-0 flex justify-end bg-slate-900/95 border-b border-slate-700 px-4 py-2 rounded-t-2xl z-10 backdrop-blur-sm">
                 <button

@@ -23,7 +23,7 @@ class CountryFactory extends Factory
         return [
             'name' => $name,
             'slug' => Str::slug($name).'-'.fake()->unique()->numerify('###'),
-            'flag_emoji' => '🌍',
+            'iso_code' => fake()->randomElement(['CO', 'MX', 'AR', 'ES', 'US', 'IT']),
             'sort_order' => 0,
         ];
     }

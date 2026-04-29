@@ -15,7 +15,7 @@ class Country extends Model
     protected $fillable = [
         'name',
         'slug',
-        'flag_emoji',
+        'iso_code',
         'sort_order',
     ];
 

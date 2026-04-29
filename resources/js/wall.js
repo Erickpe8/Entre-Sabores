@@ -1,99 +1,45 @@
-const ExperienceLabels = {
-    tradicional: 'Tradicional',
-    callejero: 'Callejero',
-    gourmet: 'Gourmet',
-    dulce: 'Dulce',
-    salado: 'Salado',
-};
+import {
+    renderCard,
+    heartSvgHtml,
+    esc,
+    formatStory,
+    ICON_COMMENT,
+    flashLikeAnimation,
+    countryPreviewMetaHtml,
+    relativeTimeEs,
+} from './social/postCard.js';
+import { renderCommentsTreeHtml, setupCommentInteractions } from './social/commentThread.js';
 
-const DrinkLabels = {
-    cafe: 'Café',
-    vino: 'Vino',
-    cerveza: 'Cerveza',
-    tradicional: 'Bebidas tradicionales',
-};
-
-/** Gradientes tipo daily.dev para cabecera de card (determinísticos por id) */
-const HEADER_GRADIENTS = [
-    'from-violet-600 via-purple-600 to-fuchsia-700',
-    'from-emerald-600 via-teal-600 to-cyan-700',
-    'from-amber-600 via-orange-600 to-rose-700',
-    'from-sky-600 via-blue-600 to-indigo-800',
-    'from-rose-600 via-pink-600 to-violet-800',
-];
-
-function gradientClassForPostId(id) {
-    const n = Number(id) || 0;
-
-    return HEADER_GRADIENTS[Math.abs(n) % HEADER_GRADIENTS.length];
-}
-
-function relativeTimeEs(iso) {
-    if (!iso) {
-        return '';
-    }
-    const then = new Date(iso).getTime();
-    if (Number.isNaN(then)) {
-        return '';
-    }
-    const sec = Math.floor((Date.now() - then) / 1000);
-    if (sec < 45) {
-        return 'ahora';
-    }
-    const min = Math.floor(sec / 60);
-    if (min < 60) {
-        return min <= 1 ? 'hace 1 min' : `hace ${min} min`;
-    }
-    const h = Math.floor(min / 60);
-    if (h < 24) {
-        return h === 1 ? 'hace 1 h' : `hace ${h} h`;
-    }
-    const d = Math.floor(h / 24);
-    if (d < 7) {
-        return d === 1 ? 'hace 1 día' : `hace ${d} días`;
-    }
-    const w = Math.floor(d / 7);
-    if (w < 5) {
-        return w === 1 ? 'hace 1 sem' : `hace ${w} sem`;
-    }
-
-    return new Date(iso).toLocaleDateString('es', { day: 'numeric', month: 'short' });
-}
-
-function esc(s) {
-    const d = document.createElement('div');
-    d.textContent = s;
-
-    return d.innerHTML;
-}
-
-function onEnterOrSpace(event, callback) {
-    if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        callback();
-    }
-}
-
-function formatStory(text) {
-    return esc(String(text)).replace(/\n/g, '<br>');
-}
-
-/** Chips del muro (tema oscuro, alineado con Blade) */
 const CLS = {
-    inactive:
-        'wall-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white',
-    inactiveCountry:
-        'wall-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition bg-slate-800/90 text-slate-300 hover:bg-slate-700 hover:text-white inline-flex items-center gap-1',
-    primary:
-        'wall-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition bg-emerald-600/90 text-white shadow-sm shadow-emerald-900/30 hover:bg-emerald-500',
-    primaryCountry:
-        'wall-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition bg-emerald-600/90 text-white shadow-sm shadow-emerald-900/30 hover:bg-emerald-500 inline-flex items-center gap-1',
     secondary:
-        'wall-chip shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/35 hover:bg-emerald-500/25',
+        'wall-chip wall-chip-sort shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition sm:px-4 sm:text-sm bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/35 hover:bg-emerald-500/25',
+    inactiveSort:
+        'wall-chip wall-chip-sort shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition sm:px-4 sm:text-sm bg-slate-800/90 text-slate-300 ring-1 ring-slate-700/80 hover:bg-slate-700 hover:text-white',
 };
 
-const ICON_COMMENT =
-    '<svg class="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>';
+function showToast(message, variant = 'info') {
+    const root = document.getElementById('wall-toast-root');
+    if (!root) {
+        return;
+    }
+    const el = document.createElement('div');
+    const base =
+        'pointer-events-auto rounded-xl px-4 py-3 text-sm shadow-lg border backdrop-blur-sm transition';
+    const styles =
+        variant === 'success'
+            ? 'bg-emerald-950/95 text-emerald-50 border-emerald-500/40'
+            : variant === 'error'
+              ? 'bg-red-950/95 text-red-50 border-red-500/40'
+              : 'bg-slate-900/95 text-slate-100 border-slate-600/80';
+    el.className = `${base} ${styles}`;
+    el.setAttribute('role', 'status');
+    el.textContent = message;
+    root.appendChild(el);
+    window.setTimeout(() => {
+        el.classList.add('opacity-0');
+        window.setTimeout(() => el.remove(), 300);
+    }, 4200);
+}
 
 export function initWall() {
     const axios = window.axios;
@@ -113,17 +59,54 @@ export function initWall() {
     const scrollAnchor = document.getElementById('feed-scroll-anchor');
     const feedStatus = document.getElementById('feed-status');
     const skeleton = document.getElementById('wall-skeleton');
+    const feedLoadingMore = document.getElementById('feed-loading-more');
     const modal = document.getElementById('wall-modal');
     const modalBody = document.getElementById('wall-modal-body');
     const modalBackdrop = document.getElementById('wall-modal-backdrop');
 
+    const createModal = document.getElementById('create-post-modal');
+    const createBackdrop = document.getElementById('create-post-backdrop');
+    const createForm = document.getElementById('create-post-form');
+    const createErrors = document.getElementById('create-post-errors');
+    const fabCreatePost = document.getElementById('wall-fab-create-post');
+    const createCloseBtn = document.getElementById('create-post-close');
+    const createCancelBtn = document.getElementById('create-post-cancel');
+    const imageInput = document.getElementById('create-post-field-image');
+    const imageZone = document.getElementById('create-post-image-zone');
+    const imageEmpty = document.getElementById('create-post-image-empty');
+    const imageFilled = document.getElementById('create-post-image-filled');
+    const imagePreview = document.getElementById('create-post-image-preview');
+    const removeImageBtn = document.getElementById('create-post-remove-image');
+    const titleEditable = document.getElementById('create-post-editable-title');
+    const descEditable = document.getElementById('create-post-editable-description');
+    const hiddenTitle = document.getElementById('create-post-field-title');
+    const hiddenDesc = document.getElementById('create-post-field-description');
+    const tagPillsEl = document.getElementById('create-post-card-tag-pills');
+    const tagPanel = document.getElementById('create-post-tag-panel');
+    const tagPanelDismiss = document.getElementById('create-post-tag-panel-dismiss');
+    const tagPanelCloseBtn = document.getElementById('create-post-tag-panel-close');
+    const openTagsBtn = document.getElementById('create-post-open-tags');
+    const searchInput = document.getElementById('wall-search-q');
+
     const state = {
-        country_id: null,
         following: config.initialFollowing === true,
-        experience_type: null,
-        drink_type: null,
         sort: 'recent',
+        q: '',
     };
+
+    const params = new URLSearchParams(window.location.search);
+    const urlSearch = (params.get('search') ?? params.get('q') ?? '').trim();
+    if (urlSearch) {
+        state.q = urlSearch;
+    }
+    const urlSort = params.get('sort');
+    if (urlSort === 'popular' || urlSort === 'trending' || urlSort === 'recent') {
+        state.sort = urlSort;
+    }
+    if (searchInput && urlSearch) {
+        searchInput.value = urlSearch;
+    }
+    let searchDebounceTimer = null;
     let fetchDebounceTimer = null;
     let activeRequestController = null;
     const pagination = {
@@ -132,6 +115,500 @@ export function initWall() {
         hasMore: true,
         loadingMore: false,
     };
+
+    const selectedCreateTags = new Set();
+    /** @type {Map<number, { id: number, name: string, type: string, slug: string }>} */
+    const selectedTagMeta = new Map();
+    let createImageObjectUrl = null;
+    let syncCardFrame = null;
+    let modalCommentAbort = null;
+
+    function revokeCreateImageUrl() {
+        if (createImageObjectUrl) {
+            URL.revokeObjectURL(createImageObjectUrl);
+            createImageObjectUrl = null;
+        }
+    }
+
+    function plainTextFromEditable(el) {
+        return (el?.innerText || el?.textContent || '').trim();
+    }
+
+    function updateCeEmptyClass(el) {
+        if (!el) {
+            return;
+        }
+        const empty = plainTextFromEditable(el) === '';
+        el.classList.toggle('ce-empty', empty);
+    }
+
+    function normalizeEditableBr(el) {
+        if (!el) {
+            return;
+        }
+        if (!plainTextFromEditable(el)) {
+            el.innerHTML = '';
+            el.classList.add('ce-empty');
+        }
+    }
+
+    function syncHiddenFromEditables() {
+        let title = plainTextFromEditable(titleEditable);
+        if (title.length > 150) {
+            title = title.slice(0, 150);
+            if (titleEditable) {
+                titleEditable.textContent = title;
+            }
+        }
+        const desc = plainTextFromEditable(descEditable);
+        if (hiddenTitle) {
+            hiddenTitle.value = title;
+        }
+        if (hiddenDesc) {
+            hiddenDesc.value = desc;
+        }
+    }
+
+    function updateCardTagPills() {
+        if (!tagPillsEl) {
+            return;
+        }
+        tagPillsEl.innerHTML = '';
+        selectedCreateTags.forEach((rawId) => {
+            const id = Number(rawId);
+            const meta = selectedTagMeta.get(id);
+            if (!meta) {
+                return;
+            }
+            const span = document.createElement('span');
+            span.className = 'font-medium text-emerald-400/95';
+            span.textContent = `#${meta.name}`;
+            tagPillsEl.appendChild(span);
+        });
+    }
+
+    function renderSelectedChipsBar() {
+        const bar = document.getElementById('create-post-selected-chips-bar');
+        if (!bar) {
+            return;
+        }
+        bar.innerHTML = '';
+        selectedCreateTags.forEach((rawId) => {
+            const id = Number(rawId);
+            const meta = selectedTagMeta.get(id);
+            if (!meta) {
+                return;
+            }
+            const chip = document.createElement('span');
+            chip.className =
+                'inline-flex items-center gap-1.5 rounded-full border border-emerald-500/35 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-100';
+            const label = document.createElement('span');
+            label.textContent = `#${meta.name}`;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className =
+                'rounded-full p-0.5 text-emerald-300/90 transition hover:bg-white/10 hover:text-white';
+            btn.setAttribute('aria-label', `Quitar etiqueta ${meta.name}`);
+            btn.innerHTML =
+                '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
+            btn.addEventListener('click', () => removeSelectedTag(id));
+            chip.appendChild(label);
+            chip.appendChild(btn);
+            bar.appendChild(chip);
+        });
+    }
+
+    function removeSelectedTag(id) {
+        const n = Number(id);
+        selectedCreateTags.delete(n);
+        selectedTagMeta.delete(n);
+        scheduleSyncEditableCard();
+    }
+
+    function addSelectedTag(meta) {
+        const id = Number(meta.id);
+        if (selectedCreateTags.has(id)) {
+            return;
+        }
+        selectedCreateTags.add(id);
+        selectedTagMeta.set(id, {
+            id,
+            name: meta.name,
+            type: meta.type,
+            slug: meta.slug,
+        });
+        scheduleSyncEditableCard();
+    }
+
+    const flatCatalogTags = (() => {
+        const out = [];
+        const bag = config.tagsByType || {};
+        Object.keys(bag).forEach((typeKey) => {
+            (bag[typeKey] || []).forEach((t) => {
+                out.push({
+                    id: t.id,
+                    name: t.name,
+                    slug: t.slug,
+                    type: typeKey,
+                });
+            });
+        });
+
+        return out;
+    })();
+
+    let smartHintsTimer = null;
+
+    function scheduleSmartHintsFromContent() {
+        window.clearTimeout(smartHintsTimer);
+        smartHintsTimer = window.setTimeout(() => runSmartHintsFromContent(), 450);
+    }
+
+    function runSmartHintsFromContent() {
+        const wrap = document.getElementById('create-post-smart-hints');
+        const labelEl = document.getElementById('create-post-smart-hints-label');
+        if (!wrap || !labelEl) {
+            return;
+        }
+
+        const raw = `${plainTextFromEditable(titleEditable)} ${plainTextFromEditable(descEditable)}`;
+        const normalized = raw
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/\p{M}/gu, '');
+        const tokens = normalized.split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 3);
+        if (tokens.length === 0) {
+            wrap.classList.add('hidden');
+            labelEl.classList.add('hidden');
+            wrap.innerHTML = '';
+
+            return;
+        }
+
+        const selectedIds = new Set(selectedCreateTags);
+        /** @type {Map<number, number>} */
+        const scores = new Map();
+
+        for (const tok of tokens) {
+            for (const t of flatCatalogTags) {
+                if (selectedIds.has(t.id)) {
+                    continue;
+                }
+                const tn = t.name
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/\p{M}/gu, '');
+                if (tn.includes(tok) || tok.includes(tn)) {
+                    scores.set(t.id, (scores.get(t.id) || 0) + 1);
+                }
+            }
+        }
+
+        const ranked = [...scores.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8)
+            .map(([tid]) => flatCatalogTags.find((x) => x.id === tid))
+            .filter(Boolean);
+
+        if (ranked.length === 0) {
+            wrap.classList.add('hidden');
+            labelEl.classList.add('hidden');
+            wrap.innerHTML = '';
+
+            return;
+        }
+
+        labelEl.classList.remove('hidden');
+        wrap.classList.remove('hidden');
+        wrap.innerHTML = '';
+        ranked.forEach((t) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className =
+                'rounded-full border border-emerald-500/30 bg-zinc-800/90 px-3 py-1.5 text-[11px] font-medium text-emerald-200 transition hover:bg-emerald-600/35';
+            b.textContent = `+ #${t.name}`;
+            b.addEventListener('click', () => {
+                addSelectedTag(t);
+                runSmartHintsFromContent();
+            });
+            wrap.appendChild(b);
+        });
+    }
+
+    const tagInput = document.getElementById('create-post-tag-input');
+    const tagDropdown = document.getElementById('create-post-tag-dropdown');
+    let tagSearchTimer = null;
+
+    function isTagPanelOpen() {
+        return Boolean(tagPanel && !tagPanel.classList.contains('hidden'));
+    }
+
+    function openTagPanel() {
+        if (!tagPanel) {
+            return;
+        }
+        tagPanel.classList.remove('hidden');
+        tagPanel.setAttribute('aria-hidden', 'false');
+        window.requestAnimationFrame(() => {
+            tagInput?.focus();
+            runSmartHintsFromContent();
+        });
+    }
+
+    function closeTagPanel() {
+        if (!tagPanel) {
+            return;
+        }
+        tagPanel.classList.add('hidden');
+        tagPanel.setAttribute('aria-hidden', 'true');
+        hideTagDropdown();
+    }
+    /** @type {AbortController | null} */
+    let tagSearchAbort = null;
+
+    function hideTagDropdown() {
+        tagDropdown?.classList.add('hidden');
+        if (tagDropdown) {
+            tagDropdown.innerHTML = '';
+        }
+    }
+
+    async function runTagSearchQuery() {
+        const q = (tagInput?.value || '').trim();
+        tagSearchAbort?.abort();
+        if (!config.tagsSearchUrl || q.length < 1) {
+            hideTagDropdown();
+
+            return;
+        }
+
+        const ctrl = new AbortController();
+        tagSearchAbort = ctrl;
+
+        try {
+            const url = `${config.tagsSearchUrl}?${new URLSearchParams({ q })}`;
+            const { data } = await axios.get(url, { signal: ctrl.signal });
+            const rawItems = data.tags || [];
+            const items = rawItems.filter((t) => !selectedCreateTags.has(Number(t.id)));
+            if (!tagDropdown) {
+                return;
+            }
+            tagDropdown.innerHTML = '';
+            if (items.length === 0) {
+                const li = document.createElement('li');
+                li.className = 'px-4 py-3 text-sm text-slate-500';
+                li.textContent = 'Sin coincidencias';
+                tagDropdown.appendChild(li);
+                tagDropdown.classList.remove('hidden');
+
+                return;
+            }
+
+            items.forEach((t) => {
+                const li = document.createElement('li');
+                li.setAttribute('role', 'option');
+                li.className =
+                    'cursor-pointer px-4 py-2.5 text-sm text-slate-100 transition hover:bg-emerald-600/25 active:bg-emerald-600/35';
+                li.textContent = t.name;
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                });
+                li.addEventListener('click', () => {
+                    addSelectedTag(t);
+                    if (tagInput) {
+                        tagInput.value = '';
+                    }
+                    hideTagDropdown();
+                    tagInput?.focus();
+                });
+                tagDropdown.appendChild(li);
+            });
+            tagDropdown.classList.remove('hidden');
+        } catch (e) {
+            if (e?.name === 'CanceledError' || e?.name === 'AbortError') {
+                return;
+            }
+            console.error(e);
+        }
+    }
+
+    tagInput?.addEventListener('input', () => {
+        window.clearTimeout(tagSearchTimer);
+        tagSearchTimer = window.setTimeout(() => {
+            void runTagSearchQuery();
+        }, 300);
+    });
+
+    tagInput?.addEventListener('focus', () => {
+        if ((tagInput.value || '').trim().length > 0) {
+            void runTagSearchQuery();
+        }
+    });
+
+    tagInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hideTagDropdown();
+        }
+    });
+
+    createModal?.addEventListener('click', (e) => {
+        if (e.target === createBackdrop) {
+            hideTagDropdown();
+        }
+    });
+
+    openTagsBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openTagPanel();
+    });
+
+    tagPanelDismiss?.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeTagPanel();
+    });
+
+    tagPanelCloseBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeTagPanel();
+    });
+
+    function scheduleSyncEditableCard() {
+        if (syncCardFrame) {
+            cancelAnimationFrame(syncCardFrame);
+        }
+        syncCardFrame = requestAnimationFrame(() => {
+            syncCardFrame = null;
+            syncHiddenFromEditables();
+            updateCardTagPills();
+            renderSelectedChipsBar();
+            updateCeEmptyClass(titleEditable);
+            updateCeEmptyClass(descEditable);
+            const validationHint = document.getElementById('create-post-validation-hint');
+            if (validationHint) {
+                validationHint.textContent =
+                    selectedCreateTags.size === 0 ? 'Selecciona al menos una etiqueta para publicar.' : '';
+            }
+        });
+    }
+
+    function bindCreateComposerEditables() {
+        const pastePlain = (e) => {
+            e.preventDefault();
+            const text = e.clipboardData?.getData('text/plain') ?? '';
+            document.execCommand('insertText', false, text);
+        };
+
+        titleEditable?.addEventListener('paste', pastePlain);
+        descEditable?.addEventListener('paste', pastePlain);
+
+        titleEditable?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                descEditable?.focus();
+            }
+        });
+
+        titleEditable?.addEventListener('input', () => {
+            if (titleEditable && (titleEditable.textContent?.length ?? 0) > 150) {
+                titleEditable.textContent = titleEditable.textContent.slice(0, 150);
+            }
+            updateCeEmptyClass(titleEditable);
+            scheduleSyncEditableCard();
+            scheduleSmartHintsFromContent();
+        });
+
+        descEditable?.addEventListener('input', () => {
+            updateCeEmptyClass(descEditable);
+            scheduleSyncEditableCard();
+            scheduleSmartHintsFromContent();
+        });
+
+        titleEditable?.addEventListener('blur', () => {
+            normalizeEditableBr(titleEditable);
+            updateCeEmptyClass(titleEditable);
+        });
+
+        descEditable?.addEventListener('blur', () => {
+            normalizeEditableBr(descEditable);
+            updateCeEmptyClass(descEditable);
+        });
+    }
+
+    bindCreateComposerEditables();
+
+    function applyLikeState(postId, liked, likesCount) {
+        document.querySelectorAll(`[data-like-post-id="${postId}"]`).forEach((btn) => {
+            btn.dataset.liked = liked ? '1' : '0';
+            btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+            btn.classList.toggle('text-rose-500', liked);
+            btn.classList.toggle('text-slate-500', !liked);
+            const span = btn.querySelector('[data-like-count]');
+            if (span) {
+                span.textContent = String(likesCount);
+            }
+            const wrap = btn.querySelector('.wall-like-svg-wrap');
+            if (wrap) {
+                wrap.innerHTML = heartSvgHtml(liked);
+            }
+        });
+    }
+
+    function setLikeButtonsBusy(postId, busy) {
+        document.querySelectorAll(`[data-like-post-id="${postId}"]`).forEach((btn) => {
+            btn.dataset.busy = busy ? '1' : '0';
+            btn.toggleAttribute('disabled', busy);
+            btn.classList.toggle('opacity-70', busy);
+            btn.classList.toggle('cursor-wait', busy);
+        });
+    }
+
+    function applyCommentsCount(postId, count) {
+        document.querySelectorAll(`article[data-post-id="${postId}"] [data-comments-count]`).forEach((el) => {
+            el.textContent = String(count);
+        });
+        const modalCount = document.getElementById('wall-modal-comments-count');
+        if (modalCount) {
+            modalCount.textContent = String(count);
+        }
+    }
+
+    async function toggleLike(postId) {
+        if (!config.isAuthenticated) {
+            window.location.href = config.loginUrl;
+
+            return;
+        }
+
+        const probeBtn = document.querySelector(`[data-like-post-id="${postId}"]`);
+        if (!probeBtn || probeBtn.dataset.busy === '1') {
+            return;
+        }
+
+        const previousLiked = probeBtn.dataset.liked === '1';
+        const previousCount = Number(
+            probeBtn.querySelector('[data-like-count]')?.textContent || 0,
+        );
+        const optimisticLiked = !previousLiked;
+        const optimisticCount = Math.max(0, previousCount + (optimisticLiked ? 1 : -1));
+
+        setLikeButtonsBusy(postId, true);
+        applyLikeState(postId, optimisticLiked, optimisticCount);
+
+        try {
+            const { data } = await axios.post(`${config.postBaseUrl}/${postId}/likes/toggle`);
+            applyLikeState(postId, data.liked === true, data.likes_count);
+            if (data.liked === true) {
+                flashLikeAnimation(postId);
+            }
+        } catch (e) {
+            applyLikeState(postId, previousLiked, previousCount);
+            console.error(e);
+            showToast('No se pudo actualizar el me gusta.', 'error');
+        } finally {
+            setLikeButtonsBusy(postId, false);
+        }
+    }
 
     function setFeedStatus(message) {
         if (feedStatus) {
@@ -145,6 +622,18 @@ export function initWall() {
             url.searchParams.set('following', '1');
         } else {
             url.searchParams.delete('following');
+        }
+        const qq = String(state.q || '').trim();
+        if (qq) {
+            url.searchParams.set('search', qq);
+        } else {
+            url.searchParams.delete('search');
+        }
+        url.searchParams.delete('q');
+        if (state.sort && state.sort !== 'recent') {
+            url.searchParams.set('sort', state.sort);
+        } else {
+            url.searchParams.delete('sort');
         }
         window.history.replaceState({}, '', `${url.pathname}${url.search}`);
     }
@@ -166,25 +655,34 @@ export function initWall() {
 
     function buildQuery(page = 1) {
         const p = new URLSearchParams();
-        if (state.country_id) {
-            p.set('country_id', String(state.country_id));
-        }
         if (state.following) {
             p.set('following', '1');
         }
-        if (state.experience_type) {
-            p.set('experience_type', state.experience_type);
-        }
-        if (state.drink_type) {
-            p.set('drink_type', state.drink_type);
-        }
         if (state.sort) {
             p.set('sort', state.sort);
+        }
+        const qq = String(state.q || '').trim();
+        if (qq) {
+            p.set('search', qq);
         }
         p.set('page', String(page));
         p.set('per_page', String(pagination.perPage));
 
         return p.toString();
+    }
+
+    function applyFeedTagSearch(term) {
+        const t = String(term || '').trim();
+        state.q = t;
+        if (searchInput) {
+            searchInput.value = t;
+        }
+        state.following = false;
+        pagination.page = 1;
+        pagination.hasMore = true;
+        updateNavbarFeedUi();
+        updateFilterUi();
+        scheduleFetch(0);
     }
 
     async function fetchBoard({ append = false } = {}) {
@@ -196,10 +694,11 @@ export function initWall() {
 
         if (!append) {
             skeleton?.classList.remove('hidden');
-            feedEl?.classList.add('opacity-40', 'pointer-events-none');
+            feedEl?.classList.add('opacity-0', 'pointer-events-none');
             setFeedStatus('Cargando publicaciones...');
         } else {
             pagination.loadingMore = true;
+            feedLoadingMore?.classList.remove('hidden');
             setFeedStatus('Cargando más publicaciones...');
         }
 
@@ -220,10 +719,16 @@ export function initWall() {
             }
         } finally {
             if (!append) {
-                skeleton?.classList.add('hidden');
-                feedEl?.classList.remove('opacity-40', 'pointer-events-none');
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        skeleton?.classList.add('hidden');
+                        feedEl?.classList.remove('opacity-0', 'pointer-events-none');
+                        feedEl?.classList.add('opacity-100');
+                    });
+                });
             } else {
                 pagination.loadingMore = false;
+                feedLoadingMore?.classList.add('hidden');
             }
             syncFeedQueryParam();
         }
@@ -279,7 +784,13 @@ export function initWall() {
         }
 
         posts.forEach((post) => {
-            feedEl.appendChild(renderCard(post));
+            feedEl.appendChild(
+                renderCard(post, {
+                    onOpenDetail: (id) => {
+                        void openModal(id);
+                    },
+                }),
+            );
         });
 
         pagination.page = Number(meta?.current_page || pagination.page || 1);
@@ -290,6 +801,45 @@ export function initWall() {
                 : 'Publicaciones cargadas. Fin del feed.',
         );
     }
+
+    feedEl?.addEventListener('click', (e) => {
+        const pill = e.target.closest('.wall-feed-tag-pill');
+        if (pill) {
+            e.preventDefault();
+            e.stopPropagation();
+            const name = pill.getAttribute('data-tag-name') || '';
+            applyFeedTagSearch(name);
+
+            return;
+        }
+        const likeBtn = e.target.closest('.wall-like-btn');
+        if (!likeBtn || !likeBtn.dataset.likePostId) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        toggleLike(Number(likeBtn.dataset.likePostId));
+    });
+
+    modalBody?.addEventListener('click', (e) => {
+        const pill = e.target.closest('.wall-feed-tag-pill');
+        if (pill) {
+            e.preventDefault();
+            e.stopPropagation();
+            const name = pill.getAttribute('data-tag-name') || '';
+            closeModal();
+            applyFeedTagSearch(name);
+
+            return;
+        }
+        const likeBtn = e.target.closest('.wall-like-btn');
+        if (!likeBtn || !likeBtn.dataset.likePostId) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        toggleLike(Number(likeBtn.dataset.likePostId));
+    });
 
     function setupInfiniteScroll() {
         if (!scrollAnchor || !('IntersectionObserver' in window)) {
@@ -313,56 +863,6 @@ export function initWall() {
         observer.observe(scrollAnchor);
     }
 
-    function renderCard(post) {
-        const el = document.createElement('article');
-        el.className =
-            'group relative flex flex-col overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/80 shadow-sm shadow-black/30 transition duration-200 ease-out hover:z-[1] hover:scale-[1.02] active:scale-[0.99] hover:shadow-lg hover:shadow-black/40 hover:border-slate-600 cursor-pointer backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70';
-        el.dataset.postId = String(post.id);
-        el.setAttribute('role', 'button');
-        el.setAttribute('tabindex', '0');
-        el.setAttribute('aria-label', `Abrir publicación: ${post.title}`);
-
-        const countryName = post.country?.name ?? '—';
-        const flag = post.country?.flag_emoji ?? '';
-        const when = relativeTimeEs(post.created_at);
-        const metaLine = when ? `${esc(flag)} ${esc(countryName)} · ${esc(when)}` : `${esc(flag)} ${esc(countryName)}`;
-
-        const grad = gradientClassForPostId(post.id);
-        const typeLabel = ExperienceLabels[post.experience_type] || post.experience_type || '';
-
-        el.innerHTML = `
-            <div class="relative h-[140px] shrink-0 overflow-hidden bg-slate-800">
-                <div class="absolute inset-0 bg-gradient-to-br ${grad} opacity-95"></div>
-                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.12),_transparent_55%)]"></div>
-            </div>
-            <div class="flex flex-1 flex-col p-4 pt-3">
-                <h3 class="text-[15px] font-semibold leading-snug text-slate-100 line-clamp-2">${esc(post.title)}</h3>
-                <p class="mt-2 text-[11px] text-slate-500">${metaLine}</p>
-                <p class="mt-3 text-sm leading-relaxed text-slate-400 line-clamp-3">${esc(post.excerpt)}</p>
-                <div class="mt-4 space-y-1.5 text-xs text-slate-300">
-                    <p class="truncate"><span aria-hidden="true">🍽</span> ${esc(post.food_label)}</p>
-                    <p class="truncate"><span aria-hidden="true">🍷</span> ${esc(post.drink_label)}</p>
-                </div>
-                <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-700/80 pt-3">
-                    <span class="inline-flex max-w-[70%] items-center rounded-full bg-slate-800 px-2.5 py-0.5 text-[11px] font-medium text-emerald-300/95 ring-1 ring-slate-600/80 truncate" title="${esc(typeLabel)}">${esc(typeLabel)}</span>
-                    <span class="inline-flex shrink-0 items-center gap-1 text-[11px] text-slate-500" title="Comentarios">
-                        ${ICON_COMMENT}<span>${post.comments_count ?? 0}</span>
-                    </span>
-                </div>
-            </div>
-        `;
-
-        el.addEventListener('click', (e) => {
-            if (e.target.closest('a')) {
-                return;
-            }
-            openModal(post.id);
-        });
-        el.addEventListener('keydown', (e) => onEnterOrSpace(e, () => openModal(post.id)));
-
-        return el;
-    }
-
     async function openModal(postId) {
         if (!modal || !modalBody) {
             return;
@@ -376,31 +876,46 @@ export function initWall() {
         try {
             const { data } = await axios.get(`${config.postBaseUrl}/${postId}`);
             const p = data.post;
-            const countryLine =
-                p.country != null
-                    ? `<p class="text-sm text-slate-400 mt-2 flex items-center gap-2"><span class="text-lg">${esc(p.country.flag_emoji || '')}</span><span>${esc(p.country.name)}</span></p>`
-                    : '';
-
-            const commentsHtml = (p.comments || [])
-                .map(
-                    (c) => `
-                <div class="rounded-xl bg-slate-800/80 border border-slate-700/80 p-3 text-sm">
-                    <div class="flex items-center gap-2 mb-1">
-                        <img src="${c.user.avatar}" alt="Avatar de ${esc(c.user.name)}" loading="lazy" class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600" />
-                        <div>
-                            <div class="font-medium text-slate-100">${esc(c.user.name)}</div>
-                            <div class="text-xs text-slate-500">@${esc(c.user.username)}</div>
-                        </div>
+            const whenModal = relativeTimeEs(p.created_at);
+            const metaPieces = [];
+            if (p.country != null) {
+                metaPieces.push(countryPreviewMetaHtml(p.country));
+            }
+            if (whenModal) {
+                metaPieces.push(`<span class="shrink-0 text-slate-500">${esc(whenModal)}</span>`);
+            }
+            const metaJoinedModal = metaPieces.join(
+                '<span class="text-slate-600" aria-hidden="true">·</span>',
+            );
+            const userHeaderModal = `
+                <div class="flex gap-3">
+                    <a href="${esc(p.user.profile_url)}" class="wall-post-user-avatar shrink-0 rounded-full ring-1 ring-slate-600/70 outline-none transition hover:ring-emerald-500/50 focus-visible:ring-2 focus-visible:ring-emerald-400/60" aria-label="Ver perfil: @${esc(p.user.username)}">
+                        <img src="${esc(p.user.avatar)}" alt="" class="h-12 w-12 rounded-full object-cover bg-slate-800" width="48" height="48" loading="lazy" decoding="async" />
+                    </a>
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate font-semibold text-slate-100">@${esc(p.user.username)}</p>
+                        ${
+                            metaJoinedModal !== ''
+                                ? `<div class="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] leading-tight">${metaJoinedModal}</div>`
+                                : ''
+                        }
                     </div>
-                    <p class="text-slate-300">${esc(c.body)}</p>
-                </div>
-            `,
+                </div>`;
+
+            const tagsLine = (p.tags || [])
+                .map(
+                    (t) =>
+                        `<button type="button" class="wall-feed-tag-pill inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-emerald-200 ring-1 ring-slate-600 transition hover:bg-emerald-600/25 hover:ring-emerald-500/50" data-tag-name="${esc(t.name)}" aria-label="Filtrar por ${esc(t.name)}">#${esc(t.name)}</button>`,
                 )
-                .join('');
+                .join(' ');
+
+            const commentsHtml = renderCommentsTreeHtml(p.comments || [], {
+                showReplyButtons: config.isAuthenticated === true,
+            });
 
             const commentForm = config.isAuthenticated
                 ? `
-                <form id="wall-comment-form" class="mt-4 space-y-2">
+                <form id="wall-comment-form" class="mt-4 space-y-2 border-t border-slate-700/80 pt-4">
                     <label class="block text-sm font-medium text-slate-300">Tu comentario</label>
                     <textarea name="body" rows="3" class="w-full rounded-xl border-slate-600 bg-slate-800/80 text-slate-100 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500 placeholder-slate-500" required maxlength="2000" placeholder="Escribe algo…"></textarea>
                     <button type="submit" class="inline-flex items-center px-4 py-2 rounded-full bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500">Publicar</button>
@@ -408,69 +923,61 @@ export function initWall() {
             `
                 : `<p class="mt-4 text-sm text-slate-400"><a href="${config.loginUrl}" class="text-emerald-400 hover:text-emerald-300 underline">Inicia sesión</a> para comentar.</p>`;
 
+            const heroImg =
+                p.image_url != null
+                    ? `<div class="mb-4 overflow-hidden rounded-xl border border-slate-700"><img src="${esc(p.image_url)}" alt="" class="w-full max-h-72 object-cover" loading="lazy" /></div>`
+                    : '';
+
+            const modalLiked = p.liked === true;
+            const modalLikesCount = p.likes_count ?? 0;
+            const likeToolbar = `
+                <div class="flex flex-wrap items-center gap-6 border-y border-slate-700 py-3">
+                    <button type="button" class="wall-like-btn inline-flex items-center gap-2 rounded-full px-2 py-1.5 text-sm font-medium transition hover:bg-slate-800/90 ${modalLiked ? 'text-rose-500' : 'text-slate-400'}" data-like-post-id="${p.id}" data-liked="${modalLiked ? '1' : '0'}" aria-pressed="${modalLiked ? 'true' : 'false'}" aria-label="Me gusta">
+                        <span class="wall-like-svg-wrap">${heartSvgHtml(modalLiked)}</span>
+                        <span data-like-count class="tabular-nums">${modalLikesCount}</span>
+                    </button>
+                    <span class="inline-flex items-center gap-2 text-sm text-slate-400">
+                        ${ICON_COMMENT}
+                        <span class="tabular-nums"><span id="wall-modal-comments-count">${p.comments_count ?? 0}</span> comentarios</span>
+                    </span>
+                </div>
+            `;
+
             modalBody.innerHTML = `
-                <div class="space-y-4">
+                <div class="space-y-4" data-modal-post-id="${p.id}">
+                    ${heroImg}
+                    ${userHeaderModal}
                     <div>
                         <h2 class="text-xl font-bold text-slate-50">${esc(p.title)}</h2>
-                        <p class="text-sm text-slate-500 mt-1">${ExperienceLabels[p.experience_type] || ''} · ${DrinkLabels[p.drink_type] || ''}</p>
-                        ${countryLine}
+                        <div class="mt-2 flex flex-wrap gap-2">${tagsLine}</div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <img src="${p.user.avatar}" alt="Avatar de ${esc(p.user.name)}" loading="lazy" class="h-12 w-12 rounded-full object-cover border border-slate-600" />
-                        <div>
-                            <div class="font-semibold text-slate-100">${esc(p.user.name)}</div>
-                            <a href="${esc(p.user.profile_url)}" class="text-sm text-emerald-400 hover:text-emerald-300 hover:underline">@${esc(p.user.username)}</a>
-                        </div>
-                    </div>
-                    <div class="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">${formatStory(p.story)}</div>
-                    <div class="flex flex-wrap gap-4 text-sm border-t border-slate-700 pt-4 text-slate-300">
-                        <span><strong class="text-slate-200">🍽 Comida:</strong> ${esc(p.food_label)}</span>
-                        <span><strong class="text-slate-200">🍷 Bebida:</strong> ${esc(p.drink_label)}</span>
-                    </div>
+                    <div class="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">${formatStory(p.description)}</div>
+                    ${likeToolbar}
                     <div>
-                        <h3 class="font-semibold text-slate-200 mb-2">Comentarios (${p.comments_count})</h3>
-                        <div id="wall-modal-comments" class="space-y-2 max-h-60 overflow-y-auto">${commentsHtml || '<p class="text-sm text-slate-500">Sin comentarios aún.</p>'}</div>
+                        <h3 class="font-semibold text-slate-200 mb-2">Comentarios</h3>
+                        <div id="wall-modal-comments" class="wall-modal-comments-scroll max-h-[min(420px,55vh)] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-700/60 bg-slate-950/50 p-3 shadow-inner">${commentsHtml}</div>
                         ${commentForm}
                     </div>
                 </div>
             `;
 
-            const form = document.getElementById('wall-comment-form');
-            if (form) {
-                form.addEventListener('submit', async (ev) => {
-                    ev.preventDefault();
-                    const fd = new FormData(form);
-                    const body = String(fd.get('body') || '').trim();
-                    if (!body) {
-                        return;
-                    }
-                    try {
-                        const res = await axios.post(`${config.postBaseUrl}/${postId}/comments`, { body });
-                        const wrap = document.getElementById('wall-modal-comments');
-                        if (wrap && res.data.comment) {
-                            const c = res.data.comment;
-                            const block = document.createElement('div');
-                            block.className =
-                                'rounded-xl bg-slate-800/80 border border-slate-700/80 p-3 text-sm';
-                            block.innerHTML = `
-                                <div class="flex items-center gap-2 mb-1">
-                                    <img src="${c.user.avatar}" alt="Avatar de ${esc(c.user.name)}" loading="lazy" class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600" />
-                                    <div>
-                                        <div class="font-medium text-slate-100">${esc(c.user.name)}</div>
-                                        <div class="text-xs text-slate-500">@${esc(c.user.username)}</div>
-                                    </div>
-                                </div>
-                                <p class="text-slate-300">${esc(c.body)}</p>
-                            `;
-                            wrap.prepend(block);
-                            form.reset();
-                        }
-                        fetchBoard();
-                    } catch (err) {
-                        console.error(err);
-                    }
-                });
-            }
+            modalCommentAbort?.abort();
+            modalCommentAbort = new AbortController();
+            setupCommentInteractions(
+                modalBody,
+                {
+                    postId: Number(p.id),
+                    postBaseUrl: config.postBaseUrl,
+                    axios,
+                    isAuthenticated: config.isAuthenticated === true,
+                    loginUrl: config.loginUrl,
+                    getCommentsWrap: () => document.getElementById('wall-modal-comments'),
+                    showToast,
+                    applyCommentsCount,
+                    modalCommentsCountSelector: '#wall-modal-comments-count',
+                },
+                { signal: modalCommentAbort.signal },
+            );
         } catch (e) {
             modalBody.innerHTML =
                 '<p class="text-red-400 text-center py-8">No se pudo cargar la publicación.</p>';
@@ -478,15 +985,250 @@ export function initWall() {
     }
 
     function closeModal() {
+        modalCommentAbort?.abort();
+        modalCommentAbort = null;
         modal?.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
     }
 
+    function openCreateModal() {
+        if (!createModal) {
+            return;
+        }
+        createModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeCreateModal() {
+        closeTagPanel();
+        createModal?.classList.add('hidden');
+        const detailOpen = modal && !modal.classList.contains('hidden');
+        if (!detailOpen) {
+            document.body.classList.remove('overflow-hidden');
+        }
+    }
+
+    function resetCreateForm() {
+        closeTagPanel();
+        createForm?.reset();
+        selectedCreateTags.clear();
+        selectedTagMeta.clear();
+        if (tagInput) {
+            tagInput.value = '';
+        }
+        hideTagDropdown();
+        const smartWrap = document.getElementById('create-post-smart-hints');
+        const smartLab = document.getElementById('create-post-smart-hints-label');
+        smartWrap?.classList.add('hidden');
+        smartLab?.classList.add('hidden');
+        if (smartWrap) {
+            smartWrap.innerHTML = '';
+        }
+        revokeCreateImageUrl();
+        if (imageInput) {
+            imageInput.value = '';
+        }
+        if (imagePreview) {
+            imagePreview.removeAttribute('src');
+        }
+        imageFilled?.classList.add('hidden');
+        imageEmpty?.classList.remove('hidden');
+        imageZone?.setAttribute('data-drag', 'inactive');
+        if (titleEditable) {
+            titleEditable.innerHTML = '';
+            titleEditable.classList.add('ce-empty');
+        }
+        if (descEditable) {
+            descEditable.innerHTML = '';
+            descEditable.classList.add('ce-empty');
+        }
+        if (hiddenTitle) {
+            hiddenTitle.value = '';
+        }
+        if (hiddenDesc) {
+            hiddenDesc.value = '';
+        }
+        if (createErrors) {
+            createErrors.classList.add('hidden');
+            createErrors.textContent = '';
+        }
+        scheduleSyncEditableCard();
+    }
+
+    function applyImageFile(file) {
+        if (!file || !String(file.type || '').startsWith('image/')) {
+            return;
+        }
+        revokeCreateImageUrl();
+        createImageObjectUrl = URL.createObjectURL(file);
+        if (imagePreview) {
+            imagePreview.src = createImageObjectUrl;
+        }
+        imageEmpty?.classList.add('hidden');
+        imageFilled?.classList.remove('hidden');
+        scheduleSyncEditableCard();
+    }
+
+    imageInput?.addEventListener('change', () => {
+        const file = imageInput.files?.[0];
+        if (!file) {
+            return;
+        }
+        applyImageFile(file);
+    });
+
+    imageEmpty?.addEventListener('click', () => {
+        imageInput?.click();
+    });
+
+    removeImageBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        revokeCreateImageUrl();
+        if (imageInput) {
+            imageInput.value = '';
+        }
+        imagePreview?.removeAttribute('src');
+        imageFilled?.classList.add('hidden');
+        imageEmpty?.classList.remove('hidden');
+        scheduleSyncEditableCard();
+    });
+
+    imageZone?.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        imageZone.setAttribute('data-drag', 'active');
+    });
+
+    imageZone?.addEventListener('dragleave', (e) => {
+        if (!imageZone.contains(e.relatedTarget)) {
+            imageZone.setAttribute('data-drag', 'inactive');
+        }
+    });
+
+    imageZone?.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        imageZone.setAttribute('data-drag', 'inactive');
+        const file = e.dataTransfer?.files?.[0];
+        if (!file) {
+            return;
+        }
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        imageInput.files = dt.files;
+        applyImageFile(file);
+    });
+
+    fabCreatePost?.addEventListener('click', () => {
+        resetCreateForm();
+        openCreateModal();
+        window.requestAnimationFrame(() => {
+            titleEditable?.focus();
+        });
+    });
+
+    [createBackdrop, createCloseBtn, createCancelBtn].forEach((el) => {
+        el?.addEventListener('click', () => {
+            closeCreateModal();
+        });
+    });
+
+    createForm?.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        if (!config.postStoreUrl) {
+            return;
+        }
+
+        syncHiddenFromEditables();
+        normalizeEditableBr(titleEditable);
+        normalizeEditableBr(descEditable);
+
+        const titleLen = plainTextFromEditable(titleEditable);
+        const descLen = plainTextFromEditable(descEditable);
+        if (!titleLen || !descLen) {
+            showToast('Escribe un título y una descripción.', 'error');
+
+            return;
+        }
+
+        if (selectedCreateTags.size === 0) {
+            openTagPanel();
+            if (createErrors) {
+                createErrors.textContent = 'Selecciona al menos una etiqueta.';
+                createErrors.classList.remove('hidden');
+            }
+            showToast('Selecciona al menos una etiqueta.', 'error');
+
+            return;
+        }
+
+        const submitBtn = document.getElementById('create-post-submit');
+        submitBtn?.setAttribute('disabled', 'true');
+
+        const fd = new FormData(createForm);
+        fd.delete('tags');
+        selectedCreateTags.forEach((id) => fd.append('tags[]', String(id)));
+
+        if (createErrors) {
+            createErrors.classList.add('hidden');
+            createErrors.textContent = '';
+        }
+
+        try {
+            // No fijar Content-Type manualmente: FormData necesita boundary; Axios lo añade solo.
+            const { data } = await axios.post(config.postStoreUrl, fd);
+            const post = data.post;
+            showToast('Publicación creada.', 'success');
+            closeCreateModal();
+            resetCreateForm();
+            if (feedEl && post) {
+                feedEl.insertBefore(
+                    renderCard(post, {
+                        onOpenDetail: (id) => {
+                            void openModal(id);
+                        },
+                    }),
+                    feedEl.firstChild,
+                );
+            }
+            setFeedStatus('Nueva publicación añadida al feed.');
+        } catch (err) {
+            const res = err.response;
+            if (res?.status === 422 && res.data?.errors) {
+                const lines = Object.values(res.data.errors)
+                    .flat()
+                    .map((m) => String(m));
+                if (createErrors) {
+                    createErrors.innerHTML = lines.map((l) => `<p>${esc(l)}</p>`).join('');
+                    createErrors.classList.remove('hidden');
+                }
+                showToast(lines[0] || 'Revisa los datos del formulario.', 'error');
+            } else {
+                showToast('No se pudo crear la publicación. Intenta de nuevo.', 'error');
+            }
+        } finally {
+            submitBtn?.removeAttribute('disabled');
+        }
+    });
+
     document.getElementById('wall-modal-close')?.addEventListener('click', closeModal);
     modalBackdrop?.addEventListener('click', closeModal);
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-            closeModal();
+        if (e.key === 'Escape') {
+            if (createModal && !createModal.classList.contains('hidden')) {
+                if (isTagPanelOpen()) {
+                    closeTagPanel();
+
+                    return;
+                }
+                closeCreateModal();
+
+                return;
+            }
+            if (modal && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
         }
     });
 
@@ -495,7 +1237,6 @@ export function initWall() {
             const tab = btn.dataset.navbarFeed || '';
             if (tab === 'fyp') {
                 state.following = false;
-                state.country_id = null;
                 updateFilterUi();
                 scheduleFetch();
 
@@ -508,42 +1249,9 @@ export function initWall() {
                     return;
                 }
                 state.following = true;
-                state.country_id = null;
                 updateFilterUi();
                 scheduleFetch();
             }
-        });
-    });
-
-    document.querySelectorAll('[data-country-chip]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const id = Number(btn.dataset.countryChip);
-            if (state.country_id === id) {
-                state.country_id = null;
-            } else {
-                state.country_id = id;
-            }
-            state.following = false;
-            updateFilterUi();
-            scheduleFetch();
-        });
-    });
-
-    document.querySelectorAll('[data-adv-experience]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const v = btn.dataset.advExperience || '';
-            state.experience_type = state.experience_type === v ? null : v;
-            updateFilterUi();
-            scheduleFetch();
-        });
-    });
-
-    document.querySelectorAll('[data-adv-drink]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const v = btn.dataset.advDrink || '';
-            state.drink_type = state.drink_type === v ? null : v;
-            updateFilterUi();
-            scheduleFetch();
         });
     });
 
@@ -555,30 +1263,24 @@ export function initWall() {
         });
     });
 
+    searchInput?.addEventListener('input', () => {
+        if (searchDebounceTimer) {
+            window.clearTimeout(searchDebounceTimer);
+        }
+        searchDebounceTimer = window.setTimeout(() => {
+            state.q = searchInput.value;
+            pagination.page = 1;
+            pagination.hasMore = true;
+            scheduleFetch();
+        }, 320);
+    });
+
     function updateFilterUi() {
         updateNavbarFeedUi();
 
-        document.querySelectorAll('[data-country-chip]').forEach((el) => {
-            const id = Number(el.dataset.countryChip);
-            const on = !state.following && state.country_id === id;
-            el.className = on ? CLS.primaryCountry : CLS.inactiveCountry;
-        });
-
-        document.querySelectorAll('[data-adv-experience]').forEach((el) => {
-            const v = el.dataset.advExperience;
-            const on = state.experience_type === v;
-            el.className = on ? CLS.secondary : CLS.inactive;
-        });
-
-        document.querySelectorAll('[data-adv-drink]').forEach((el) => {
-            const v = el.dataset.advDrink;
-            const on = state.drink_type === v;
-            el.className = on ? CLS.secondary : CLS.inactive;
-        });
-
         document.querySelectorAll('[data-sort]').forEach((el) => {
             const on = state.sort === el.dataset.sort;
-            el.className = on ? CLS.secondary : CLS.inactive;
+            el.className = on ? CLS.secondary : CLS.inactiveSort;
         });
     }
 
