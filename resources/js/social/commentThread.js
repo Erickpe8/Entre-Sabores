@@ -37,7 +37,7 @@ export function renderCommentsTreeHtml(comments, opts) {
 function renderCommentNodeHtml(c, showReplyButtons) {
     const { relative, absolute } = commentTimeDetail(c.created_at);
     const replyBtn = showReplyButtons
-        ? `<button type="button" class="wall-comment-reply-btn text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:underline" data-comment-id="${c.id}">Responder</button>`
+        ? `<button type="button" class="wall-comment-reply-btn text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:underline" data-comment-id="${c.id}" data-comment-username="${esc(c.user.username)}">Responder</button>`
         : '';
 
     const repliesHtml =
@@ -57,23 +57,34 @@ function renderCommentNodeHtml(c, showReplyButtons) {
         </div>
         <time class="text-[11px] text-slate-400 shrink-0 tabular-nums text-right max-w-[min(100%,9rem)] leading-tight" datetime="${esc(c.created_at || '')}" title="${esc(absolute)}">${esc(relative)}</time>
     </div>
-    <p class="text-slate-300 whitespace-pre-wrap break-words">${esc(c.body)}</p>
+    <p class="text-slate-300 whitespace-pre-wrap break-words">${formatCommentBodyHtml(c.body)}</p>
     <div class="mt-2 flex flex-wrap items-center gap-2">${replyBtn}</div>
-    <div class="wall-reply-slot mt-2 hidden border-t border-slate-700/50 pt-2" data-reply-slot="${c.id}"></div>
     ${repliesHtml}
 </article>`;
 }
 
-function replyFormHtml(parentId) {
-    return `
-<form class="wall-reply-form space-y-2" data-parent-id="${parentId}">
-    <label class="sr-only">Respuesta</label>
-    <textarea name="body" rows="2" required maxlength="2000" placeholder="Escribe tu respuesta…" class="w-full rounded-lg border-slate-600 bg-slate-900/80 text-slate-100 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500 placeholder-slate-500"></textarea>
-    <div class="flex flex-wrap gap-2">
-        <button type="submit" class="inline-flex items-center rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-500">Publicar respuesta</button>
-        <button type="button" class="wall-reply-cancel rounded-full px-3 py-1.5 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200">Cancelar</button>
-    </div>
-</form>`;
+/**
+ * Resalta menciones @usuario y las convierte en enlace al perfil.
+ * @param {string} text
+ * @returns {string}
+ */
+function formatCommentBodyHtml(text) {
+    const source = String(text || '');
+    const regex = /(^|[\s([{"'])@([a-z0-9_-]{3,30})/gi;
+    let out = '';
+    let last = 0;
+    let match;
+    while ((match = regex.exec(source)) !== null) {
+        const [full, prefix, username] = match;
+        const start = match.index;
+        out += esc(source.slice(last, start));
+        out += esc(prefix);
+        out += `<a href="/profile/${encodeURIComponent(username)}" class="font-medium text-emerald-300 transition hover:text-emerald-200 hover:underline">@${esc(username)}</a>`;
+        last = start + full.length;
+    }
+    out += esc(source.slice(last));
+
+    return out;
 }
 
 /**
@@ -96,6 +107,97 @@ function replyFormHtml(parentId) {
 export function setupCommentInteractions(rootEl, ctx, options = {}) {
     const listenerOpts = options.signal ? { signal: options.signal } : undefined;
     const submitUrl = `${ctx.postBaseUrl}/${ctx.postId}/comments`;
+    const mainCommentForm = rootEl.querySelector('#wall-comment-form');
+    const mainCommentTextarea = /** @type {HTMLTextAreaElement|null} */ (
+        mainCommentForm?.querySelector('textarea[name="body"]') ?? null
+    );
+    const replyStateId = 'wall-comment-reply-state';
+    const replyParentInputId = 'wall-comment-parent-id';
+
+    function ensureReplyUi() {
+        if (!mainCommentForm) {
+            return;
+        }
+
+        let parentInput = /** @type {HTMLInputElement|null} */ (
+            mainCommentForm.querySelector(`#${replyParentInputId}`)
+        );
+        if (!parentInput) {
+            parentInput = document.createElement('input');
+            parentInput.type = 'hidden';
+            parentInput.name = 'parent_id';
+            parentInput.id = replyParentInputId;
+            mainCommentForm.appendChild(parentInput);
+        }
+
+        let replyState = mainCommentForm.querySelector(`#${replyStateId}`);
+        if (!replyState) {
+            replyState = document.createElement('div');
+            replyState.id = replyStateId;
+            replyState.className =
+                'hidden items-center justify-between gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200';
+            replyState.innerHTML = `
+                <p class="min-w-0 truncate"><span class="text-emerald-300">Respondiendo a</span> <span data-reply-username></span></p>
+                <button type="button" class="wall-reply-cancel rounded-full border border-emerald-300/30 px-2.5 py-1 text-[11px] font-medium text-emerald-100 transition hover:bg-emerald-500/20">Cancelar</button>
+            `;
+            const label = mainCommentForm.querySelector('label');
+            if (label && label.parentNode) {
+                label.parentNode.insertBefore(replyState, label.nextSibling);
+            } else {
+                mainCommentForm.prepend(replyState);
+            }
+        }
+    }
+
+    function clearReplyState() {
+        if (!mainCommentForm) {
+            return;
+        }
+        const parentInput = /** @type {HTMLInputElement|null} */ (
+            mainCommentForm.querySelector(`#${replyParentInputId}`)
+        );
+        if (parentInput) {
+            parentInput.value = '';
+        }
+        const replyState = mainCommentForm.querySelector(`#${replyStateId}`);
+        if (replyState) {
+            replyState.classList.add('hidden');
+            replyState.classList.remove('flex');
+            const usernameEl = replyState.querySelector('[data-reply-username]');
+            if (usernameEl) {
+                usernameEl.textContent = '';
+            }
+        }
+    }
+
+    function setReplyState(parentId, username) {
+        if (!mainCommentForm || !mainCommentTextarea) {
+            return;
+        }
+        ensureReplyUi();
+        const parentInput = /** @type {HTMLInputElement|null} */ (
+            mainCommentForm.querySelector(`#${replyParentInputId}`)
+        );
+        const replyState = mainCommentForm.querySelector(`#${replyStateId}`);
+        if (!parentInput || !replyState) {
+            return;
+        }
+
+        parentInput.value = String(parentId);
+        const usernameEl = replyState.querySelector('[data-reply-username]');
+        if (usernameEl) {
+            usernameEl.textContent = `@${username}`;
+        }
+        replyState.classList.remove('hidden');
+        replyState.classList.add('flex');
+
+        const mention = `@${username} `;
+        mainCommentTextarea.value = mention;
+        mainCommentTextarea.focus();
+        const pos = mention.length;
+        mainCommentTextarea.setSelectionRange(pos, pos);
+        mainCommentTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 
     async function refreshCommentsTree() {
         const wrap = ctx.getCommentsWrap();
@@ -148,12 +250,20 @@ export function setupCommentInteractions(rootEl, ctx, options = {}) {
             if (!body) {
                 return;
             }
+            const parentInput = /** @type {HTMLInputElement|null} */ (
+                form.querySelector(`#${replyParentInputId}`)
+            );
+            const payload = { body };
+            if (parentInput?.value) {
+                payload.parent_id = Number(parentInput.value);
+            }
             try {
-                await ctx.axios.post(submitUrl, { body });
+                await ctx.axios.post(submitUrl, payload);
                 form.reset();
+                clearReplyState();
                 await refreshCommentsTree();
                 if (ctx.showToast) {
-                    ctx.showToast('Comentario publicado.', 'success');
+                    ctx.showToast(payload.parent_id ? 'Respuesta publicada.' : 'Comentario publicado.', 'success');
                 }
                 if (ctx.afterCommentPosted) {
                     ctx.afterCommentPosted();
@@ -167,45 +277,6 @@ export function setupCommentInteractions(rootEl, ctx, options = {}) {
 
             return;
         }
-
-        if (form.classList.contains('wall-reply-form')) {
-            e.preventDefault();
-            if (!ctx.isAuthenticated) {
-                window.location.href = ctx.loginUrl;
-
-                return;
-            }
-            const parentId = Number(form.dataset.parentId);
-            if (Number.isNaN(parentId)) {
-                return;
-            }
-            const fd = new FormData(form);
-            const body = String(fd.get('body') || '').trim();
-            if (!body) {
-                return;
-            }
-            try {
-                await ctx.axios.post(submitUrl, { body, parent_id: parentId });
-                const slot = rootEl.querySelector(`[data-reply-slot="${parentId}"]`);
-                if (slot) {
-                    slot.innerHTML = '';
-                    slot.classList.add('hidden');
-                    slot.setAttribute('hidden', '');
-                }
-                await refreshCommentsTree();
-                if (ctx.showToast) {
-                    ctx.showToast('Respuesta publicada.', 'success');
-                }
-                if (ctx.afterCommentPosted) {
-                    ctx.afterCommentPosted();
-                }
-            } catch (err) {
-                console.error(err);
-                if (ctx.showToast) {
-                    ctx.showToast('No se pudo publicar la respuesta.', 'error');
-                }
-            }
-        }
     }, listenerOpts);
 
     rootEl.addEventListener('click', (e) => {
@@ -217,49 +288,22 @@ export function setupCommentInteractions(rootEl, ctx, options = {}) {
                 return;
             }
             const id = replyBtn.dataset.commentId;
+            const username = (replyBtn.dataset.commentUsername || '').trim();
             if (!id) {
                 return;
             }
-            const slot = rootEl.querySelector(`[data-reply-slot="${id}"]`);
-            if (!slot) {
+            if (!username) {
                 return;
             }
-            const wasHidden = slot.classList.contains('hidden');
-            rootEl.querySelectorAll('.wall-reply-slot').forEach((s) => {
-                if (s !== slot) {
-                    s.innerHTML = '';
-                    s.classList.add('hidden');
-                    s.setAttribute('hidden', '');
-                }
-            });
-            if (wasHidden) {
-                slot.innerHTML = replyFormHtml(id);
-                slot.classList.remove('hidden');
-                slot.removeAttribute('hidden');
-                const ta = slot.querySelector('textarea');
-                ta?.focus();
-            } else {
-                slot.innerHTML = '';
-                slot.classList.add('hidden');
-                slot.setAttribute('hidden', '');
-            }
+            setReplyState(Number(id), username);
 
             return;
         }
 
         const cancelBtn = e.target.closest('.wall-reply-cancel');
         if (cancelBtn && rootEl.contains(cancelBtn)) {
-            const form = cancelBtn.closest('.wall-reply-form');
-            const parentId = form?.dataset.parentId;
-            if (!parentId) {
-                return;
-            }
-            const slot = rootEl.querySelector(`[data-reply-slot="${parentId}"]`);
-            if (slot) {
-                slot.innerHTML = '';
-                slot.classList.add('hidden');
-                slot.setAttribute('hidden', '');
-            }
+            clearReplyState();
+            mainCommentTextarea?.focus();
         }
     }, listenerOpts);
 }

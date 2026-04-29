@@ -126,7 +126,7 @@ export function renderCard(post, options = {}) {
     el.setAttribute('aria-label', `Publicación: ${post.title}`);
 
     const when = relativeTimeEs(post.created_at);
-    const countryHtml = countryPreviewMetaHtml(post.country);
+    const countryHtml = countryPreviewMetaHtml(post.user?.country ?? post.country);
     const timeHtml = when
         ? `<span class="shrink-0 text-slate-500" data-post-relative-time>${esc(when)}</span>`
         : '';
