@@ -17,6 +17,13 @@
 - **Vite:** `@vite(['resources/css/app.css', 'resources/js/app.js'])` en layouts.
 - **Config inyectada:** `wallConfig` (y otras) desde controladores; rutas relativas donde aplica para cookies de sesión.
 
+### Laravel Echo
+
+- **Inicialización:** `resources/js/echo.js` importado desde `bootstrap.js`. Solo crea `window.Echo` si existe `VITE_PUSHER_APP_KEY` (compatible con Soketi vía `VITE_PUSHER_HOST` / `VITE_PUSHER_PORT` / `VITE_PUSHER_SCHEME`).
+- **Detalle de post** (`post-show.js`): suscripción a `Echo.channel('post.{id}')` escuchando `.post.like.updated` y `.post.comment.created`; al salir de la página se llama `Echo.leave('post.{id}')` en `beforeunload`.
+- **Notificaciones** (`notificationsNav.js`): si hay usuario, `Echo.private('user.{authUserId}')` y `.notification.created` para actualizar badge, toast breve y evento `entre-sabores:notifications-refresh`; `Echo.leave('user.{id}')` al descargar.
+- El feed del muro **no** suscribe canales de tiempo real (solo HTTP / polling ligero del badge si aplica).
+
 ## Muro (`wall.js`) — estado del feed
 
 ### Dos niveles de navegación (no mezclar)

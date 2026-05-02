@@ -1,6 +1,9 @@
 import axios from 'axios';
+import { installEchoAxiosInterceptor } from './echo';
 
 window.axios = axios;
+
+installEchoAxiosInterceptor(axios);
 
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 axios.defaults.withCredentials = true;

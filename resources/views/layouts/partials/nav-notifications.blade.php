@@ -1,4 +1,4 @@
-@php($navUnreadCount = auth()->user()->unreadNotifications()->count())
+@php($navUnreadCount = (int) auth()->user()->unread_notifications_count)
 @php($navDark = request()->routeIs('dashboard') || request()->routeIs('settings.profile') || request()->routeIs('settings.account') || request()->routeIs('profile.show'))
 
 <div
@@ -75,4 +75,5 @@
     'notificationsUrl' => route('notifications.index'),
     'readAllUrl' => route('notifications.read_all'),
     'initialUnread' => $navUnreadCount,
+    'authUserId' => auth()->id(),
 ]) !!}</script>

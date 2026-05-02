@@ -58,6 +58,33 @@ php artisan test
 composer lint / composer format   # Laravel Pint
 ```
 
+## Broadcasting y eventos
+
+### Capas
+
+| Capa | Rol |
+|------|-----|
+| **Eventos de dominio** | `PostLiked`, `CommentCreated`, `NotificationRecorded` — solo datos de negocio; los despachan controladores u observers (`::dispatch(...)`). |
+| **Listeners** (`App\Listeners\Broadcasting\`) | Traducen dominio → WS: construyen `App\Events\Broadcasting\*Broadcast` (`ShouldBroadcast`), `broadcast(...)->toOthers()` donde aplica, métricas y log `broadcast.emitted`. |
+| **Payloads WS** | `PostLikedBroadcast`, `CommentCreatedBroadcast`, `NotificationCreatedBroadcast` — contrato estable con Echo (nombres de canal y `broadcastAs`). |
+
+**Ventajas:** los controladores no conocen Soketi/Pusher; los tests pueden fijar eventos de dominio con `Event::fake()`; los payloads WS se prueban aparte (`tests/Unit/BroadcastingPayloadTest.php`).
+
+- **Configuración:** `config/broadcasting.php`; variable `BROADCAST_CONNECTION` (`null` | `pusher` | …). Con `null`, los listeners no llaman a `broadcast()` (el contador `users.unread_notifications_count` sí se mantiene).
+- **Colas:** los `*Broadcast` implementan `ShouldBroadcast` (emisión **encolada**). Con `QUEUE_CONNECTION=redis`, hace falta **worker** (`php artisan queue:work redis`). Con `sync` (tests/local), el job corre en el mismo request.
+- **Fallos:** tabla `failed_jobs` migrada; revisar con `php artisan queue:failed`, reintentar con `queue:retry`.
+- **Contador no leídas:** columna `users.unread_notifications_count` — incremento en `DatabaseNotificationObserver`, decremento al marcar una como leída, reset en «marcar todas». Reparar drift: `php artisan notifications:sync-unread-counts`.
+- **Rutas:** `BroadcastServiceProvider` registra `POST /broadcasting/auth` con middleware `web` + `auth`. Canales en `routes/channels.php`:
+  - `user.{userId}` — solo el usuario cuyo `id` coincide sesión ↔ parámetro.
+- **Registro:** `AppServiceProvider` enlaza dominio → listeners (`Event::listen`).
+- **Observabilidad:** `OperationalLogger::broadcastEmitted` (canal `structured`, clave `broadcast.emitted`) y `OperationalMetrics::incrementBroadcastsEmitted` (Redis por minuto si `CACHE_STORE=redis`).
+- **Payloads WS** (`ShouldBroadcast`):
+  - `PostLikedBroadcast` → canal `post.{postId}`, `post.like.updated`.
+  - `CommentCreatedBroadcast` → `post.{postId}`, `post.comment.created`.
+  - `NotificationCreatedBroadcast` → `PrivateChannel('user.{userId}')`, `notification.created`.
+- **Disparo dominio:** `PostLikeController::toggle`, `PostCommentController::store`, `DatabaseNotificationObserver::created`.
+- **`toOthers()`** en like y comentario: el cliente envía `X-Socket-Id` (Axios); la pestaña que originó la acción no recibe el mismo evento por WS.
+
 ## Referencias cruzadas
 
 - Diseño del feed y ramas: [ARCHITECTURE.md](ARCHITECTURE.md).

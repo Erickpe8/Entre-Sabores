@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CommentCreated;
 use App\Http\Requests\StorePostCommentRequest;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
@@ -49,6 +50,13 @@ class PostCommentController extends Controller
             comment: $comment,
             actor: $actor,
             alreadyNotifiedUserIds: $notifiedUserIds,
+        );
+
+        CommentCreated::dispatch(
+            $post->id,
+            $post->comments()->count(),
+            (new CommentResource($comment))->resolve(request()),
+            $actor->id,
         );
 
         return response()->json([

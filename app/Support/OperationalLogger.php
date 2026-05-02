@@ -47,4 +47,18 @@ final class OperationalLogger
             'ip' => $request->ip(),
         ]);
     }
+
+    /**
+     * Emisión hacia Soketi/Pusher (listener ya ejecutó broadcast(); latencia local del dispatch).
+     *
+     * @param  array<string, int|string|null>  $context
+     */
+    public static function broadcastEmitted(string $broadcastEvent, array $context = [], ?float $latencyMs = null): void
+    {
+        Log::channel('structured')->info('broadcast.emitted', [
+            'event' => $broadcastEvent,
+            'latency_ms' => $latencyMs !== null ? round($latencyMs, 3) : null,
+            ...$context,
+        ]);
+    }
 }

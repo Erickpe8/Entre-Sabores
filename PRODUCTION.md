@@ -139,6 +139,19 @@ BD diaria + política de retención; storage si es local. Probar restauración.
 - [ ] Logs sin picos de errores.
 - [ ] Backups verificados.
 
+## Tiempo real (Soketi / Pusher)
+
+1. **Backend:** `BROADCAST_CONNECTION=pusher` y variables `PUSHER_APP_*` alineadas con el servidor WebSocket (Soketi, Pusher Cloud, etc.).
+2. **Colas y workers:** los eventos `ShouldBroadcast` generan jobs en la cola por defecto. **Varias réplicas PHP** requieren la misma `QUEUE_CONNECTION` (típicamente **Redis**) y uno o más procesos `php artisan queue:work redis` (o Horizon). Sin workers, los WS no salen aunque HTTP responda.
+3. **Escalado horizontal:** Soketi/Pusher absorben conexiones; los cuellos habituales son **Redis** (cola + opcionalmente backend del broadcaster), **workers** insuficientes (backlog), y **rate** de jobs `BroadcastEvent`. Escalar workers antes que réplicas PHP si la cola crece.
+4. **Frontend:** en la **misma** build que despliegas, el `.env` para Vite debe incluir `VITE_PUSHER_APP_KEY` (y host/puerto si no es Pusher Cloud).
+5. **HTTPS:** detrás de proxy, coherencia de `PUSHER_SCHEME` / `wss` y cookies para `/broadcasting/auth`.
+6. **Coste / superficie:** eventos acotados (detalle de post + canal privado por usuario); sin WS en el feed completo.
+
+**Métricas:** con Redis de caché activo, `GET /internal/metrics` puede exponer `broadcasts_emitted_last_minute`; logs `broadcast.emitted` en canal `structured` para latencia del dispatch local.
+
+Ejemplo local con Soketi: `PUSHER_HOST=127.0.0.1`, `PUSHER_PORT=6001`, `PUSHER_SCHEME=http` y en el cliente las `VITE_PUSHER_*` equivalentes.
+
 ## Documentación relacionada
 
 - [SECURITY.md](SECURITY.md) — riesgos.
