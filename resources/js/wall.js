@@ -12,9 +12,32 @@ import { renderCommentsTreeHtml, setupCommentInteractions } from './social/comme
 
 const CLS = {
     secondary:
-        'wall-chip wall-chip-sort shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition sm:px-4 sm:text-sm bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/35 hover:bg-emerald-500/25',
+        'wall-chip wall-chip-sort shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition sm:px-3.5 sm:py-2 sm:text-sm bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/35 hover:bg-emerald-500/25',
     inactiveSort:
-        'wall-chip wall-chip-sort shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition sm:px-4 sm:text-sm bg-slate-800/90 text-slate-300 ring-1 ring-slate-700/80 hover:bg-slate-700 hover:text-white',
+        'wall-chip wall-chip-sort shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition sm:px-3.5 sm:py-2 sm:text-sm bg-slate-800/90 text-slate-300 ring-1 ring-slate-700/80 hover:bg-slate-700 hover:text-white',
+};
+
+/** Etiquetas visibles y ayuda contextual (state.sort sigue siendo recent | popular | trending). */
+const SORT_UX = {
+    recent: {
+        title: 'Recientes',
+        hint: 'Publicaciones recomendadas según tu actividad.',
+    },
+    popular: {
+        title: 'Populares',
+        hint: 'Las publicaciones con más interacción.',
+    },
+    trending: {
+        title: 'Tendencia',
+        hint: 'Lo más relevante en los últimos días.',
+    },
+};
+
+/** Ayuda cuando el feed es solo «Siguiendo» (evita repetir frases con el badge). */
+const SORT_UX_FOLLOWING_HINT = {
+    recent: 'Cronología entre las cuentas que sigues.',
+    popular: 'Mayor interacción entre las cuentas que sigues.',
+    trending: 'Lo más relevante en los últimos días, solo entre cuentas que sigues.',
 };
 
 function showToast(message, variant = 'info') {
@@ -613,6 +636,38 @@ export function initWall() {
     function setFeedStatus(message) {
         if (feedStatus) {
             feedStatus.textContent = message;
+        }
+    }
+
+    const sortFeedbackEl = document.getElementById('wall-sort-feedback');
+    const sortActiveKindEl = document.getElementById('wall-sort-active-kind');
+    const sortScopeBadgeEl = document.getElementById('wall-sort-scope-badge');
+    const sortHintEl = document.getElementById('wall-sort-hint');
+
+    function updateSortContextUi({ flash = false } = {}) {
+        const ux = SORT_UX[state.sort] ?? SORT_UX.recent;
+        if (sortActiveKindEl) {
+            sortActiveKindEl.textContent = ux.title;
+        }
+        if (sortScopeBadgeEl) {
+            if (state.following) {
+                sortScopeBadgeEl.textContent = 'Siguiendo';
+                sortScopeBadgeEl.classList.remove('hidden');
+            } else {
+                sortScopeBadgeEl.textContent = '';
+                sortScopeBadgeEl.classList.add('hidden');
+            }
+        }
+        if (sortHintEl) {
+            sortHintEl.textContent = state.following
+                ? (SORT_UX_FOLLOWING_HINT[state.sort] ?? SORT_UX_FOLLOWING_HINT.recent)
+                : ux.hint;
+        }
+        if (flash && sortFeedbackEl) {
+            sortFeedbackEl.classList.remove('wall-sort-context-flash');
+            void sortFeedbackEl.offsetWidth;
+            sortFeedbackEl.classList.add('wall-sort-context-flash');
+            window.setTimeout(() => sortFeedbackEl.classList.remove('wall-sort-context-flash'), 480);
         }
     }
 
@@ -1258,8 +1313,10 @@ export function initWall() {
 
     document.querySelectorAll('[data-sort]').forEach((btn) => {
         btn.addEventListener('click', () => {
-            state.sort = btn.dataset.sort || 'recent';
-            updateFilterUi();
+            const next = btn.dataset.sort || 'recent';
+            const sortChanged = next !== state.sort;
+            state.sort = next;
+            updateFilterUi({ flashSortContext: sortChanged });
             scheduleFetch();
         });
     });
@@ -1276,13 +1333,16 @@ export function initWall() {
         }, 320);
     });
 
-    function updateFilterUi() {
+    function updateFilterUi({ flashSortContext = false } = {}) {
         updateNavbarFeedUi();
 
         document.querySelectorAll('[data-sort]').forEach((el) => {
             const on = state.sort === el.dataset.sort;
             el.className = on ? CLS.secondary : CLS.inactiveSort;
+            el.setAttribute('aria-selected', on ? 'true' : 'false');
         });
+
+        updateSortContextUi({ flash: flashSortContext });
     }
 
     updateFilterUi();

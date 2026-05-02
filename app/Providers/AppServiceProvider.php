@@ -2,6 +2,14 @@
 
 namespace App\Providers;
 
+use App\Support\OperationalLogger;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,6 +32,49 @@ class AppServiceProvider extends ServiceProvider
         if (config('session.driver') === 'database' && config('database.default') === 'sqlite') {
             config(['session.driver' => 'file']);
         }
+
+        RateLimiter::for('login', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+        RateLimiter::for('register', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+        RateLimiter::for('password-email', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+        RateLimiter::for('password-store', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+        RateLimiter::for('password-update', fn (Request $request) => Limit::perMinute(10)->by((string) $request->user()->getAuthIdentifier()));
+
+        RateLimiter::for('feed-filter', fn (Request $request) => Limit::perMinute(120)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
+        RateLimiter::for('tags-index', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+        RateLimiter::for('tags-search', fn (Request $request) => Limit::perMinute(90)->by($request->ip()));
+        RateLimiter::for('comment-store', fn (Request $request) => Limit::perMinute(30)->by((string) $request->user()->getAuthIdentifier()));
+        RateLimiter::for('like-toggle', fn (Request $request) => Limit::perMinute(60)->by((string) $request->user()->getAuthIdentifier()));
+        RateLimiter::for('notifications-api', fn (Request $request) => Limit::perMinute(90)->by((string) $request->user()->getAuthIdentifier()));
+        RateLimiter::for('profile-posts-json', fn (Request $request) => Limit::perMinute(120)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
+        RateLimiter::for('username-check', fn (Request $request) => Limit::perMinute(30)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip())));
+        RateLimiter::for('settings-write', fn (Request $request) => Limit::perMinute(25)->by((string) $request->user()->getAuthIdentifier()));
+
+        RateLimiter::for('create-post', function (Request $request): Limit {
+            return Limit::perMinute(5)->by((string) ($request->user()?->getAuthIdentifier() ?? $request->ip()));
+        });
+
+        RateLimiter::for('follow-toggle', function (Request $request): Limit {
+            return Limit::perMinute(30)->by((string) $request->user()->getAuthIdentifier());
+        });
+
+        Event::listen(Login::class, function (Login $event): void {
+            OperationalLogger::authLogin($event->user->getAuthIdentifier(), request(), $event->remember);
+        });
+
+        Event::listen(Logout::class, function (Logout $event): void {
+            if ($event->user !== null) {
+                OperationalLogger::authLogout($event->user->getAuthIdentifier(), request());
+            }
+        });
+
+        Event::listen(Failed::class, function (Failed $event): void {
+            $email = null;
+            if (is_array($event->credentials ?? null)) {
+                $e = $event->credentials['email'] ?? null;
+                $email = is_string($e) ? $e : null;
+            }
+            OperationalLogger::authFailed($email, request());
+        });
 
         $this->forceHttpsInProduction();
     }

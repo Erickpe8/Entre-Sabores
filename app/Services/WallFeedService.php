@@ -9,6 +9,7 @@ use Illuminate\Contracts\Pagination\Paginator as PaginatorContract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -157,11 +158,54 @@ class WallFeedService
      */
     private function globalExploreFeed(FilterPostsRequest $request, int $perPage, int $page, string $sort): JsonResponse
     {
+        $ttl = (int) config('performance.wall_guest_feed_ttl', 0);
+        $guestCacheKey = null;
+
+        if (! auth()->check() && $ttl > 0) {
+            $guestCacheKey = $this->guestExploreCacheKey($request, $perPage, $page, $sort);
+            $cached = Cache::get($guestCacheKey);
+            if (is_array($cached)) {
+                return response()->json($cached);
+            }
+        }
+
         $query = $this->baseQuery();
         $this->applyExploreFilters($query, $request);
         $this->applySort($query, $sort);
 
-        return $this->jsonPaginate($query->simplePaginate($perPage, self::POST_COLUMNS, 'page', $page), 'explore_'.$sort);
+        $response = $this->jsonPaginate($query->simplePaginate($perPage, self::POST_COLUMNS, 'page', $page), 'explore_'.$sort);
+
+        if ($guestCacheKey !== null && $ttl > 0) {
+            $payload = json_decode($response->getContent(), true);
+            if (is_array($payload)) {
+                Cache::put($guestCacheKey, $payload, now()->addSeconds($ttl));
+            }
+        }
+
+        return $response;
+    }
+
+    /**
+     * Clave de caché para exploración global solo invitados (sin estado de «like» propio).
+     */
+    private function guestExploreCacheKey(FilterPostsRequest $request, int $perPage, int $page, string $sort): string
+    {
+        $tagIds = array_values(array_unique(array_map(
+            'intval',
+            $request->input('tag_ids', []) ?? []
+        )));
+        sort($tagIds);
+        $search = trim((string) ($request->input('search') ?? $request->input('q', '')));
+
+        $payload = [
+            'sort' => $sort,
+            'page' => $page,
+            'per' => $perPage,
+            'tags' => $tagIds,
+            'search' => $search,
+        ];
+
+        return 'wall:guest:v1:'.hash('xxh128', json_encode($payload, JSON_THROW_ON_ERROR));
     }
 
     private function baseQuery(): Builder

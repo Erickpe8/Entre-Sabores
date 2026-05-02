@@ -1,63 +1,75 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Entre Sabores
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Red social gastronómica orientada al intercambio cultural (proyecto COIL México–Colombia): publicaciones con etiquetas, muro con exploración y modo «siguiendo», likes, comentarios en hilos, perfiles públicos y notificaciones.
 
-## About Laravel
+## Feed del muro (lectura rápida)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| En la UI | Parámetro HTTP | Comportamiento backend (resumen) |
+|----------|----------------|----------------------------------|
+| **FYP** / **Siguiendo** | `following` ausente vs `following=1` | Fuente: exploración global vs solo cuentas que sigues (invitado en «Siguiendo» ve mensaje de login). Detalle en [ARCHITECTURE.md](ARCHITECTURE.md#feed-del-muro-wallfeedservice). |
+| **Recientes** / **Populares** / **Tendencia** | `sort=recent` \| `popular` \| `trending` | Orden y reglas de ranking; con usuario autenticado en FYP y **Recientes**, aplica la **mezcla ~70 % seguidos + ~30 % global por engagement** si tiene seguidos. |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Los nombres de chips no coinciden literalmente con los valores de `sort` (son etiquetas de producto). El contrato de API sigue siendo **`sort` en inglés**.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Entorno y producción
 
-## Learning Laravel
+- **Local**: PHP 8.4, Composer, Node; base de datos según `.env` (MySQL recomendado alineado con Docker).
+- **Producción**: seguir [PRODUCTION.md](PRODUCTION.md) (checklist) y [SECURITY.md](SECURITY.md). Referencia de variables: [.env.production.example](.env.production.example).
+- **Madurez**: validaciones, policies, rate limits diferenciados, tests de características sociales; observabilidad (logs JSON, métricas Redis, `/health`, `/internal/metrics`) — ver [PRODUCTION.md](PRODUCTION.md).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Stack
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Área | Tecnología |
+|------|------------|
+| Backend | Laravel 13, PHP 8.4 |
+| Auth / scaffolding | Laravel Breeze |
+| Frontend | Blade, Vite, Tailwind CSS, Alpine.js, Axios |
+| Base de datos | MySQL (desarrollo con Docker; véase abajo) |
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Documentación del repositorio
 
-## Agentic Development
+| Documento | Contenido |
+|-----------|-----------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Decisiones de arquitectura, **WallFeedService**, feed 70/30, observabilidad |
+| [BACKEND.md](BACKEND.md) | Requests, servicios, policies, rate limiting |
+| [FRONTEND.md](FRONTEND.md) | Vite, muro (`wall.js`), estado del feed, CSRF |
+| [DATABASE.md](DATABASE.md) | Tablas, migraciones relevantes, índices |
+| [CHANGELOG.md](CHANGELOG.md) | Historial |
+| [PRODUCTION.md](PRODUCTION.md) | Despliegue, Redis, salud, métricas, backups |
+| [SECURITY.md](SECURITY.md) | Superficie de seguridad y prácticas |
+| [PERFORMANCE.md](PERFORMANCE.md) | Feed, caché invitados, índices, cuellos de botella |
+| [DOCKER.md](DOCKER.md) | Stack PHP/Nginx/MySQL/phpMyAdmin/Redis |
+| [.env.production.example](.env.production.example) | Variables de referencia para producción |
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Requisitos rápidos
+
+- PHP 8.4, Composer, Node.js/npm
+- Base de datos configurada en `.env` (copiar desde `.env.example`)
+
+## Puesta en marcha (local sin Docker)
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cp .env.example .env
+composer install
+php artisan key:generate
+php artisan migrate
+npm install
+npm run build   # o npm run dev durante desarrollo
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Script Composer útil: `composer setup` (instala dependencias, migraciones, build de front).
 
-## Contributing
+## Pruebas
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# Entre-Sabores
+```bash
+php artisan test
+```
 
 ## Docker
 
 Desarrollo con PHP, Nginx, MySQL, phpMyAdmin y Redis: consulta [DOCKER.md](DOCKER.md) y levanta el stack con `docker compose up -d` desde la raíz del proyecto.
+
+## Licencia
+
+MIT (plantilla Laravel); el contenido específico del proyecto Entre Sabores pertenece al equipo del proyecto según los acuerdos académicos aplicables.

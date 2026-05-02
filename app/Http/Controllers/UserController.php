@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserPostsRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Like;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class UserController extends Controller
@@ -50,7 +50,7 @@ class UserController extends Controller
     /**
      * Publicaciones del usuario (JSON paginado, mismo formato que PostResource).
      */
-    public function posts(Request $request, string $username): JsonResponse
+    public function posts(UserPostsRequest $request, string $username): JsonResponse
     {
         $user = User::query()->where('username', $username)->firstOrFail();
 

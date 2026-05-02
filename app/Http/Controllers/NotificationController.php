@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\NotificationApiPayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -14,6 +15,16 @@ class NotificationController extends Controller
 
         $notifications = $request->user()
             ->notifications()
+            ->select([
+                'id',
+                'type',
+                'notifiable_type',
+                'notifiable_id',
+                'data',
+                'read_at',
+                'created_at',
+                'updated_at',
+            ])
             ->latest()
             ->take($limit)
             ->get()
@@ -21,7 +32,7 @@ class NotificationController extends Controller
                 'id' => $n->id,
                 'read' => $n->read_at !== null,
                 'type' => class_basename($n->type),
-                'data' => $n->data,
+                'data' => NotificationApiPayload::forApi($n->data),
                 'created_at' => $n->created_at?->toIso8601String(),
             ]);
 

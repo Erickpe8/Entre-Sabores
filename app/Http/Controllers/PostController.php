@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
+use App\Support\OperationalLogger;
+use App\Support\OperationalMetrics;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -28,7 +30,11 @@ class PostController extends Controller
             'image_path' => $imagePath,
         ]);
 
-        $post->tags()->sync(array_values(array_unique($validated['tags'])));
+        $tagIds = array_values(array_unique($validated['tags']));
+        $post->tags()->sync($tagIds);
+
+        OperationalLogger::postCreated($post, $request, count($tagIds));
+        OperationalMetrics::incrementPostsCreated();
 
         $post->load([
             'user:id,first_name,last_name,username,profile_photo',
