@@ -143,4 +143,21 @@ class ProfileTest extends TestCase
     {
         $this->get(route('profile.show', 'usuario_inexistente_xyz'))->assertNotFound();
     }
+
+    public function test_profile_posts_json_rejects_per_page_above_limit(): void
+    {
+        $user = User::factory()->create(['username' => 'pageruser']);
+
+        $this->getJson(route('users.posts.index', ['username' => $user->username]).'?per_page=99')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['per_page']);
+    }
+
+    public function test_profile_posts_json_accepts_per_page_within_limit(): void
+    {
+        $user = User::factory()->create(['username' => 'pageruserok']);
+
+        $this->getJson(route('users.posts.index', ['username' => $user->username]).'?per_page=30')
+            ->assertOk();
+    }
 }

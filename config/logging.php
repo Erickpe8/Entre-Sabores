@@ -1,5 +1,6 @@
 <?php
 
+use App\Logging\ApplyJsonFormatterTap;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -125,6 +126,17 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
+        ],
+
+        /*
+         * Una línea JSON por registro (rotación diaria). Usar LOG_STACK=single,structured en prod si quieres duplicar en laravel.log + structured.json.
+         */
+        'structured' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/structured.json'),
+            'level' => env('LOG_STRUCTURED_LEVEL', 'info'),
+            'days' => (int) env('LOG_STRUCTURED_DAYS', 14),
+            'tap' => [ApplyJsonFormatterTap::class],
         ],
 
     ],

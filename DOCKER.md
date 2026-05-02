@@ -2,6 +2,44 @@
 
 Stack: **PHP 8.4 (FPM)**, **Nginx**, **MySQL 8**, **phpMyAdmin** y **Redis** (caché/colas o futuros workers).
 
+## Rendimiento en desarrollo (Docker)
+
+**Contexto típico:** desarrollo en **Windows** con Docker Desktop (motor **Linux/WSL2**). El mayor impacto en lentitud suele ser **dónde vive el código respecto al VM Linux**, no solo PHP.
+
+### Causas frecuentes (orden de impacto habitual)
+
+| Causa | Por qué duele | Qué hacer |
+|-------|----------------|-----------|
+| **Bind mount desde `C:\…` hacia Linux** | Traducción NTFS ↔ VM y miles de operaciones `stat`/lectura (`vendor`, `node_modules`) | Clonar el repo **dentro del sistema de archivos de WSL** (`\\wsl$\Ubuntu\home\tu\entre-sabores` o `~/proyecto`), no en `/mnt/c/...`. |
+| **Arranque con `config:cache` + `route:cache` + `view:cache` en cada `up`** | Recompilar y escribir muchos archivos en el volumen | Por defecto, con `APP_ENV=local`, `docker/start.sh` usa **arranque ligero** (sin esas caches). Arranque completo: `DOCKER_LIGHT_START=0` en `.env` (raíz, para sustitución de Compose). |
+| **Seed en cada arranque** | Migraciones + seeders repetidos | Los seeders automáticos en modo ligero solo corren si `DOCKER_RUN_SEED=1`. Para una vez: `docker compose exec app php artisan db:seed`. |
+| **OPcache desactivado o mal ajustado** | PHP reparsea miles de archivos | Imagen: `docker/php/local.ini` habilita OPcache con `validate_timestamps=1` (adecuado para dev). |
+| **Xdebug** | Sobrecarga notable si está cargado | Esta imagen **no** incluye Xdebug. Si lo añades, desactívalo cuando no depures. |
+| **Vite (`npm run dev`) en el host** | Muchos archivos observados en disco lento | Misma regla: proyecto en disco **Linux de WSL**, no en `C:\`. |
+| **`vendor` sincronizado por bind mount** | Miles de archivos | Opción avanzada: volumen nombrado solo para `vendor` (Composer solo en contenedor); mejora I/O pero el IDE en Windows puede no ver `vendor` sin truco — valorar solo si el cuello es claro. |
+
+### Variables útiles (`.env` en la raíz del repo)
+
+Docker Compose sustituye estas claves al leer `docker-compose.yml`:
+
+- **`DOCKER_LIGHT_START`** — `1` = arranque rápido (sin caches de config/ruta/vistas en el `start`). `0` = igual que antes (optimize + caches + migraciones; seed en local si aplica al modo completo).
+- **`DOCKER_RUN_SEED`** — `1` = ejecutar `db:seed` en el arranque cuando el modo ligero está activo (útil la primera vez).
+
+### Cómo medir mejoras
+
+- **Tiempo de primera respuesta** tras `docker compose up`: debe caer mucho al quitar caches en cada arranque (cambio ya aplicado para `APP_ENV=local`).
+- **`curl -o /dev/null -s -w '%{time_total}\n' http://localhost:8080/dashboard`** (ajusta URL/puerto): comparar antes/después de mover el repo a disco WSL.
+- **`docker compose logs app`** y tiempos en **Nginx access log** si los activas.
+- **PHP**: si instalas Xdebug “solo cuando haga falta”, compara `php artisan about` o un request representativo.
+
+### Redis y MySQL en desarrollo
+
+- **Redis**: en `.env` puedes usar `REDIS_HOST=redis`, `CACHE_STORE=redis`, `SESSION_DRIVER=redis` para aliviar disco en sesión/caché. La imagen actual **no** incluye la extensión **phpredis**; para usar Redis como driver en Laravel hace falta añadirla al `Dockerfile` (PECL) o instalar el paquete **predis/predis** y configurar `REDIS_CLIENT=predis`.
+- **MySQL**: el volumen `mysql_data` ya evita recrear datos en cada `up`. Para entornos **solo dev** se puede relajar InnoDB en el `command` del servicio (trade-off durabilidad); no está aplicado por defecto para no sorprender.
+
+---
+
+
 | Servicio     | Uso en el host (por defecto) |
 |-------------|------------------------------|
 | Aplicación  | <http://localhost:8080>      |
@@ -31,6 +69,8 @@ Stack: **PHP 8.4 (FPM)**, **Nginx**, **MySQL 8**, **phpMyAdmin** y **Redis** (ca
    ```
 
 2. Asegúrate de que en `.env` tengas credenciales coherentes con el servicio `mysql` (o usa las por defecto del ejemplo: base `entre_sabores`, usuario `entre_sabores`, clave `secret`, root `DB_ROOT_PASSWORD=root`).
+
+   **`docker-compose.yml` fuerza `DB_CONNECTION=mysql` en el contenedor `app`** (las variables del bloque `environment` prevalecen sobre `env_file`). Así no se usa SQLite dentro de Docker, donde el archivo `database/database.sqlite` en volumen compartido suele quedar **solo lectura** para PHP-FPM y fallan login, caché (`CACHE_STORE=database`), sesión en BD, etc. Si necesitas SQLite en Docker, quita esa línea y arregla permisos del fichero y del directorio `database/` dentro del contenedor.
 
 3. **Levantar todo**
 
@@ -81,9 +121,9 @@ Dentro de la red Docker, Laravel usa `DB_HOST=mysql` (fijado en `docker-compose`
 - Tareas programadas: contenedor con `php artisan schedule:work` o un cron sidecar.
 - Añade volúmenes o servicio de objetos (MinIO, S3) según almacenamiento de archivos.
 
-## Nginx y recreación de contenedores
+## Nginx y PHP-FPM
 
-Tras un `--build` o al recrearse el servicio `app`, si ves **502** en el navegador, suele deberse a que Nginx mantiene la IP antigua de `app`. En esta configuración se usa el **resolver** de Docker (`127.0.0.11`) y `fastcgi_pass` con variable para volver a resolver el nombre. Aun así, un `docker compose restart nginx` restablece el servicio de inmediato.
+Nginx y PHP-FPM van **en el mismo contenedor** (`supervisord`). `fastcgi_pass` apunta a **`127.0.0.1:9000`** (`docker/nginx/web.conf`). Si ves **502**, revisa logs (`docker compose logs app`) y que **php-fpm** esté arriba; un `docker compose restart app` suele bastar.
 
 ## Comandos frecuentes
 

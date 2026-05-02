@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\HealthController;
+use App\Http\Controllers\InternalMetricsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
@@ -10,6 +12,7 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsernameAvailabilityController;
 use App\Http\Controllers\WallController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,20 +23,28 @@ Route::get('/welcome', function () {
     return view('welcome');
 })->name('welcome');
 
-Route::get('/tags', [TagController::class, 'index'])
+Route::get('/health', HealthController::class)
     ->middleware('throttle:120,1')
+    ->name('health');
+
+Route::get('/internal/metrics', InternalMetricsController::class)
+    ->middleware('throttle:30,1')
+    ->name('internal.metrics');
+
+Route::get('/tags', [TagController::class, 'index'])
+    ->middleware('throttle:tags-index')
     ->name('tags.index');
 
 Route::get('/tags/search', [TagController::class, 'search'])
-    ->middleware('throttle:90,1')
+    ->middleware('throttle:tags-search')
     ->name('tags.search');
 
 Route::get('/posts/filter', [WallController::class, 'filter'])
-    ->middleware('throttle:120,1')
+    ->middleware('throttle:feed-filter')
     ->name('posts.filter');
 
 // GET /posts?search=… → muro con búsqueda (alineado con descubrimiento tipo red social).
-Route::get('/posts', function (\Illuminate\Http\Request $request) {
+Route::get('/posts', function (Request $request) {
     if (! auth()->check()) {
         return redirect()->route('welcome');
     }
@@ -48,19 +59,19 @@ Route::get('/posts', function (\Illuminate\Http\Request $request) {
 Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
 
 Route::post('/posts/{post}/comments', [PostCommentController::class, 'store'])
-    ->middleware(['auth', 'throttle:30,1'])
+    ->middleware(['auth', 'throttle:comment-store'])
     ->name('posts.comments.store');
 
 Route::post('/posts/{post}/likes/toggle', [PostLikeController::class, 'toggle'])
-    ->middleware(['auth', 'throttle:120,1'])
+    ->middleware(['auth', 'throttle:like-toggle'])
     ->name('posts.likes.toggle');
 
 Route::post('/posts', [PostController::class, 'store'])
-    ->middleware('auth')
+    ->middleware(['auth', 'throttle:create-post'])
     ->name('posts.store');
 
 Route::get('/username/availability', UsernameAvailabilityController::class)
-    ->middleware('throttle:30,1')
+    ->middleware('throttle:username-check')
     ->name('username.availability');
 
 Route::get('/user/{username}', function (string $username) {
@@ -73,14 +84,14 @@ Route::get('/profile/{username}', [UserController::class, 'show'])
 
 Route::get('/users/{username}/posts', [UserController::class, 'posts'])
     ->where('username', '[a-z0-9_-]+')
-    ->middleware('throttle:120,1')
+    ->middleware('throttle:profile-posts-json')
     ->name('users.posts.index');
 
 Route::get('/dashboard', [WallController::class, 'index'])
     ->middleware('auth')
     ->name('dashboard');
 
-Route::middleware(['auth', 'throttle:120,1'])->group(function () {
+Route::middleware(['auth', 'throttle:notifications-api'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read_all');
@@ -89,9 +100,11 @@ Route::middleware(['auth', 'throttle:120,1'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/users/{username}/follow', [FollowController::class, 'store'])
         ->where('username', '[a-z0-9_-]+')
+        ->middleware('throttle:follow-toggle')
         ->name('users.follow.store');
     Route::delete('/users/{username}/follow', [FollowController::class, 'destroy'])
         ->where('username', '[a-z0-9_-]+')
+        ->middleware('throttle:follow-toggle')
         ->name('users.follow.destroy');
 
     Route::get('/profile', function () {
@@ -99,8 +112,12 @@ Route::middleware('auth')->group(function () {
     })->name('profile.redirect');
 
     Route::get('/settings/profile', [ProfileController::class, 'edit'])->name('settings.profile');
-    Route::patch('/settings/profile', [ProfileController::class, 'update'])->name('settings.profile.update');
-    Route::delete('/settings/profile', [ProfileController::class, 'destroy'])->name('settings.profile.destroy');
+    Route::patch('/settings/profile', [ProfileController::class, 'update'])
+        ->middleware('throttle:settings-write')
+        ->name('settings.profile.update');
+    Route::delete('/settings/profile', [ProfileController::class, 'destroy'])
+        ->middleware('throttle:settings-write')
+        ->name('settings.profile.destroy');
     Route::get('/settings/account', [ProfileController::class, 'account'])->name('settings.account');
 });
 

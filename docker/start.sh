@@ -19,21 +19,44 @@ echo "[start] Configurando permisos..."
 chmod -R 775 database storage bootstrap/cache 2>/dev/null || true
 chown -R www-data:www-data database storage bootstrap/cache 2>/dev/null || true
 
+LIGHT_START=""
+case "${DOCKER_LIGHT_START:-}" in
+  1|true|yes) LIGHT_START=1 ;;
+  0|false|no) LIGHT_START=0 ;;
+esac
+if [ -z "${LIGHT_START}" ]; then
+  if [ "${APP_ENV:-}" = "local" ]; then
+    LIGHT_START=1
+  else
+    LIGHT_START=0
+  fi
+fi
+
 if [ -f artisan ]; then
-  echo "[start] Limpiando cache previa..."
-  php artisan optimize:clear || true
+  if [ "${LIGHT_START}" = "1" ]; then
+    echo "[start] Modo desarrollo (DOCKER_LIGHT_START / APP_ENV=local): sin config:route:view cache en arranque."
+    php artisan migrate --force
 
-  echo "[start] Generando caches..."
-  php artisan config:cache
-  php artisan route:cache
-  php artisan view:cache
+    if [ "${DOCKER_RUN_SEED:-}" = "1" ]; then
+      echo "[start] DOCKER_RUN_SEED=1: ejecutando seeders..."
+      php artisan db:seed --force || true
+    fi
+  else
+    echo "[start] Modo arranque completo: limpiando cache y regenerando..."
+    php artisan optimize:clear || true
 
-  echo "[start] Ejecutando migraciones..."
-  php artisan migrate --force
+    echo "[start] Generando caches..."
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
 
-  if [ "${APP_ENV}" = "local" ]; then
-    echo "[start] APP_ENV=local, ejecutando seeders..."
-    php artisan db:seed --force || true
+    echo "[start] Ejecutando migraciones..."
+    php artisan migrate --force
+
+    if [ "${APP_ENV}" = "local" ]; then
+      echo "[start] APP_ENV=local, ejecutando seeders..."
+      php artisan db:seed --force || true
+    fi
   fi
 
   php artisan storage:link --force >/dev/null 2>&1 || true

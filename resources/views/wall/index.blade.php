@@ -3,64 +3,111 @@
 
     <div id="wall-toast-root" class="fixed top-20 left-1/2 z-[60] flex -translate-x-1/2 flex-col gap-2 pointer-events-none px-4 w-full max-w-md" aria-live="polite"></div>
 
+    <style>
+        @keyframes wall-sort-context-flash {
+            0% {
+                opacity: 0.55;
+                transform: translateY(2px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .wall-sort-context-flash {
+            animation: wall-sort-context-flash 0.42s ease-out;
+        }
+    </style>
+
     <div class="min-h-[100dvh] bg-slate-950 text-slate-100">
         <div class="sticky top-14 sm:top-16 z-30 border-b border-slate-800/90 bg-slate-900/95 shadow-sm shadow-black/20 backdrop-blur-md">
-            <div
-                class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-5 sm:px-6"
-                id="wall-filter-bar"
-                aria-label="Explorar el muro"
-            >
-                <div class="min-w-0 flex-1">
-                    <label class="sr-only" for="wall-search-q">Buscar publicaciones y etiquetas</label>
-                    <div class="relative">
-                        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-500" aria-hidden="true">
-                            <svg class="h-4 w-4 sm:h-5 sm:w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                        </span>
-                        <input
-                            id="wall-search-q"
-                            type="search"
-                            enterkeyhint="search"
-                            autocomplete="off"
-                            placeholder="Buscar..."
-                            class="w-full rounded-full border border-slate-700/90 bg-slate-800/85 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-500 shadow-inner shadow-black/20 transition focus:border-emerald-500/80 focus:outline-none focus:ring-2 focus:ring-emerald-500/25 sm:py-2.5"
-                        />
+            <div id="wall-filter-bar" class="flex flex-col" aria-label="Explorar el muro">
+                {{-- Fila 1: búsqueda + chips --}}
+                <div class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6">
+                    <div class="min-w-0 flex-1 sm:max-w-xl lg:max-w-2xl">
+                        <label class="sr-only" for="wall-search-q">Buscar publicaciones y etiquetas</label>
+                        <div class="relative">
+                            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-500" aria-hidden="true">
+                                <svg class="h-4 w-4 sm:h-5 sm:w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                            </span>
+                            <input
+                                id="wall-search-q"
+                                type="search"
+                                enterkeyhint="search"
+                                autocomplete="off"
+                                placeholder="Buscar..."
+                                class="w-full rounded-full border border-slate-700/90 bg-slate-800/85 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-500 shadow-inner shadow-black/20 transition focus:border-emerald-500/80 focus:outline-none focus:ring-2 focus:ring-emerald-500/25 sm:py-2.5"
+                            />
+                        </div>
                     </div>
-                </div>
 
-                <div class="w-full sm:w-auto sm:max-w-full sm:flex sm:justify-end">
                     <div
-                        class="w-full overflow-x-auto scrollbar-none pb-0.5 sm:w-auto"
+                        class="w-full shrink-0 overflow-x-auto scrollbar-none pb-0.5 sm:w-auto sm:pb-0"
                         role="tablist"
                         aria-label="Orden del feed"
+                        aria-describedby="wall-sort-hint"
                     >
-                        <div class="inline-flex min-w-max items-center gap-1.5 rounded-full border border-slate-700/80 bg-slate-900/80 p-1 shadow-inner shadow-black/20">
+                        <div class="inline-flex min-w-max items-center gap-1 rounded-full border border-slate-700/80 bg-slate-950/60 p-1 shadow-inner shadow-black/30 sm:gap-1.5">
                             <button
                                 type="button"
                                 data-sort="recent"
-                                class="wall-chip wall-chip-sort shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition sm:px-4 sm:text-sm bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/35 hover:bg-emerald-500/25 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
-                                aria-label="Ordenar por más recientes"
+                                class="wall-chip wall-chip-sort shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition sm:px-3.5 sm:py-2 sm:text-sm bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/35 hover:bg-emerald-500/25 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+                                aria-label="Ordenar por recientes (mezcla personalizada en el feed principal)"
+                                aria-selected="true"
                                 role="tab"
                             >
-                                Más recientes
+                                Recientes
                             </button>
                             <button
                                 type="button"
                                 data-sort="popular"
-                                class="wall-chip wall-chip-sort shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition sm:px-4 sm:text-sm bg-slate-800/90 text-slate-300 ring-1 ring-slate-700/80 hover:bg-slate-700 hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
-                                aria-label="Ordenar por más populares"
+                                class="wall-chip wall-chip-sort shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition sm:px-3.5 sm:py-2 sm:text-sm bg-slate-800/90 text-slate-300 ring-1 ring-slate-700/80 hover:bg-slate-700 hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+                                aria-label="Populares — más interacción"
+                                aria-selected="false"
                                 role="tab"
                             >
-                                Más populares
+                                Populares
                             </button>
                             <button
                                 type="button"
                                 data-sort="trending"
-                                class="wall-chip wall-chip-sort shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition sm:px-4 sm:text-sm bg-slate-800/90 text-slate-300 ring-1 ring-slate-700/80 hover:bg-slate-700 hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
-                                aria-label="Tendencia"
+                                class="wall-chip wall-chip-sort shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition sm:px-3.5 sm:py-2 sm:text-sm bg-slate-800/90 text-slate-300 ring-1 ring-slate-700/80 hover:bg-slate-700 hover:text-white active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+                                aria-label="Tendencia — últimos días"
+                                aria-selected="false"
                                 role="tab"
                             >
                                 Tendencia
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Fila 2: contexto del orden (ancho completo, sin huecos raros) --}}
+                <div class="border-t border-slate-800/80 bg-slate-950/60 px-4 py-2.5 sm:px-6">
+                    <div
+                        id="wall-sort-feedback"
+                        class="flex items-start gap-3 transition-opacity duration-300 sm:items-center sm:gap-3.5"
+                    >
+                        <span
+                            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/[0.08] text-emerald-400/90 ring-1 ring-emerald-500/20 sm:mt-0"
+                            aria-hidden="true"
+                        >
+                            <svg class="h-[18px] w-[18px]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 18h9.75M10.5 12h9.75M3.75 6h.007v.008H3.75V6Zm0 6h.007v.008H3.75v-.008Zm0 6h.007v.008H3.75v-.008Z"/>
+                            </svg>
+                        </span>
+                        <div class="min-w-0 flex-1 pt-0.5 sm:pt-0">
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1" aria-live="polite">
+                                <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Orden activo</span>
+                                <span id="wall-sort-active-kind" class="text-sm font-semibold text-emerald-400">Recientes</span>
+                                <span
+                                    id="wall-sort-scope-badge"
+                                    class="hidden rounded-full border border-slate-600/90 bg-slate-800/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-300"
+                                ></span>
+                            </div>
+                            <p id="wall-sort-hint" class="mt-1 text-xs leading-relaxed text-slate-500 sm:text-[13px]">
+                                Publicaciones recomendadas según tu actividad.
+                            </p>
                         </div>
                     </div>
                 </div>
