@@ -2,8 +2,16 @@
 
 namespace App\Providers;
 
+use App\Events\CommentCreated;
+use App\Events\NotificationRecorded;
+use App\Events\PostLiked;
+use App\Listeners\Broadcasting\SendCommentCreatedBroadcast;
+use App\Listeners\Broadcasting\SendNotificationCreatedBroadcast;
+use App\Listeners\Broadcasting\SendPostLikedBroadcast;
+use App\Observers\DatabaseNotificationObserver;
 use App\Support\OperationalLogger;
 use Illuminate\Auth\Events\Failed;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -75,6 +83,12 @@ class AppServiceProvider extends ServiceProvider
             }
             OperationalLogger::authFailed($email, request());
         });
+
+        DatabaseNotification::observe(DatabaseNotificationObserver::class);
+
+        Event::listen(PostLiked::class, SendPostLikedBroadcast::class);
+        Event::listen(CommentCreated::class, SendCommentCreatedBroadcast::class);
+        Event::listen(NotificationRecorded::class, SendNotificationCreatedBroadcast::class);
 
         $this->forceHttpsInProduction();
     }

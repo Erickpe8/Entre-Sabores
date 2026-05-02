@@ -1,3 +1,5 @@
+import { ensureEcho } from './echo.js';
+
 function esc(s) {
     const d = document.createElement('div');
     d.textContent = s;
@@ -16,6 +18,22 @@ function formatNotifTime(iso) {
 
     return d.toLocaleString('es', { dateStyle: 'short', timeStyle: 'short' });
 }
+
+function showRealtimeToast(message, themeDark) {
+    const el = document.createElement('div');
+    el.setAttribute('role', 'status');
+    el.className = themeDark
+        ? 'fixed bottom-6 left-1/2 z-[70] max-w-[min(calc(100vw-2rem),22rem)] -translate-x-1/2 rounded-xl border border-emerald-500/40 bg-slate-900/95 px-4 py-3 text-sm text-emerald-50 shadow-lg backdrop-blur-sm'
+        : 'fixed bottom-6 left-1/2 z-[70] max-w-[min(calc(100vw-2rem),22rem)] -translate-x-1/2 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm text-stone-900 shadow-lg';
+    el.textContent = message;
+    document.body.appendChild(el);
+    window.setTimeout(() => {
+        el.remove();
+    }, 5200);
+}
+
+/** Evita doble init si el bundle se cargara dos veces (defensa). */
+let notificationsNavInitialized = false;
 
 function updateBadge(badgeEl, count) {
     if (!badgeEl) {
@@ -50,6 +68,11 @@ export function initNotificationsNav() {
     if (!axios) {
         return;
     }
+
+    if (notificationsNavInitialized) {
+        return;
+    }
+    notificationsNavInitialized = true;
 
     const config = JSON.parse(cfgEl.textContent);
     const themeDark = root?.dataset.navTheme !== 'light';
@@ -179,7 +202,51 @@ export function initNotificationsNav() {
 
     updateBadge(badge, config.initialUnread ?? 0);
 
-    window.setInterval(() => {
-        void refreshUnreadOnly();
-    }, 90000);
+    const Echo = ensureEcho();
+    const uid = config.authUserId;
+
+    function syncWsIndicator() {
+        if (!Echo) {
+            return;
+        }
+        const ok = window.__echoWsOnline === true;
+        btn.classList.toggle('opacity-70', !ok);
+        btn.title = ok ? 'Notificaciones' : 'Notificaciones (sin tiempo real; sincronización periódica)';
+    }
+
+    if (Echo && uid != null) {
+        Echo.private(`user.${uid}`).listen('.notification.created', (payload) => {
+            updateBadge(badge, payload.unread_count ?? 0);
+            showRealtimeToast(String(payload.title || 'Nueva notificación'), themeDark);
+            window.dispatchEvent(new CustomEvent('entre-sabores:notifications-refresh'));
+        });
+
+        window.addEventListener(
+            'beforeunload',
+            () => {
+                Echo.leave(`user.${uid}`);
+            },
+            { once: true },
+        );
+
+        syncWsIndicator();
+        window.addEventListener('entre-sabores:echo-connection', syncWsIndicator);
+    }
+
+    const POLL_MS_WS_UP = 180000;
+    const POLL_MS_WS_DOWN = 45000;
+
+    let pollTimer = 0;
+
+    function restartUnreadPolling() {
+        window.clearInterval(pollTimer);
+        const wsUp = window.__echoWsOnline === true;
+        const interval = wsUp ? POLL_MS_WS_UP : POLL_MS_WS_DOWN;
+        pollTimer = window.setInterval(() => {
+            void refreshUnreadOnly();
+        }, interval);
+    }
+
+    restartUnreadPolling();
+    window.addEventListener('entre-sabores:echo-connection', () => restartUnreadPolling());
 }

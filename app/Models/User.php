@@ -76,6 +76,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'unread_notifications_count' => 'integer',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'birthdate' => 'date',

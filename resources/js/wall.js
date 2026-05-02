@@ -1,3 +1,4 @@
+import { ensureEcho } from './echo.js';
 import {
     renderCard,
     heartSvgHtml,
@@ -71,6 +72,8 @@ export function initWall() {
 
         return;
     }
+
+    ensureEcho();
 
     const cfgEl = document.getElementById('wall-config');
     if (!cfgEl?.textContent) {

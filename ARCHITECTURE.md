@@ -112,6 +112,23 @@ Las rutas suelen servir Blade con config JS (`wallConfig`, …) usando **rutas r
 - Por defecto en `.env.example`: `QUEUE_CONNECTION=sync`, `CACHE_STORE=file`; producción suele usar Redis para caché, sesión y colas ([PRODUCTION.md](PRODUCTION.md)).
 - Índices en follows, post_tag, likes, posts — ver [DATABASE.md](DATABASE.md).
 
+## Tiempo real (broadcasting)
+
+Solo donde aporta UX clara: **notificaciones** (badge + toast), **likes** y **comentarios** en la **vista de detalle de un post**. El feed del muro y los rankings **no** usan WebSockets.
+
+| Canal | Tipo | Uso |
+|-------|------|-----|
+| `post.{id}` | público (`Echo.channel`) | Contador de likes y nuevos comentarios solo para quien abre ese post. |
+| `user.{id}` | privado (`Echo.private`) | Notificaciones del usuario autenticado; autorización en `routes/channels.php`. |
+
+**Privado vs público:** el canal del post es público porque cualquier visitante puede ver la página del post; no expone datos sensibles (solo conteos y el comentario nuevo ya formateado como en la API). Las notificaciones van en canal **privado** para que solo el destinatario pueda suscribirse tras `/broadcasting/auth`.
+
+Con `BROADCAST_CONNECTION=null` no se emiten eventos; la aplicación sigue funcionando con respuestas HTTP habituales.
+
+**Arquitectura:** el dominio emite eventos (`PostLiked`, `CommentCreated`, `NotificationRecorded`); listeners dedicados construyen los payloads `*Broadcast` y llaman a `broadcast()`. Así el HTTP no depende del proveedor WS y el contrato Echo queda acotado a `App\Events\Broadcasting\*`.
+
+Detalle de configuración: [BACKEND.md](BACKEND.md#broadcasting-y-eventos), [FRONTEND.md](FRONTEND.md#laravel-echo), [PRODUCTION.md](PRODUCTION.md#tiempo-real-soketi--pusher).
+
 ## Observabilidad
 
 - **Salud**: `GET /up`; `GET /health` (token opcional `HEALTH_CHECK_TOKEN`).

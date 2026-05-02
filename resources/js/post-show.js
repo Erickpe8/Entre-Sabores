@@ -1,5 +1,12 @@
+import { ensureEcho } from './echo.js';
 import { renderCard, heartSvgHtml, flashLikeAnimation } from './social/postCard.js';
-import { renderCommentsTreeHtml, setupCommentInteractions } from './social/commentThread.js';
+import {
+    renderCommentsTreeHtml,
+    setupCommentInteractions,
+    renderCommentNodeHtml,
+} from './social/commentThread.js';
+
+let postShowPageInitialized = false;
 
 function showToast(el, message) {
     if (!el) {
@@ -20,9 +27,10 @@ function syncCommentsCount(root, postId, count) {
 
 export function initPostShow() {
     const root = document.getElementById('post-show-page');
-    if (!root) {
+    if (!root || postShowPageInitialized) {
         return;
     }
+    postShowPageInitialized = true;
 
     const axios = window.axios;
     if (!axios) {
@@ -115,4 +123,85 @@ export function initPostShow() {
             }
         },
     });
+
+    const Echo = ensureEcho();
+    if (!Echo || config.postId == null) {
+        return;
+    }
+
+    async function reloadCommentsTreeRemote() {
+        const wrap = document.getElementById('post-show-comments');
+        if (!wrap) {
+            return;
+        }
+        try {
+            const { data } = await axios.get(`${config.postBaseUrl}/${config.postId}`);
+            const p = data.post;
+            wrap.innerHTML = renderCommentsTreeHtml(p.comments || [], {
+                showReplyButtons: config.isAuthenticated === true,
+            });
+            syncCommentsCount(root, p.id, p.comments_count ?? 0);
+            const heading = document.getElementById('post-show-heading-count');
+            if (heading) {
+                heading.textContent = `(${p.comments_count ?? 0})`;
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    const channel = Echo.channel(`post.${config.postId}`);
+
+    channel.listen('.post.like.updated', (e) => {
+        if (Number(e.post_id) !== Number(config.postId)) {
+            return;
+        }
+        root.querySelectorAll(`[data-like-post-id="${e.post_id}"]`).forEach((btn) => {
+            const span = btn.querySelector('[data-like-count]');
+            if (span) {
+                span.textContent = String(e.likes_count);
+            }
+        });
+    });
+
+    channel.listen('.post.comment.created', async (e) => {
+        if (Number(e.post_id) !== Number(config.postId)) {
+            return;
+        }
+        const wrap = document.getElementById('post-show-comments');
+        if (!wrap) {
+            return;
+        }
+        const cid = e.comment?.id;
+        if (cid != null && wrap.querySelector(`[data-comment-id="${cid}"]`)) {
+            return;
+        }
+        syncCommentsCount(root, e.post_id, e.comments_count);
+        const heading = document.getElementById('post-show-heading-count');
+        if (heading) {
+            heading.textContent = `(${e.comments_count})`;
+        }
+        if (e.comment?.parent_id) {
+            await reloadCommentsTreeRemote();
+
+            return;
+        }
+        const treeRoot = wrap.querySelector('.space-y-3');
+        const html = renderCommentNodeHtml(e.comment, config.isAuthenticated === true);
+        if (treeRoot) {
+            treeRoot.insertAdjacentHTML('beforeend', html);
+        } else {
+            wrap.innerHTML = renderCommentsTreeHtml([e.comment], {
+                showReplyButtons: config.isAuthenticated === true,
+            });
+        }
+    });
+
+    window.addEventListener(
+        'beforeunload',
+        () => {
+            Echo.leave(`post.${config.postId}`);
+        },
+        { once: true },
+    );
 }

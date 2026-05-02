@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Support\NotificationApiPayload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -38,7 +39,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'notifications' => $notifications,
-            'unread_count' => $request->user()->unreadNotifications()->count(),
+            'unread_count' => (int) $request->user()->unread_notifications_count,
         ]);
     }
 
@@ -48,19 +49,29 @@ class NotificationController extends Controller
             abort(404);
         }
 
-        $updated = $request->user()->notifications()->where('id', $id)->update([
+        $user = $request->user();
+
+        $updated = $user->notifications()->where('id', $id)->whereNull('read_at')->update([
             'read_at' => now(),
         ]);
 
+        if ($updated > 0) {
+            User::query()->whereKey($user->id)->where('unread_notifications_count', '>', 0)->decrement('unread_notifications_count');
+        }
+
         return response()->json([
             'ok' => $updated > 0,
-            'unread_count' => $request->user()->unreadNotifications()->count(),
+            'unread_count' => (int) $user->fresh()->unread_notifications_count,
         ]);
     }
 
     public function markAllRead(Request $request): JsonResponse
     {
-        $request->user()->unreadNotifications->markAsRead();
+        $user = $request->user();
+
+        $user->notifications()->whereNull('read_at')->update(['read_at' => now()]);
+
+        User::query()->whereKey($user->id)->update(['unread_notifications_count' => 0]);
 
         return response()->json([
             'ok' => true,

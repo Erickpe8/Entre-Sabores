@@ -67,10 +67,12 @@ class PostController extends Controller
             'ogImage' => $post->image_url ? url($post->image_url) : null,
             'ogUrl' => route('posts.show', $post),
             'postShowConfig' => [
+                'postId' => $post->id,
                 'postBaseUrl' => '/posts',
                 'commentStoreUrl' => route('posts.comments.store', ['post' => $post], false),
                 'loginUrl' => route('login', [], false),
                 'isAuthenticated' => auth()->check(),
+                'authUserId' => auth()->id(),
             ],
         ]);
     }

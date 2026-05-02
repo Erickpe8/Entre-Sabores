@@ -34,7 +34,7 @@ export function renderCommentsTreeHtml(comments, opts) {
  * @param {object} c
  * @param {boolean} showReplyButtons
  */
-function renderCommentNodeHtml(c, showReplyButtons) {
+export function renderCommentNodeHtml(c, showReplyButtons) {
     const { relative, absolute } = commentTimeDetail(c.created_at);
     const replyBtn = showReplyButtons
         ? `<button type="button" class="wall-comment-reply-btn text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:underline" data-comment-id="${c.id}" data-comment-username="${esc(c.user.username)}">Responder</button>`

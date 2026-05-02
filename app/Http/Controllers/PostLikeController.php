@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PostLiked;
 use App\Models\Post;
 use App\Notifications\NewLikeNotification;
 use Illuminate\Http\JsonResponse;
@@ -30,6 +31,8 @@ class PostLikeController extends Controller
         }
 
         $likesCount = $post->likes()->count();
+
+        PostLiked::dispatch($post->id, $likesCount, $user->id);
 
         return response()->json([
             'liked' => $liked,

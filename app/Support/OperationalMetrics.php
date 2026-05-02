@@ -26,6 +26,11 @@ final class OperationalMetrics
         self::incr('http_errors');
     }
 
+    public static function incrementBroadcastsEmitted(): void
+    {
+        self::incr('broadcasts_emitted');
+    }
+
     private static function incr(string $suffix): void
     {
         if (! config('monitoring.metrics_enabled', true)) {
@@ -60,6 +65,7 @@ final class OperationalMetrics
                 'posts_created_last_minute' => null,
                 'http_requests_last_minute' => null,
                 'http_5xx_last_minute' => null,
+                'broadcasts_emitted_last_minute' => null,
             ];
         }
 
@@ -72,6 +78,7 @@ final class OperationalMetrics
                 'posts_created_last_minute' => (int) $connection->get($prefix.'metrics:posts_created:'.$minute),
                 'http_requests_last_minute' => (int) $connection->get($prefix.'metrics:http_requests:'.$minute),
                 'http_5xx_last_minute' => (int) $connection->get($prefix.'metrics:http_errors:'.$minute),
+                'broadcasts_emitted_last_minute' => (int) $connection->get($prefix.'metrics:broadcasts_emitted:'.$minute),
             ];
         } catch (\Throwable) {
             return ['driver' => 'redis', 'error' => 'unavailable'];
