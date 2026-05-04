@@ -14,14 +14,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(CountrySeeder::class);
+        $this->call(TagSeeder::class);
+
         if (! app()->environment('local')) {
-            $this->command?->warn('Seeders deshabilitados fuera de entorno local.');
+            $this->command?->info('Seeders de desarrollo omitidos (no local).');
 
             return;
         }
-
-        $this->call(CountrySeeder::class);
-        $this->call(TagSeeder::class);
 
         if (file_exists(database_path('seeders/DevUserSeeder.php'))) {
             $this->call(DevUserSeeder::class);

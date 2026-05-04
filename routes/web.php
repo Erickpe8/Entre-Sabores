@@ -12,6 +12,7 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsernameAvailabilityController;
 use App\Http\Controllers\WallController;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -66,6 +67,14 @@ Route::post('/posts/{post}/likes/toggle', [PostLikeController::class, 'toggle'])
     ->middleware(['auth', 'throttle:like-toggle'])
     ->name('posts.likes.toggle');
 
+/*
+| GET /posts/{post}/reanalyze no ejecuta el reanálisis (eso es POST).
+| Sin esta ruta, abrir el URL en el navegador devolvía 405 Method Not Allowed.
+*/
+Route::get('/posts/{post}/reanalyze', function (Post $post) {
+    return redirect()->route('posts.show', $post);
+});
+
 Route::post('/posts/{post}/reanalyze', [PostController::class, 'reanalyze'])
     ->middleware(['auth', 'throttle:maridaje-reanalyze'])
     ->name('posts.reanalyze');
@@ -97,7 +106,8 @@ Route::get('/dashboard', [WallController::class, 'index'])
 
 Route::middleware(['auth', 'throttle:notifications-api'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::match(['patch', 'post'], '/notifications/{id}/read', [NotificationController::class, 'markRead'])
+        ->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read_all');
 });
 

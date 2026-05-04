@@ -11,6 +11,20 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
+/*
+| Cerrar sesión real es solo POST (CSRF). Un GET a /logout (enlace, pestaña nueva, etc.)
+| provocaba 405. Redirigimos a una pantalla segura con aviso.
+*/
+Route::get('logout', function () {
+    if (auth()->check()) {
+        return redirect()
+            ->route('dashboard')
+            ->with('status', 'Para cerrar sesión, abre el menú de tu cuenta y elige «Cerrar sesión».');
+    }
+
+    return redirect()->route('welcome');
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');

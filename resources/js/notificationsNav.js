@@ -167,7 +167,7 @@ export function initNotificationsNav() {
             return;
         }
         const id = row.dataset.notificationId;
-        axios.patch(`/notifications/${id}/read`).then(() => refreshUnreadOnly()).catch(() => {});
+        axios.post(`/notifications/${id}/read`).then(() => refreshUnreadOnly()).catch(() => {});
     });
 
     const panel = document.getElementById('nav-notifications-panel');

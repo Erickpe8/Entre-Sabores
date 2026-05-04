@@ -53,10 +53,8 @@ if [ -f artisan ]; then
     echo "[start] Ejecutando migraciones..."
     php artisan migrate --force
 
-    if [ "${APP_ENV}" = "local" ]; then
-      echo "[start] APP_ENV=local, ejecutando seeders..."
-      php artisan db:seed --force || true
-    fi
+    echo "[start] Ejecutando seeders (catálogo: países y tags; usuarios existentes no se borran)..."
+    php artisan db:seed --force
   fi
 
   php artisan storage:link --force >/dev/null 2>&1 || true

@@ -20,6 +20,14 @@ class PostReanalyzeTest extends TestCase
         $this->seed(TagSeeder::class);
     }
 
+    public function test_get_reanalyze_redirects_to_post_show(): void
+    {
+        $post = Post::factory()->create();
+
+        $this->get(route('posts.reanalyze', $post))
+            ->assertRedirect(route('posts.show', $post));
+    }
+
     public function test_guest_cannot_reanalyze(): void
     {
         $post = Post::factory()->create();
