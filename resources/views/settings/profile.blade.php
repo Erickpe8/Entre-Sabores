@@ -98,8 +98,19 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     @foreach (\App\Models\User::PREFERENCE_OPTIONS as $pref)
-                        <label class="flex items-center gap-2 cursor-pointer bg-white/5 px-3 py-2 rounded-xl hover:bg-white/10 transition border border-white/10 text-left">
-                            <input type="checkbox" name="preferences[]" value="{{ $pref }}" @checked(in_array($pref, old('preferences', $user->preferences ?? []), true)) class="accent-green-400 shrink-0 rounded border-gray-600">
+                        <label class="flex items-center gap-2.5 cursor-pointer bg-white/5 px-3 py-2 rounded-xl hover:bg-white/10 transition border border-white/10 text-left">
+                            <input
+                                type="checkbox"
+                                name="preferences[]"
+                                value="{{ $pref }}"
+                                @checked(in_array($pref, old('preferences', $user->preferences ?? []), true))
+                                class="peer sr-only"
+                            >
+                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-white/35 bg-slate-900/90 transition peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-400/70 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-slate-950 peer-checked:border-emerald-400 peer-checked:bg-emerald-500 peer-checked:[&>svg]:opacity-100">
+                                <svg class="h-3.5 w-3.5 text-white opacity-0 transition-opacity" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                                    <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
                             <span class="text-sm text-gray-200">{{ $pref }}</span>
                         </label>
                     @endforeach
