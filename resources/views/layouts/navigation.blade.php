@@ -106,14 +106,17 @@
                                 class="{{ $navDark ? 'text-slate-200 hover:bg-slate-800 focus:bg-slate-800' : '' }}"
                             >Configuración</x-dropdown-link>
 
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link href="#"
-                                        class="{{ $navDark ? 'text-slate-200 hover:bg-slate-800 focus:bg-slate-800' : '' }}"
-                                        onclick="event.preventDefault(); this.closest('form').submit();">
-                                    Cerrar sesión
-                                </x-dropdown-link>
-                            </form>
+                            <div class="{{ $navDark ? 'border-t border-white/10 mt-1 pt-1' : 'border-t border-stone-100 mt-1 pt-1' }}">
+                                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                                    @csrf
+                                    <button
+                                        type="submit"
+                                        class="block w-full px-4 py-2 text-start text-sm leading-5 transition duration-150 ease-in-out rounded-md {{ $navDark ? 'text-rose-300 hover:bg-slate-800 hover:text-rose-200 focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-500/40' : 'text-rose-600 hover:bg-rose-50 focus:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-500/30' }}"
+                                    >
+                                        Cerrar sesión
+                                    </button>
+                                </form>
+                            </div>
                         </x-slot>
                     </x-dropdown>
                 @else
@@ -196,18 +199,27 @@
                     </div>
                 </div>
                 <div class="px-4 pb-4 space-y-1">
-                    <x-responsive-nav-link :href="route('dashboard')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Ir al muro</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('profile.show', Auth::user()->username)" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Mi perfil</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('settings.profile')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Configuración</x-responsive-nav-link>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <x-responsive-nav-link href="#" onclick="event.preventDefault(); this.closest('form').submit();">Cerrar sesión</x-responsive-nav-link>
-                    </form>
+                    <x-responsive-nav-link :dark="$navDark" :href="route('dashboard')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Ir al muro</x-responsive-nav-link>
+                    <x-responsive-nav-link :dark="$navDark" :href="route('profile.show', Auth::user()->username)" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Mi perfil</x-responsive-nav-link>
+                    <x-responsive-nav-link :dark="$navDark" :href="route('settings.profile')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Configuración</x-responsive-nav-link>
+
+                    <div class="{{ $navDark ? 'border-t border-white/10 mt-3 pt-3' : 'border-t border-stone-100 mt-3 pt-3' }}">
+                        <form method="POST" action="{{ route('logout') }}" class="w-full">
+                            @csrf
+                            <button
+                                type="submit"
+                                onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'));"
+                                class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium transition duration-150 ease-in-out rounded-md {{ $navDark ? 'text-rose-300 hover:text-rose-200 hover:bg-white/5 hover:border-rose-400/40 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-500/40' : 'text-rose-600 hover:text-rose-700 hover:bg-rose-50 hover:border-rose-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-500/30' }}"
+                            >
+                                Cerrar sesión
+                            </button>
+                        </form>
+                    </div>
                 </div>
             @else
                 <div class="border-t {{ $navDark ? 'border-white/10' : 'border-stone-100' }} px-4 py-4 space-y-2">
-                    <x-responsive-nav-link :href="route('login')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Iniciar sesión</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('register')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Crear cuenta</x-responsive-nav-link>
+                    <x-responsive-nav-link :dark="$navDark" :href="route('login')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Iniciar sesión</x-responsive-nav-link>
+                    <x-responsive-nav-link :dark="$navDark" :href="route('register')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Crear cuenta</x-responsive-nav-link>
                 </div>
             @endauth
         </div>
