@@ -170,14 +170,68 @@ export function initNotificationsNav() {
         axios.patch(`/notifications/${id}/read`).then(() => refreshUnreadOnly()).catch(() => {});
     });
 
-    btn.addEventListener('click', () => {
-        window.requestAnimationFrame(() => {
-            if (btn.getAttribute('aria-expanded') === 'true') {
-                if (!loadedOnce || listEl.innerHTML.trim() === '') {
-                    void loadNotifications();
-                }
+    const panel = document.getElementById('nav-notifications-panel');
+    let dropdownOpen = false;
+
+    function setNotificationsDropdown(open) {
+        dropdownOpen = open;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (panel) {
+            panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+        }
+        if (!panel) {
+            return;
+        }
+        if (open) {
+            panel.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                panel.classList.remove('opacity-0', 'scale-95', 'translate-y-1');
+                panel.classList.add('opacity-100', 'scale-100', 'translate-y-0');
+            });
+            if (!loadedOnce || listEl.innerHTML.trim() === '') {
+                void loadNotifications();
             }
-        });
+
+            return;
+        }
+
+        panel.classList.remove('opacity-100', 'scale-100', 'translate-y-0');
+        panel.classList.add('opacity-0', 'scale-95', 'translate-y-1');
+        window.setTimeout(() => {
+            if (!dropdownOpen) {
+                panel.classList.add('hidden');
+            }
+        }, 100);
+    }
+
+    if (panel) {
+        panel.setAttribute('aria-hidden', 'true');
+    }
+
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setNotificationsDropdown(!dropdownOpen);
+    });
+
+    panel?.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    document.addEventListener(
+        'click',
+        (e) => {
+            if (!dropdownOpen || root.contains(e.target)) {
+                return;
+            }
+            setNotificationsDropdown(false);
+        },
+        true,
+    );
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && dropdownOpen) {
+            setNotificationsDropdown(false);
+        }
     });
 
     markAllBtn?.addEventListener('click', async (e) => {
@@ -194,7 +248,7 @@ export function initNotificationsNav() {
 
     window.addEventListener('entre-sabores:notifications-refresh', () => {
         void refreshUnreadOnly();
-        if (btn.getAttribute('aria-expanded') === 'true') {
+        if (dropdownOpen) {
             loadedOnce = false;
             void loadNotifications();
         }

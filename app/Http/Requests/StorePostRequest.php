@@ -18,7 +18,7 @@ class StorePostRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:150'],
-            'description' => ['required', 'string'],
+            'description' => ['required', 'string', 'max:12000'],
             'tags' => ['required', 'array', 'min:1'],
             'tags.*' => ['required', 'integer', 'exists:tags,id'],
             'image' => ['nullable', 'image', 'max:5120'],

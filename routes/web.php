@@ -66,6 +66,10 @@ Route::post('/posts/{post}/likes/toggle', [PostLikeController::class, 'toggle'])
     ->middleware(['auth', 'throttle:like-toggle'])
     ->name('posts.likes.toggle');
 
+Route::post('/posts/{post}/reanalyze', [PostController::class, 'reanalyze'])
+    ->middleware(['auth', 'throttle:maridaje-reanalyze'])
+    ->name('posts.reanalyze');
+
 Route::post('/posts', [PostController::class, 'store'])
     ->middleware(['auth', 'throttle:create-post'])
     ->name('posts.store');

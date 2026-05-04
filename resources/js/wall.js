@@ -10,6 +10,7 @@ import {
     relativeTimeEs,
 } from './social/postCard.js';
 import { renderCommentsTreeHtml, setupCommentInteractions } from './social/commentThread.js';
+import { bindMaridajeFlip, buildWallModalFlipHtml } from './social/maridajeFlip.js';
 
 const CLS = {
     secondary:
@@ -148,6 +149,8 @@ export function initWall() {
     let createImageObjectUrl = null;
     let syncCardFrame = null;
     let modalCommentAbort = null;
+    /** @type {(() => void) | null} */
+    let modalFlipCleanup = null;
 
     function revokeCreateImageUrl() {
         if (createImageObjectUrl) {
@@ -926,6 +929,9 @@ export function initWall() {
             return;
         }
 
+        modalFlipCleanup?.();
+        modalFlipCleanup = null;
+
         modalBody.innerHTML =
             '<div class="flex justify-center py-12 text-slate-400">Cargando…</div>';
         modal.classList.remove('hidden');
@@ -989,6 +995,11 @@ export function initWall() {
 
             const modalLiked = p.liked === true;
             const modalLikesCount = p.likes_count ?? 0;
+            const canReanalyzeMaridaje =
+                config.isAuthenticated === true &&
+                config.authUserId != null &&
+                Number(config.authUserId) === Number(p.user?.id);
+
             const likeToolbar = `
                 <div class="flex flex-wrap items-center gap-6 border-y border-slate-700 py-3">
                     <button type="button" class="wall-like-btn inline-flex items-center gap-2 rounded-full px-2 py-1.5 text-sm font-medium transition hover:bg-slate-800/90 ${modalLiked ? 'text-rose-500' : 'text-slate-400'}" data-like-post-id="${p.id}" data-liked="${modalLiked ? '1' : '0'}" aria-pressed="${modalLiked ? 'true' : 'false'}" aria-label="Me gusta">
@@ -1004,14 +1015,17 @@ export function initWall() {
 
             modalBody.innerHTML = `
                 <div class="space-y-4" data-modal-post-id="${p.id}">
-                    ${heroImg}
-                    ${userHeaderModal}
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-50">${esc(p.title)}</h2>
-                        <div class="mt-2 flex flex-wrap gap-2">${tagsLine}</div>
-                    </div>
-                    <div class="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">${formatStory(p.description)}</div>
-                    ${likeToolbar}
+                    ${buildWallModalFlipHtml({
+                        postId: Number(p.id),
+                        heroImg,
+                        userHeaderModal,
+                        tagsLine,
+                        titleHtml: esc(p.title),
+                        descriptionStoryHtml: formatStory(p.description),
+                        likeToolbar,
+                        aiAnalysis: p.ai_analysis ?? null,
+                        canReanalyze: canReanalyzeMaridaje,
+                    })}
                     <div>
                         <h3 class="font-semibold text-slate-200 mb-2">Comentarios</h3>
                         <div id="wall-modal-comments" class="wall-modal-comments-scroll max-h-[min(420px,55vh)] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-700/60 bg-slate-950/50 p-3 shadow-inner">${commentsHtml}</div>
@@ -1019,6 +1033,20 @@ export function initWall() {
                     </div>
                 </div>
             `;
+
+            modalFlipCleanup?.();
+            modalFlipCleanup = null;
+            const flipRoot = modalBody.querySelector('[data-maridaje-flip-root]');
+            if (flipRoot) {
+                modalFlipCleanup = bindMaridajeFlip(flipRoot, {
+                    postId: Number(p.id),
+                    axios,
+                    reanalyzeUrl: `${String(config.postBaseUrl).replace(/\/$/, '')}/${p.id}/reanalyze`,
+                    canReanalyze: canReanalyzeMaridaje,
+                    initialAnalysis: p.ai_analysis ?? null,
+                    onNotify: (msg, variant) => showToast(msg, variant ?? 'info'),
+                });
+            }
 
             modalCommentAbort?.abort();
             modalCommentAbort = new AbortController();
@@ -1044,6 +1072,8 @@ export function initWall() {
     }
 
     function closeModal() {
+        modalFlipCleanup?.();
+        modalFlipCleanup = null;
         modalCommentAbort?.abort();
         modalCommentAbort = null;
         modal?.classList.add('hidden');

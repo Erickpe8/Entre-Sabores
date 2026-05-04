@@ -33,6 +33,8 @@ class PostResource extends JsonResource
             ? $tags->firstWhere('type', Tag::TYPE_COUNTRY)
             : null;
 
+        $analysis = is_array($this->ai_analysis) ? $this->ai_analysis : null;
+
         $base = [
             'id' => $this->id,
             'title' => $this->title,
@@ -44,6 +46,8 @@ class PostResource extends JsonResource
             'engagement_score' => ((int) ($this->likes_count ?? 0)) * 2 + ((int) ($this->comments_count ?? 0)) * 3,
             'liked' => auth()->check() && (bool) data_get($this->resource, 'liked_by_me', false),
             'created_at' => $this->created_at?->toIso8601String(),
+            'ai_analysis' => $this->ai_analysis,
+            'maridaje_highlighted' => self::isMaridajeHighlighted($analysis),
             'tags' => $tags instanceof Collection
                 ? $tags->map(fn ($t) => [
                     'id' => $t->id,
@@ -74,6 +78,20 @@ class PostResource extends JsonResource
         }
 
         return $base;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $analysis
+     */
+    private static function isMaridajeHighlighted(?array $analysis): bool
+    {
+        if ($analysis === null) {
+            return false;
+        }
+
+        $score = (int) ($analysis['score'] ?? 0);
+
+        return $score >= 8;
     }
 
     /**

@@ -22,7 +22,15 @@ class Post extends Model
         'title',
         'description',
         'image_path',
+        'ai_analysis',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'ai_analysis' => 'array',
+        ];
+    }
 
     protected function imageUrl(): Attribute
     {

@@ -3,6 +3,21 @@ import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 
+/**
+ * @param {string[]} envKeys
+ * @returns {string}
+ */
+function firstEnvString(...envKeys) {
+    for (const name of envKeys) {
+        const v = import.meta.env[name];
+        if (typeof v === 'string' && v.length > 0) {
+            return v;
+        }
+    }
+
+    return '';
+}
+
 /** @type {import('laravel-echo').default | null} */
 let echoInstance = null;
 
@@ -15,8 +30,8 @@ let axiosInterceptorInstalled = false;
  * @returns {import('laravel-echo').default | null}
  */
 export function ensureEcho() {
-    const key = import.meta.env.VITE_PUSHER_APP_KEY;
-    if (typeof key !== 'string' || key.length === 0) {
+    const key = firstEnvString('VITE_REVERB_APP_KEY', 'VITE_PUSHER_APP_KEY');
+    if (!key) {
         return null;
     }
 
@@ -24,11 +39,17 @@ export function ensureEcho() {
         return echoInstance;
     }
 
-    const scheme = import.meta.env.VITE_PUSHER_SCHEME ?? 'https';
+    const scheme =
+        firstEnvString('VITE_REVERB_SCHEME', 'VITE_PUSHER_SCHEME') || 'https';
     const forceTLS = scheme === 'https';
-    const cluster = import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1';
-    const wsHost = import.meta.env.VITE_PUSHER_HOST;
-    const wsPort = Number(import.meta.env.VITE_PUSHER_PORT ?? 6001);
+    const cluster =
+        firstEnvString(
+            'VITE_REVERB_APP_CLUSTER',
+            'VITE_PUSHER_APP_CLUSTER',
+        ) || 'mt1';
+    const wsHost = firstEnvString('VITE_REVERB_HOST', 'VITE_PUSHER_HOST');
+    const portRaw = firstEnvString('VITE_REVERB_PORT', 'VITE_PUSHER_PORT');
+    const wsPort = portRaw ? Number(portRaw) : 6001;
 
     const echoOptions = {
         broadcaster: 'pusher',

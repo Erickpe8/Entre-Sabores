@@ -39,6 +39,7 @@ class WallController extends Controller
                 'postBaseUrl' => '/posts',
                 'loginUrl' => route('login', [], false),
                 'isAuthenticated' => auth()->check(),
+                'authUserId' => auth()->id(),
                 'initialFollowing' => request()->boolean('following'),
                 'tagsByType' => $tagsByType,
             ],
