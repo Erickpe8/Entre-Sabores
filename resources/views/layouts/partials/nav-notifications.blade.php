@@ -62,8 +62,8 @@
 </div>
 
 <textarea id="nav-notifications-config" class="sr-only" readonly tabindex="-1" aria-hidden="true">{!! json_encode([
-    'notificationsUrl' => route('notifications.index'),
-    'readAllUrl' => route('notifications.read_all'),
+    'notificationsUrl' => route('notifications.index', absolute: false),
+    'readAllUrl' => route('notifications.read_all', absolute: false),
     'initialUnread' => $navUnreadCount,
     'authUserId' => auth()->id(),
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</textarea>

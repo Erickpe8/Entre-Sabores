@@ -32,7 +32,7 @@
                             </p>
 
                             <a
-                                href="{{ route('user.profile', $user->username) }}"
+                                href="{{ route('profile.show', $user->username) }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="inline-flex items-center gap-1.5 text-xs text-green-400 hover:text-green-300 hover:underline"

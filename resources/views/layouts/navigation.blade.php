@@ -108,7 +108,7 @@
 
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <x-dropdown-link :href="route('logout')"
+                                <x-dropdown-link href="#"
                                         class="{{ $navDark ? 'text-slate-200 hover:bg-slate-800 focus:bg-slate-800' : '' }}"
                                         onclick="event.preventDefault(); this.closest('form').submit();">
                                     Cerrar sesión
@@ -201,7 +201,7 @@
                     <x-responsive-nav-link :href="route('settings.profile')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Configuración</x-responsive-nav-link>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Cerrar sesión</x-responsive-nav-link>
+                        <x-responsive-nav-link href="#" onclick="event.preventDefault(); this.closest('form').submit();">Cerrar sesión</x-responsive-nav-link>
                     </form>
                 </div>
             @else
