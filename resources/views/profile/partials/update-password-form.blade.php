@@ -41,11 +41,9 @@
 
             @if (session('status') === 'password-updated')
                 <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-green-400"
+                    data-flash-auto-hide="2000"
+                    class="text-sm text-green-400 transition-opacity duration-300"
+                    role="status"
                 >{{ __('Guardado.') }}</p>
             @endif
         </div>

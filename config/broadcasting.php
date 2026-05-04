@@ -7,7 +7,7 @@ return [
     | Default Broadcaster
     |--------------------------------------------------------------------------
     |
-    | Usa "null" hasta configurar Echo/Soketi/Pusher. Ver PRODUCTION.md y .env.example.
+    | Reverb (por defecto en .env.example), Pusher, Ably o "null". Ver .env.example y `php artisan reverb:start`.
     |
     */
 

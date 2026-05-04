@@ -1,13 +1,18 @@
 import './bootstrap';
-import 'flowbite';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 
-import Alpine from 'alpinejs';
+import { initMobileNav } from './ui/mobileNav.js';
+import { initDropdowns } from './ui/dropdowns.js';
+import { initModals } from './ui/modals.js';
+import { initFlashAutoHide } from './ui/flashMessages.js';
 
 window.Cropper = Cropper;
-window.Alpine = Alpine;
-Alpine.start();
+
+initMobileNav();
+initDropdowns();
+initModals();
+initFlashAutoHide();
 
 if (document.getElementById('posts-container')) {
     import('./wall.js').then((m) => m.initWall());

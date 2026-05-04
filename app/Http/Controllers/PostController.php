@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
 use App\Http\Resources\PostResource;
+use App\Jobs\GeneratePostAnalysisJob;
 use App\Models\Post;
 use App\Support\OperationalLogger;
 use App\Support\OperationalMetrics;
@@ -35,6 +36,8 @@ class PostController extends Controller
 
         OperationalLogger::postCreated($post, $request, count($tagIds));
         OperationalMetrics::incrementPostsCreated();
+
+        GeneratePostAnalysisJob::dispatch($post->id)->afterCommit();
 
         $post->load([
             'user:id,first_name,last_name,username,profile_photo',
@@ -74,6 +77,23 @@ class PostController extends Controller
                 'isAuthenticated' => auth()->check(),
                 'authUserId' => auth()->id(),
             ],
+        ]);
+    }
+
+    /**
+     * Regenera el análisis IA (solo autor del post).
+     */
+    public function reanalyze(Request $request, Post $post): JsonResponse
+    {
+        $this->authorize('update', $post);
+
+        $post->forceFill(['ai_analysis' => null])->save();
+
+        GeneratePostAnalysisJob::dispatch($post->id)->afterCommit();
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Análisis en cola.',
         ]);
     }
 

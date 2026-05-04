@@ -7,9 +7,7 @@
     : 'inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium text-stone-500 transition hover:bg-stone-50 hover:text-stone-800')
 
 <nav
-    x-data="{ open: false }"
-    x-effect="document.body.classList.toggle('overflow-hidden', open)"
-    @close-mobile-menu.window="open = false"
+    data-mobile-nav
     class="{{ $navDark ? 'bg-[#0b1120]/95 border-b border-white/10 backdrop-blur-md' : 'bg-white border-b border-stone-100' }} safe-top safe-left safe-right fixed top-0 inset-x-0 z-50"
 >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center gap-2">
@@ -80,7 +78,7 @@
                         :contentClasses="$navDark ? 'py-1 bg-slate-900 border border-slate-700' : 'py-1 bg-white'"
                     >
                         <x-slot name="trigger">
-                            <button type="button" class="inline-flex items-center gap-2 rounded-full px-1.5 py-1 border transition {{ $navDark ? 'bg-white/5 border-white/15 hover:bg-white/10 focus:ring-white/40 focus:ring-offset-slate-900' : 'bg-white border-stone-200 hover:bg-stone-50 focus:ring-amber-500 focus:ring-offset-white' }} focus:outline-none focus:ring-2 focus:ring-offset-2" aria-label="Menú de cuenta">
+                            <button type="button" class="inline-flex items-center gap-2 rounded-full px-1.5 py-1 border transition {{ $navDark ? 'bg-white/5 border-white/15 hover:bg-white/10 focus:ring-white/40 focus:ring-offset-slate-900' : 'bg-white border-stone-200 hover:bg-stone-50 focus:ring-amber-500 focus:ring-offset-white' }} focus:outline-none focus:ring-2 focus:ring-offset-2" aria-label="Menú de cuenta" aria-expanded="false" aria-haspopup="menu">
                                 <img
                                     src="{{ Auth::user()->profile_photo_url }}"
                                     alt=""
@@ -127,94 +125,91 @@
             </div>
 
             <div class="-me-2 flex items-center md:hidden">
-                <button type="button" @click="open = ! open" :aria-expanded="open.toString()" class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-lg transition duration-150 ease-in-out {{ $navDark ? 'text-slate-200 hover:text-white hover:bg-white/10 active:scale-95' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-100 active:scale-95' }}" aria-label="Menú">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <button
+                    type="button"
+                    id="mobile-nav-toggle"
+                    class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-lg transition duration-150 ease-in-out {{ $navDark ? 'text-slate-200 hover:text-white hover:bg-white/10 active:scale-95' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-100 active:scale-95' }}"
+                    aria-label="Menú"
+                    aria-expanded="false"
+                    aria-controls="mobile-nav-layer"
+                >
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <path id="mobile-nav-icon-menu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path id="mobile-nav-icon-x" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
         </div>
     </div>
 
-    {{-- Menú móvil fullscreen (renderizado a nivel raíz visual) --}}
-    <template x-teleport="body">
+    {{-- Menú móvil fullscreen --}}
+    <div
+        id="mobile-nav-layer"
+        class="fixed inset-0 z-[9999] hidden md:hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-hidden="true"
+        aria-labelledby="mobile-nav-title"
+    >
         <div
-            x-cloak
-            x-show="open"
-            @keydown.escape.window="open = false"
-            class="fixed inset-0 z-[9999] md:hidden"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Menú de navegación"
+            id="mobile-nav-backdrop"
+            class="absolute inset-0 bg-black/90 backdrop-blur-md opacity-0 transition-opacity duration-300"
+            aria-hidden="true"
+        ></div>
+
+        <div
+            id="mobile-nav-drawer"
+            class="relative h-full w-full translate-x-full overflow-y-auto {{ $navDark ? 'bg-[#0b1120]' : 'bg-white' }} transition-transform duration-300 ease-out"
+            style="padding-top: max(env(safe-area-inset-top), 0px); padding-bottom: max(env(safe-area-inset-bottom), 0px);"
         >
-            <div
-                class="absolute inset-0 bg-black/90 backdrop-blur-md transition-opacity duration-300"
-                x-show="open"
-                x-transition.opacity
-                @click="open = false"
-            ></div>
-
-            <div
-                class="relative h-full w-full overflow-y-auto {{ $navDark ? 'bg-[#0b1120]' : 'bg-white' }} transition-transform duration-300 ease-out"
-                x-show="open"
-                x-transition:enter="transform transition duration-300 ease-out"
-                x-transition:enter-start="translate-x-full"
-                x-transition:enter-end="translate-x-0"
-                x-transition:leave="transform transition duration-250 ease-in"
-                x-transition:leave-start="translate-x-0"
-                x-transition:leave-end="translate-x-full"
-                style="padding-top: max(env(safe-area-inset-top), 0px); padding-bottom: max(env(safe-area-inset-bottom), 0px);"
-            >
-                <div class="flex items-center justify-between px-4 py-3 border-b {{ $navDark ? 'border-white/10' : 'border-stone-100' }}">
-                    <span class="text-base font-semibold {{ $navDark ? 'text-slate-200' : 'text-stone-700' }}">Menú</span>
-                    <button
-                        type="button"
-                        @click="open = false"
-                        class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg {{ $navDark ? 'text-slate-200 hover:bg-white/10' : 'text-stone-500 hover:bg-stone-100' }}"
-                        aria-label="Cerrar menú"
-                    >
-                        <svg class="h-5 w-5" stroke="currentColor" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                @if (! $isProfileArea)
-                <div class="space-y-1 px-4 py-4 border-b {{ $navDark ? 'border-white/10' : 'border-stone-100' }}">
-                    <x-responsive-nav-link :dark="$navDark" :href="route('dashboard')" :active="$isWall && ! $feedFollowing" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">
-                        FYP
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :dark="$navDark" :href="route('dashboard', ['following' => 1])" :active="$isWall && $feedFollowing" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">
-                        Siguiendo
-                    </x-responsive-nav-link>
-                </div>
-                @endif
-
-                @auth
-                    <div class="border-t {{ $navDark ? 'border-white/10' : 'border-stone-100' }} px-4 py-4 flex items-center gap-3">
-                        <img src="{{ Auth::user()->profile_photo_url }}" alt="" class="h-10 w-10 rounded-full object-cover border {{ $navDark ? 'border-white/20' : 'border-stone-200' }}" />
-                        <div class="min-w-0 flex-1">
-                            <div class="font-medium truncate {{ $navDark ? 'text-white' : 'text-stone-900' }}">{{ trim(Auth::user()->first_name.' '.Auth::user()->last_name) }}</div>
-                            <div class="text-sm truncate {{ $navDark ? 'text-slate-400' : 'text-stone-500' }}">{{ Auth::user()->email }}</div>
-                        </div>
-                    </div>
-                    <div class="px-4 pb-4 space-y-1">
-                        <x-responsive-nav-link :href="route('dashboard')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Ir al muro</x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('profile.show', Auth::user()->username)" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Mi perfil</x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('settings.profile')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Configuración</x-responsive-nav-link>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Cerrar sesión</x-responsive-nav-link>
-                        </form>
-                    </div>
-                @else
-                    <div class="border-t {{ $navDark ? 'border-white/10' : 'border-stone-100' }} px-4 py-4 space-y-2">
-                        <x-responsive-nav-link :href="route('login')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Iniciar sesión</x-responsive-nav-link>
-                        <x-responsive-nav-link :href="route('register')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Crear cuenta</x-responsive-nav-link>
-                    </div>
-                @endauth
+            <div class="flex items-center justify-between px-4 py-3 border-b {{ $navDark ? 'border-white/10' : 'border-stone-100' }}">
+                <span id="mobile-nav-title" class="text-base font-semibold {{ $navDark ? 'text-slate-200' : 'text-stone-700' }}">Menú</span>
+                <button
+                    type="button"
+                    id="mobile-nav-close"
+                    class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg {{ $navDark ? 'text-slate-200 hover:bg-white/10' : 'text-stone-500 hover:bg-stone-100' }}"
+                    aria-label="Cerrar menú"
+                >
+                    <svg class="h-5 w-5" stroke="currentColor" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
+
+            @if (! $isProfileArea)
+            <div class="space-y-1 px-4 py-4 border-b {{ $navDark ? 'border-white/10' : 'border-stone-100' }}">
+                <x-responsive-nav-link :dark="$navDark" :href="route('dashboard')" :active="$isWall && ! $feedFollowing" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">
+                    FYP
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :dark="$navDark" :href="route('dashboard', ['following' => 1])" :active="$isWall && $feedFollowing" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">
+                    Siguiendo
+                </x-responsive-nav-link>
+            </div>
+            @endif
+
+            @auth
+                <div class="border-t {{ $navDark ? 'border-white/10' : 'border-stone-100' }} px-4 py-4 flex items-center gap-3">
+                    <img src="{{ Auth::user()->profile_photo_url }}" alt="" class="h-10 w-10 rounded-full object-cover border {{ $navDark ? 'border-white/20' : 'border-stone-200' }}" />
+                    <div class="min-w-0 flex-1">
+                        <div class="font-medium truncate {{ $navDark ? 'text-white' : 'text-stone-900' }}">{{ trim(Auth::user()->first_name.' '.Auth::user()->last_name) }}</div>
+                        <div class="text-sm truncate {{ $navDark ? 'text-slate-400' : 'text-stone-500' }}">{{ Auth::user()->email }}</div>
+                    </div>
+                </div>
+                <div class="px-4 pb-4 space-y-1">
+                    <x-responsive-nav-link :href="route('dashboard')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Ir al muro</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('profile.show', Auth::user()->username)" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Mi perfil</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('settings.profile')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Configuración</x-responsive-nav-link>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Cerrar sesión</x-responsive-nav-link>
+                    </form>
+                </div>
+            @else
+                <div class="border-t {{ $navDark ? 'border-white/10' : 'border-stone-100' }} px-4 py-4 space-y-2">
+                    <x-responsive-nav-link :href="route('login')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Iniciar sesión</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('register')" onclick="window.dispatchEvent(new CustomEvent('close-mobile-menu'))">Crear cuenta</x-responsive-nav-link>
+                </div>
+            @endauth
         </div>
-    </template>
+    </div>
 </nav>

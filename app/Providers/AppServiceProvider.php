@@ -11,11 +11,11 @@ use App\Listeners\Broadcasting\SendPostLikedBroadcast;
 use App\Observers\DatabaseNotificationObserver;
 use App\Support\OperationalLogger;
 use Illuminate\Auth\Events\Failed;
-use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -63,6 +63,10 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('follow-toggle', function (Request $request): Limit {
             return Limit::perMinute(30)->by((string) $request->user()->getAuthIdentifier());
+        });
+
+        RateLimiter::for('maridaje-reanalyze', function (Request $request): Limit {
+            return Limit::perMinute(8)->by((string) $request->user()->getAuthIdentifier());
         });
 
         Event::listen(Login::class, function (Login $event): void {

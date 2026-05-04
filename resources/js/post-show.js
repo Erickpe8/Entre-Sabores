@@ -1,5 +1,6 @@
 import { ensureEcho } from './echo.js';
 import { renderCard, heartSvgHtml, flashLikeAnimation } from './social/postCard.js';
+import { mountPostShowMaridajeFlip } from './social/maridajeFlip.js';
 import {
     renderCommentsTreeHtml,
     setupCommentInteractions,
@@ -7,6 +8,9 @@ import {
 } from './social/commentThread.js';
 
 let postShowPageInitialized = false;
+
+/** @type {(() => void) | null} */
+let postShowFlipCleanup = null;
 
 function showToast(el, message) {
     if (!el) {
@@ -47,11 +51,20 @@ export function initPostShow() {
 
     const config = JSON.parse(cfgEl.textContent);
     const post = JSON.parse(postEl.textContent);
+    const toastEl = document.getElementById('post-show-toast');
 
     const mount = document.getElementById('post-show-card-mount');
     if (mount) {
         mount.innerHTML = '';
-        mount.appendChild(renderCard(post));
+        postShowFlipCleanup?.();
+        postShowFlipCleanup = null;
+        const article = renderCard(post);
+        postShowFlipCleanup = mountPostShowMaridajeFlip(mount, post, article, {
+            axios,
+            postBaseUrl: config.postBaseUrl,
+            authUserId: config.authUserId ?? null,
+            onNotify: (msg) => showToast(toastEl, msg),
+        });
     }
 
     const commentsWrap = document.getElementById('post-show-comments');
@@ -62,8 +75,6 @@ export function initPostShow() {
             showReplyButtons: config.isAuthenticated === true,
         });
     }
-
-    const toastEl = document.getElementById('post-show-toast');
 
     async function toggleLike(postId) {
         if (!config.isAuthenticated) {

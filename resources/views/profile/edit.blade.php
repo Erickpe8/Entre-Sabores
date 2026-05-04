@@ -357,11 +357,9 @@
 
                     @if (session('success') || session('status') === 'profile-updated')
                         <p
-                            x-data="{ show: true }"
-                            x-show="show"
-                            x-transition
-                            x-init="setTimeout(() => show = false, 2500)"
-                            class="text-sm text-center text-green-400"
+                            data-flash-auto-hide="2500"
+                            class="text-sm text-center text-green-400 transition-opacity duration-300"
+                            role="status"
                         >{{ session('success') ?? __('Guardado.') }}</p>
                     @endif
                 </form>

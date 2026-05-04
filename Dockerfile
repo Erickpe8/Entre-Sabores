@@ -70,7 +70,7 @@ ENV SESSION_DRIVER=file \
     CACHE_STORE=file \
     QUEUE_CONNECTION=sync
 
-EXPOSE 80
+EXPOSE 80 9090
 
 ENTRYPOINT ["/usr/local/bin/docker-app-entrypoint.sh"]
 CMD ["/start.sh"]
