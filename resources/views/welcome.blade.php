@@ -5,13 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Entre Sabores</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
     <style>
         .hero-title {
-            font-family: 'Permanent Marker', cursive;
-            letter-spacing: 0.5px;
+            font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            letter-spacing: 0.02em;
             line-height: 1.05;
         }
 
@@ -38,7 +35,7 @@
     </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-[100dvh] bg-slate-950 font-['Inter'] text-white antialiased">
+<body class="min-h-[100dvh] bg-slate-950 font-sans text-white antialiased">
     <section class="relative flex min-h-[100dvh] flex-col overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/95">
 
         <header class="relative z-20">

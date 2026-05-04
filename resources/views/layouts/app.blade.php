@@ -23,13 +23,7 @@
         @endif
         <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-        <!-- Scripts -->
+        <!-- Scripts (Vite; sin CDN externos — compatible CSP script-src 'self') -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     @php($isProfileEdit = request()->routeIs('settings.profile') || request()->routeIs('settings.account') || request()->routeIs('profile.show'))
@@ -52,11 +46,5 @@
             </main>
         </div>
 
-        <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-        <script>
-            if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
-                lucide.createIcons();
-            }
-        </script>
     </body>
 </html>

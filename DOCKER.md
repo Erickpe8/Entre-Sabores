@@ -46,6 +46,7 @@ Docker Compose sustituye estas claves al leer `docker-compose.yml`:
 | phpMyAdmin  | <http://localhost:8081>      |
 | MySQL       | `127.0.0.1:3307` (mapeo por defecto) |
 | Redis       | `127.0.0.1:6380` (mapeo por defecto; en la red interna el puerto del servicio sigue siendo 6379) |
+| **Reverb (WebSockets)** | Puerto host **`${REVERB_PORT_EXPOSED:-9090}`** → proceso Reverb en el contenedor (`REVERB_SERVER_PORT`, típicamente 9090). Nginx dentro del contenedor hace **proxy** de `/app/` y `/apps/` a `127.0.0.1:9090` para clientes que usan la misma origin que HTTP ([docker/nginx/web.conf](docker/nginx/web.conf)). |
 
 ## Requisitos
 
@@ -114,9 +115,22 @@ Docker Compose sustituye estas claves al leer `docker-compose.yml`:
 
 Dentro de la red Docker, Laravel usa `DB_HOST=mysql` (fijado en `docker-compose`).
 
+## Supervisor (un solo contenedor `app`)
+
+[docker/php/supervisord-laravel.conf](docker/php/supervisord-laravel.conf) levanta, entre otros:
+
+| Programa | Rol |
+|----------|-----|
+| `php-fpm` | Procesamiento PHP para Nginx. |
+| `nginx` | HTTP estático y proxy a Reverb en `/app/` y `/apps/`. |
+| `reverb` | `php artisan reverb:start` — servidor WebSocket interno (p. ej. puerto 9090). |
+| `queue-worker` | `php artisan queue:work` (usuario `www-data`) — **necesario** si usas colas reales (`QUEUE_CONNECTION=database` o `redis`) para jobs de IA, correo y `ShouldBroadcast`. |
+
+Para que el análisis de maridaje y los broadcasts no se queden en cola sin consumir, en `.env` del contenedor alinea `QUEUE_CONNECTION` (p. ej. `database` con la tabla `jobs` migrada) y comprueba logs: `docker compose logs -f app`.
+
 ## Escalado futuro (referencia)
 
-- Añade un servicio `queue` con `php artisan queue:work` (misma imagen `app` o `entre-sabores-app`, otro `command`).
+- **Más capacidad de cola:** añade réplicas de `queue:work` (otro contenedor o más procesos en Supervisor) si el backlog crece; **Redis** + `QUEUE_CONNECTION=redis` es el patrón típico en producción ([PRODUCTION.md](PRODUCTION.md)).
 - Usa el servicio `redis` y en `.env` define `REDIS_HOST=redis`, y opcionalmente `CACHE_STORE=redis` y `QUEUE_CONNECTION=redis` (Laravel admite Predis o extensión `phpredis` si la añades a la imagen).
 - Tareas programadas: contenedor con `php artisan schedule:work` o un cron sidecar.
 - Añade volúmenes o servicio de objetos (MinIO, S3) según almacenamiento de archivos.

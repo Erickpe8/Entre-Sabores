@@ -104,11 +104,45 @@ export function heartSvgHtml(liked) {
 }
 
 /**
+ * Like + contador de comentarios (compacto) para barra de interacción.
+ *
  * @param {object} post — payload PostResource
- * @param {{ onOpenDetail?: (id: number) => void }} [options]
+ * @param {{ commentsCountId?: string, comfortable?: boolean }} [opts]
+ */
+export function buildInteractionStatsHtml(post, opts = {}) {
+    const comfortable = opts.comfortable === true;
+    const liked = post.liked === true;
+    const likesCount = post.likes_count ?? 0;
+    const commentsCount = post.comments_count ?? 0;
+    const idAttr = opts.commentsCountId ? ` id="${esc(opts.commentsCountId)}"` : '';
+
+    const likeBtnClass = comfortable
+        ? `wall-like-btn inline-flex min-h-[40px] cursor-pointer items-center gap-1.5 rounded-full px-2 py-1.5 text-sm font-medium transition-all duration-200 ease-out hover:bg-slate-800/80 hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 active:scale-[0.98] ${
+              liked ? 'text-rose-500' : 'text-slate-400'
+          }`
+        : `wall-like-btn inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 rounded-full px-1.5 py-1 text-xs font-medium transition-all duration-200 ease-out hover:bg-slate-800/80 hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 active:scale-[0.98] ${
+              liked ? 'text-rose-500' : 'text-slate-400'
+          }`;
+
+    const statText = comfortable ? 'text-sm text-slate-400' : 'text-[11px] text-slate-400';
+
+    return `
+        <button type="button" class="${likeBtnClass}" data-like-post-id="${post.id}" data-liked="${liked ? '1' : '0'}" aria-pressed="${liked ? 'true' : 'false'}" aria-label="Me gusta">
+            <span class="wall-like-svg-wrap shrink-0">${heartSvgHtml(liked)}</span>
+            <span data-like-count class="tabular-nums">${likesCount}</span>
+        </button>
+        <span class="inline-flex cursor-default items-center gap-1.5 ${statText} transition-colors duration-200 hover:text-slate-200" title="Comentarios">
+            ${ICON_COMMENT}
+            <span${idAttr} data-comments-count class="tabular-nums">${commentsCount}</span>
+        </span>`;
+}
+
+/**
+ * @param {object} post — payload PostResource
+ * @param {{ onOpenDetail?: (id: number) => void, omitInteractionBar?: boolean }} [options]
  */
 export function renderCard(post, options = {}) {
-    const { onOpenDetail } = options;
+    const { onOpenDetail, omitInteractionBar } = options;
 
     const el = document.createElement('article');
     el.className =
@@ -140,10 +174,6 @@ export function renderCard(post, options = {}) {
     const ariaProfile = esc(user.username ? `@${user.username}` : String(user.name || 'usuario'));
 
     const grad = gradientClassForPostId(post.id);
-    const liked = post.liked === true;
-    const likesCount = post.likes_count ?? 0;
-    const commentsCount = post.comments_count ?? 0;
-
     const highlightBadge =
         post.maridaje_highlighted === true
             ? `<span class="pointer-events-none absolute right-2 top-2 z-10 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200 ring-1 ring-amber-400/40 shadow-sm shadow-black/40" title="Maridaje destacado">🔥 Destacado</span>`
@@ -188,18 +218,19 @@ export function renderCard(post, options = {}) {
                 <h3 class="text-[15px] font-semibold leading-snug text-slate-100 line-clamp-2">${esc(post.title)}</h3>
                 <p class="mt-3 text-sm leading-relaxed text-slate-400 line-clamp-3">${esc(post.excerpt)}</p>
                 <div class="mt-3 flex flex-wrap gap-1.5">${tagPills}</div>
-                <div class="mt-4 flex flex-wrap items-stretch justify-between gap-2 border-t border-slate-700/80 pt-3">
-                    <div class="flex min-w-0 flex-1 items-center gap-3">
-                        <button type="button" class="wall-like-btn inline-flex min-h-[40px] items-center gap-1.5 rounded-full px-2 text-xs font-medium transition-all duration-200 ease-out hover:bg-slate-800/80 hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 ${liked ? 'text-rose-500' : 'text-slate-500'}" data-like-post-id="${post.id}" data-liked="${liked ? '1' : '0'}" aria-pressed="${liked ? 'true' : 'false'}" aria-label="Me gusta">
-                            <span class="wall-like-svg-wrap shrink-0">${heartSvgHtml(liked)}</span>
-                            <span data-like-count class="tabular-nums">${likesCount}</span>
-                        </button>
-                        <span class="inline-flex items-center gap-1 text-[11px] text-slate-500" title="Comentarios">
-                            ${ICON_COMMENT}<span data-comments-count class="tabular-nums">${commentsCount}</span>
-                        </span>
+                ${
+                    omitInteractionBar === true
+                        ? ''
+                        : `
+                <div class="mt-4 border-t border-slate-700/80 pt-3">
+                    <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                        <div class="flex min-w-0 items-center gap-5">
+                            ${buildInteractionStatsHtml(post, { comfortable: false })}
+                        </div>
+                        <span class="max-w-full truncate text-end text-[11px] text-slate-500 sm:max-w-[45%]">${esc((post.tags || []).find((t) => t.type === 'experience')?.name || '')}</span>
                     </div>
-                    <span class="max-w-[40%] self-center truncate text-[11px] text-slate-500">${esc((post.tags || []).find((t) => t.type === 'experience')?.name || '')}</span>
-                </div>
+                </div>`
+                }
             </div>
         `;
 

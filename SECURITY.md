@@ -1,6 +1,6 @@
 # Seguridad
 
-Política práctica y superficie de ataque. **Última revisión:** 2026-05-03.
+Política práctica y superficie de ataque. **Última revisión:** 2026-05-04.
 
 ## Medidas implementadas (resumen)
 
@@ -9,7 +9,7 @@ Política práctica y superficie de ataque. **Última revisión:** 2026-05-03.
 | Autenticación | Laravel Breeze, sesión web |
 | CSRF | Meta tag + cabeceras Axios (`resources/js/bootstrap.js`); middleware CSRF en rutas web |
 | Proxies | `TRUSTED_PROXIES` → `trustProxies` en `bootstrap/app.php` |
-| Cabeceras HTTP | `SecurityHeaders`: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`; **CSP** en producción por defecto (`config/security.php`) |
+| Cabeceras HTTP | `SecurityHeaders`: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`; **CSP** en producción por defecto (`config/security.php`). El front usa **JavaScript empaquetado por Vite** sin Alpine/`eval`, lo que permite políticas **sin `unsafe-eval`** si el resto de assets (CDN, inline) lo permiten — véase [FRONTEND.md](FRONTEND.md#csp-content-security-policy). |
 | Posts | `throttle:create-post` — 5/min por usuario |
 | Follows | `throttle:follow-toggle` — 30/min por usuario |
 | Feed y social | Limitadores con nombre en `AppServiceProvider` (tabla abajo) |
@@ -41,6 +41,7 @@ El comportamiento del feed (orden, límites de lectura) es servidor-side; el cli
 | `profile-posts-json` | 120/min | usuario o IP | `GET /users/{username}/posts` |
 | `username-check` | 30/min | usuario o IP | disponibilidad de username |
 | `settings-write` | 25/min | usuario | PATCH/DELETE perfil |
+| `maridaje-reanalyze` | 8/min | usuario | `POST /posts/{post}/reanalyze` |
 
 Variables sensibles: [.env.production.example](.env.production.example); checklist: [PRODUCTION.md](PRODUCTION.md).
 

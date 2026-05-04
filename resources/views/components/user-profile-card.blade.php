@@ -28,7 +28,7 @@
                 rel="noopener noreferrer"
                 class="inline-flex items-center gap-1.5 text-xs text-green-400 hover:text-green-300 hover:underline"
             >
-                <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0" aria-hidden="true"></i>
+                <x-ui.icon name="external-link" class="w-3.5 h-3.5 shrink-0" />
                 Ver perfil público
             </a>
         @endif
@@ -36,14 +36,14 @@
 
     @if ($showCountry)
         <div class="flex items-center justify-center gap-2 text-gray-400 text-sm">
-            <i data-lucide="map-pin" class="w-4 h-4 text-green-400 shrink-0" aria-hidden="true"></i>
+            <x-ui.icon name="map-pin" class="w-4 h-4 text-green-400 shrink-0" />
             <span>{{ $user->country ?? '—' }}</span>
         </div>
     @endif
 
     @if ($showMemberSince)
         <div class="flex items-center justify-center gap-2 text-center text-sm text-gray-400">
-            <i data-lucide="calendar" class="w-4 h-4 text-green-400 shrink-0" aria-hidden="true"></i>
+            <x-ui.icon name="calendar" class="w-4 h-4 text-green-400 shrink-0" />
             <span>
                 Miembro desde
                 <span class="text-gray-300 font-medium">

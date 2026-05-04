@@ -6,6 +6,10 @@ import { initMobileNav } from './ui/mobileNav.js';
 import { initDropdowns } from './ui/dropdowns.js';
 import { initModals } from './ui/modals.js';
 import { initFlashAutoHide } from './ui/flashMessages.js';
+import { initProfileShareModal } from './ui/profileShareModal.js';
+import { initProfilePage } from './ui/profilePage.js';
+import { initUsernameAvailability } from './ui/usernameAvailability.js';
+import { initAvatarCroppers } from './ui/avatarCropper.js';
 
 window.Cropper = Cropper;
 
@@ -13,6 +17,10 @@ initMobileNav();
 initDropdowns();
 initModals();
 initFlashAutoHide();
+initProfileShareModal();
+initProfilePage();
+initUsernameAvailability();
+initAvatarCroppers();
 
 if (document.getElementById('posts-container')) {
     import('./wall.js').then((m) => m.initWall());

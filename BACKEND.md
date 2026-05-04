@@ -1,6 +1,6 @@
 # Backend — Laravel
 
-Convenciones, puntos de extensión y contratos del feed. **Última revisión:** 2026-05-03.
+Convenciones, puntos de extensión y contratos del feed. **Última revisión:** 2026-05-04.
 
 ## Estructura relevante
 
@@ -15,6 +15,17 @@ Convenciones, puntos de extensión y contratos del feed. **Última revisión:** 
 | `config/security.php` | CSP y overrides por `.env`. |
 
 Otros requests destacados: `StorePostRequest`, `StorePostCommentRequest`, `UserPostsRequest`, etc.
+
+## Maridaje IA (servicio y jobs)
+
+| Pieza | Rol |
+|-------|-----|
+| `config/services.php` / `.env` | Claves `MARIDAJE_AI_*` (URL base, modelo, API key, timeouts, límites de reintentos). |
+| `MaridajeAiAnalysisService` | Llama al proveedor HTTP; devuelve estructura normalizada para guardar en `posts.ai_analysis`. |
+| `GeneratePostAnalysisJob` | Encola el análisis; al terminar actualiza el post y puede emitir `PostAnalysisGenerated` → broadcast. |
+| `PostController::reanalyze` | `POST /posts/{post}/reanalyze` — solo el dueño; throttle **`maridaje-reanalyze`** (8/min por usuario). |
+
+Sin worker de colas activo, los jobs de análisis y los `ShouldBroadcast` no se procesan — ver [DOCKER.md](DOCKER.md#supervisor-un-solo-contenedor-app) y [PRODUCTION.md](PRODUCTION.md#colas).
 
 ## Feed HTTP — contrato
 
@@ -70,8 +81,8 @@ composer lint / composer format   # Laravel Pint
 
 **Ventajas:** los controladores no conocen Soketi/Pusher; los tests pueden fijar eventos de dominio con `Event::fake()`; los payloads WS se prueban aparte (`tests/Unit/BroadcastingPayloadTest.php`).
 
-- **Configuración:** `config/broadcasting.php`; variable `BROADCAST_CONNECTION` (`null` | `pusher` | …). Con `null`, los listeners no llaman a `broadcast()` (el contador `users.unread_notifications_count` sí se mantiene).
-- **Colas:** los `*Broadcast` implementan `ShouldBroadcast` (emisión **encolada**). Con `QUEUE_CONNECTION=redis`, hace falta **worker** (`php artisan queue:work redis`). Con `sync` (tests/local), el job corre en el mismo request.
+- **Configuración:** `config/broadcasting.php`; variable `BROADCAST_CONNECTION` (`null` | `pusher` | `reverb` | …). Con **Laravel Reverb** en Docker, el cliente Echo usa el protocolo Pusher y variables `VITE_REVERB_*` alineadas con `REVERB_APP_KEY` y el host/puerto del WS. Con `null`, los listeners no llaman a `broadcast()` (el contador `users.unread_notifications_count` sí se mantiene).
+- **Colas:** los `*Broadcast` implementan `ShouldBroadcast` (emisión **encolada**). Con `QUEUE_CONNECTION=redis` o **`database`**, hace falta **worker** (`php artisan queue:work …`). En Docker, Supervisor ya incluye `queue-worker` — asegúrate de que `QUEUE_CONNECTION` no sea `sync` si quieres IA y WS en segundo plano. Con `sync` (tests), el job corre en el mismo request.
 - **Fallos:** tabla `failed_jobs` migrada; revisar con `php artisan queue:failed`, reintentar con `queue:retry`.
 - **Contador no leídas:** columna `users.unread_notifications_count` — incremento en `DatabaseNotificationObserver`, decremento al marcar una como leída, reset en «marcar todas». Reparar drift: `php artisan notifications:sync-unread-counts`.
 - **Rutas:** `BroadcastServiceProvider` registra `POST /broadcasting/auth` con middleware `web` + `auth`. Canales en `routes/channels.php`:
@@ -81,6 +92,7 @@ composer lint / composer format   # Laravel Pint
 - **Payloads WS** (`ShouldBroadcast`):
   - `PostLikedBroadcast` → canal `post.{postId}`, `post.like.updated`.
   - `CommentCreatedBroadcast` → `post.{postId}`, `post.comment.created`.
+  - `PostAnalysisGeneratedBroadcast` → `post.{postId}`, `post.analysis.generated` (payload con `ai_analysis`).
   - `NotificationCreatedBroadcast` → `PrivateChannel('user.{userId}')`, `notification.created`.
 - **Disparo dominio:** `PostLikeController::toggle`, `PostCommentController::store`, `DatabaseNotificationObserver::created`.
 - **`toOthers()`** en like y comentario: el cliente envía `X-Socket-Id` (Axios); la pestaña que originó la acción no recibe el mismo evento por WS.

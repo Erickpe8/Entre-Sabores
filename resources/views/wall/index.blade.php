@@ -1,5 +1,5 @@
 <x-app-layout title="Entre Sabores — Muro de maridajes">
-    <script type="application/json" id="wall-config">@json($wallConfig)</script>
+    <textarea id="wall-config" class="sr-only" readonly tabindex="-1" aria-hidden="true">@json($wallConfig)</textarea>
 
     <div id="wall-toast-root" class="fixed top-20 left-1/2 z-[60] flex -translate-x-1/2 flex-col gap-2 pointer-events-none px-4 w-full max-w-md" aria-live="polite"></div>
 
@@ -35,7 +35,7 @@
                                 type="search"
                                 enterkeyhint="search"
                                 autocomplete="off"
-                                placeholder="Buscar..."
+                                placeholder="Buscar publicaciones o etiquetas…"
                                 class="w-full rounded-full border border-slate-700/90 bg-slate-800/85 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder:text-slate-500 shadow-inner shadow-black/20 transition focus:border-emerald-500/80 focus:outline-none focus:ring-2 focus:ring-emerald-500/25 sm:py-2.5"
                             />
                         </div>
@@ -106,7 +106,7 @@
                                 ></span>
                             </div>
                             <p id="wall-sort-hint" class="mt-1 text-xs leading-relaxed text-slate-500 sm:text-[13px]">
-                                Publicaciones recomendadas según tu actividad.
+                                Un mix pensado para ti: ves primero lo que suele interesarte más.
                             </p>
                         </div>
                     </div>
@@ -183,7 +183,7 @@
                             </button>
                         </div>
                         <div class="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 pt-3">
-                            <p id="create-post-smart-hints-label" class="hidden mb-2 text-[11px] font-medium text-emerald-400/95">Sugerencias según tu texto</p>
+                            <p id="create-post-smart-hints-label" class="hidden mb-2 text-[11px] font-medium text-emerald-400/95">Etiquetas sugeridas según lo que escribes</p>
                             <div id="create-post-smart-hints" class="hidden mb-4 flex flex-wrap gap-2"></div>
                             <div id="create-post-selected-chips-bar" class="mb-4 flex min-h-[36px] flex-wrap gap-2"></div>
                             <label class="sr-only" for="create-post-tag-input">Buscar etiqueta</label>
@@ -270,7 +270,7 @@
                                 role="textbox"
                                 aria-multiline="false"
                                 aria-label="Título"
-                                data-placeholder="Escribe el título..."
+                                data-placeholder="Añade un título claro a tu publicación"
                                 class="create-post-ce create-post-ce--title ce-empty text-xl font-bold leading-snug tracking-tight text-white outline-none sm:text-2xl focus-visible:ring-2 focus-visible:ring-emerald-500/35 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded-sm"
                             ></div>
 
@@ -302,7 +302,7 @@
                                 role="textbox"
                                 aria-multiline="true"
                                 aria-label="Descripción"
-                                data-placeholder="¿Qué estás compartiendo hoy?"
+                                data-placeholder="Describe el plato, la bebida o la experiencia que quieres compartir"
                                 class="create-post-ce create-post-ce--body ce-empty min-h-[6.5rem] text-[15px] leading-relaxed text-zinc-300 outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/35 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded-xl"
                             ></div>
 
@@ -358,7 +358,7 @@
         <div id="wall-modal-backdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
         <div
             id="wall-modal-panel"
-            class="scrollbar-none relative w-full h-full sm:h-auto sm:max-w-2xl sm:max-h-[90vh] overflow-y-auto sm:rounded-2xl rounded-none bg-slate-900 shadow-2xl shadow-black/50 border-0 sm:border border-slate-700"
+            class="scrollbar-none relative w-full h-full max-h-[100dvh] sm:h-auto sm:max-h-[80vh] sm:max-w-2xl overflow-y-auto overflow-x-hidden overscroll-y-contain sm:rounded-2xl rounded-none bg-slate-900 shadow-2xl shadow-black/50 border-0 sm:border border-slate-700"
         >
             <div class="sticky top-0 flex justify-end bg-slate-900/95 border-b border-slate-700 px-4 py-2 rounded-t-2xl z-10 backdrop-blur-sm">
                 <button

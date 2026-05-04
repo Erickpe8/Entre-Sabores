@@ -24,9 +24,12 @@ function showToast(el, message) {
 }
 
 function syncCommentsCount(root, postId, count) {
-    root.querySelectorAll(`article[data-post-id="${postId}"] [data-comments-count]`).forEach((node) => {
-        node.textContent = String(count);
-    });
+    const s = String(count);
+    root
+        .querySelectorAll(`article[data-post-id="${postId}"] [data-comments-count], #post-show-card-mount [data-comments-count]`)
+        .forEach((node) => {
+            node.textContent = s;
+        });
 }
 
 export function initPostShow() {
@@ -58,7 +61,7 @@ export function initPostShow() {
         mount.innerHTML = '';
         postShowFlipCleanup?.();
         postShowFlipCleanup = null;
-        const article = renderCard(post);
+        const article = renderCard(post, { omitInteractionBar: true });
         postShowFlipCleanup = mountPostShowMaridajeFlip(mount, post, article, {
             axios,
             postBaseUrl: config.postBaseUrl,
@@ -70,7 +73,7 @@ export function initPostShow() {
     const commentsWrap = document.getElementById('post-show-comments');
     if (commentsWrap) {
         commentsWrap.className =
-            'mt-4 wall-modal-comments-scroll max-h-[min(480px,60vh)] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-700/60 bg-slate-950/50 p-3 shadow-inner';
+            'mt-4 rounded-xl border border-slate-700/60 bg-slate-950/50 p-3 shadow-inner';
         commentsWrap.innerHTML = renderCommentsTreeHtml(post.comments || [], {
             showReplyButtons: config.isAuthenticated === true,
         });
@@ -93,7 +96,7 @@ export function initPostShow() {
                 btn.dataset.liked = liked ? '1' : '0';
                 btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
                 btn.classList.toggle('text-rose-500', liked);
-                btn.classList.toggle('text-slate-500', !liked);
+                btn.classList.toggle('text-slate-400', !liked);
                 const span = btn.querySelector('[data-like-count]');
                 if (span) {
                     span.textContent = String(likesCount);
@@ -105,7 +108,7 @@ export function initPostShow() {
             });
         } catch (e) {
             console.error(e);
-            showToast(toastEl, 'No se pudo actualizar el me gusta.');
+            showToast(toastEl, 'No pudimos guardar tu «me gusta». Inténtalo de nuevo.');
         }
     }
 

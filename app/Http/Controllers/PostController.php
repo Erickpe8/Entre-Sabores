@@ -93,7 +93,7 @@ class PostController extends Controller
 
         return response()->json([
             'ok' => true,
-            'message' => 'Análisis en cola.',
+            'message' => 'Hemos puesto el análisis en cola; en unos momentos estará listo.',
         ]);
     }
 
