@@ -19,6 +19,28 @@ echo "[start] Configurando permisos..."
 chmod -R 775 database storage bootstrap/cache 2>/dev/null || true
 chown -R www-data:www-data database storage bootstrap/cache 2>/dev/null || true
 
+if [ -f package.json ]; then
+  NEED_ASSETS=0
+  if [ ! -f public/build/manifest.json ]; then
+    NEED_ASSETS=1
+  fi
+  case "${DOCKER_ALWAYS_BUILD_ASSETS:-}" in
+    1|true|yes) NEED_ASSETS=1 ;;
+  esac
+  if [ "$NEED_ASSETS" = "1" ]; then
+    echo "[start] Compilando assets front-end (npm ci && npm run build)..."
+    npm ci --no-audit --no-fund
+    npm run build
+    chown -R www-data:www-data public/build 2>/dev/null || true
+    chmod -R ug+rwX public/build 2>/dev/null || true
+    if [ -d node_modules ]; then
+      chown -R www-data:www-data node_modules 2>/dev/null || true
+    fi
+  else
+    echo "[start] Assets: public/build/manifest.json presente (omite build; DOCKER_ALWAYS_BUILD_ASSETS=1 para forzar)."
+  fi
+fi
+
 LIGHT_START=""
 case "${DOCKER_LIGHT_START:-}" in
   1|true|yes) LIGHT_START=1 ;;
