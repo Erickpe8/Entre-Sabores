@@ -227,7 +227,7 @@ export function setupCommentInteractions(rootEl, ctx, options = {}) {
         } catch (e) {
             console.error(e);
             if (ctx.showToast) {
-                ctx.showToast('No se pudieron actualizar los comentarios.', 'error');
+                ctx.showToast('No pudimos cargar los comentarios actualizados. Actualiza la página si sigue igual.', 'error');
             }
         }
     }
@@ -263,7 +263,7 @@ export function setupCommentInteractions(rootEl, ctx, options = {}) {
                 clearReplyState();
                 await refreshCommentsTree();
                 if (ctx.showToast) {
-                    ctx.showToast(payload.parent_id ? 'Respuesta publicada.' : 'Comentario publicado.', 'success');
+                    ctx.showToast(payload.parent_id ? 'Tu respuesta ya está visible.' : 'Tu comentario ya está publicado.', 'success');
                 }
                 if (ctx.afterCommentPosted) {
                     ctx.afterCommentPosted();
@@ -271,7 +271,7 @@ export function setupCommentInteractions(rootEl, ctx, options = {}) {
             } catch (err) {
                 console.error(err);
                 if (ctx.showToast) {
-                    ctx.showToast('No se pudo publicar el comentario.', 'error');
+                    ctx.showToast('No pudimos publicar el comentario. Revisa la conexión e inténtalo otra vez.', 'error');
                 }
             }
 

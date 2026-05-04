@@ -15,7 +15,18 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: [
+                    'ui-sans-serif',
+                    'system-ui',
+                    'Segoe UI',
+                    'Roboto',
+                    'Helvetica Neue',
+                    'Arial',
+                    'Noto Sans',
+                    'Apple Color Emoji',
+                    'Segoe UI Emoji',
+                    ...defaultTheme.fontFamily.sans,
+                ],
             },
         },
     },

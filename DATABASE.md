@@ -1,6 +1,6 @@
 # Base de datos
 
-**Última revisión:** 2026-05-03.
+**Última revisión:** 2026-05-04.
 
 ## Motor
 
@@ -10,7 +10,7 @@
 ## Esquema principal (orden lógico)
 
 1. **`users`** — Identidad, `username` único, perfil, preferencias JSON, país, redes.
-2. **`posts`** — Evolución desde legacy; migración grande **refactor_posts_for_tags_and_comment_threads** añade descripción, imagen, hilos; parte del cambio es **irreversible** (`down()` excepción).
+2. **`posts`** — Evolución desde legacy; migración grande **refactor_posts_for_tags_and_comment_threads** añade descripción, imagen, hilos; parte del cambio es **irreversible** (`down()` excepción). Columna JSON **`ai_analysis`**: resultado del análisis de maridaje (p. ej. `score` numérico usado en el ranking del feed); migración `2026_05_05_100000_add_ai_analysis_to_posts_table`.
 3. **`tags`** — Tipos (país, tipo de comida, experiencia, bebida); `iso_code` en países para banderas (`/public/flags`).
 4. **`post_tag`** — N:M; índice en `tag_id` para filtros del feed.
 5. **`comments`** — `parent_id` para hilos.

@@ -30,15 +30,16 @@ return [
     ],
 
     /*
-    | Política base si no defines SECURITY_CSP_POLICY. Incluye CDNs usados en
-    | layouts (fonts.bunny.net, cdnjs Font Awesome, Google Fonts en welcome).
+    | Política base estricta: sin CDNs, sin eval. JS solo desde Vite (public/build).
+    | style-src conserva 'unsafe-inline' por estilos de componentes y atributos ocasionales.
+    | Si Laravel Echo/Reverb usa otro host/puerto, amplía connect-src vía SECURITY_CSP_POLICY.
     */
 
     'csp_default_policy' => implode('; ', [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com",
-        "style-src 'self' 'unsafe-inline' https://fonts.bunny.net https://fonts.googleapis.com https://cdnjs.cloudflare.com",
-        "font-src 'self' https://fonts.bunny.net https://fonts.gstatic.com data:",
+        "script-src 'self'",
+        "style-src 'self' 'unsafe-inline'",
+        "font-src 'self' data:",
         "img-src 'self' data: blob: https:",
         "connect-src 'self'",
         "frame-ancestors 'none'",

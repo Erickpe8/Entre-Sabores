@@ -8,7 +8,7 @@
 @section('settings-sidebar-actions')
     <div class="flex flex-col items-center gap-3 text-center">
         <button type="button" id="openAvatarModal" class="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white">
-            <i data-lucide="image-plus" class="h-4 w-4 shrink-0" aria-hidden="true"></i>
+            <x-ui.icon name="image-plus" class="h-4 w-4 shrink-0" />
             Cambiar foto
         </button>
         <input type="file" id="avatarInput" accept="image/*" class="sr-only" tabindex="-1" autocomplete="off">
@@ -114,14 +114,14 @@
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
                         <label for="instagram" class="block text-sm font-medium text-gray-300 mb-1">
-                            <i class="fab fa-instagram text-pink-400 mr-1" aria-hidden="true"></i>Instagram
+                            <x-ui.icon name="brand-instagram" class="inline h-4 w-4 text-pink-400 mr-1 align-text-bottom" />Instagram
                         </label>
                         <input id="instagram" type="text" name="instagram" value="{{ old('instagram', $user->instagram) }}" placeholder="usuario_instagram" class="input" autocomplete="off">
                         <x-input-error class="mt-2" :messages="$errors->get('instagram')" />
                     </div>
                     <div>
                         <label for="linkedin" class="block text-sm font-medium text-gray-300 mb-1">
-                            <i class="fab fa-linkedin text-sky-400 mr-1" aria-hidden="true"></i>LinkedIn
+                            <x-ui.icon name="brand-linkedin" class="inline h-4 w-4 text-sky-400 mr-1 align-text-bottom" />LinkedIn
                         </label>
                         <input id="linkedin" type="text" name="linkedin" value="{{ old('linkedin', $user->linkedin) }}" placeholder="usuario-o-url-linkedin" class="input" autocomplete="off">
                         <x-input-error class="mt-2" :messages="$errors->get('linkedin')" />

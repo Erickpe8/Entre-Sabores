@@ -5,8 +5,8 @@
     :og-url="$ogUrl"
 >
     <div id="post-show-page" class="min-h-[100dvh] bg-slate-950 text-slate-100">
-        <script type="application/json" id="post-show-config">@json($postShowConfig)</script>
-        <script type="application/json" id="post-show-json">@json($postPayload)</script>
+        <textarea id="post-show-config" class="sr-only" readonly tabindex="-1" aria-hidden="true">@json($postShowConfig)</textarea>
+        <textarea id="post-show-json" class="sr-only" readonly tabindex="-1" aria-hidden="true">@json($postPayload)</textarea>
 
         <div
             id="post-show-toast"
@@ -18,16 +18,19 @@
         <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
             <a
                 href="{{ auth()->check() ? route('dashboard') : route('welcome') }}"
-                class="inline-flex text-sm font-medium text-emerald-400 underline-offset-2 hover:text-emerald-300 hover:underline"
+                class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-400 underline-offset-2 hover:text-emerald-300 hover:underline"
             >
-                ← {{ auth()->check() ? 'Volver al muro' : 'Inicio' }}
+                <svg class="h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+                <span>{{ auth()->check() ? 'Volver al muro' : 'Ir al inicio' }}</span>
             </a>
 
             <noscript>
                 <article class="mt-8 rounded-xl border border-slate-700/80 bg-slate-900/80 p-6">
                     <h1 class="text-2xl font-bold text-slate-50">{{ $post->title }}</h1>
                     <div class="mt-4 whitespace-pre-wrap text-slate-300">{{ strip_tags($post->description) }}</div>
-                    <p class="mt-6 text-sm text-slate-500">Activa JavaScript para ver comentarios e interactuar.</p>
+                    <p class="mt-6 text-sm text-slate-500">Activa JavaScript en tu navegador para ver comentarios y usar las interacciones de la publicación.</p>
                 </article>
             </noscript>
 
@@ -48,7 +51,7 @@
                 @auth
                     <form id="wall-comment-form" class="mt-8 space-y-2 border-t border-slate-800 pt-8">
                         <label for="post-show-comment-body" class="block text-sm font-medium text-slate-300">
-                            Tu comentario
+                            Escribe un comentario
                         </label>
                         <textarea
                             id="post-show-comment-body"
@@ -56,7 +59,7 @@
                             rows="3"
                             required
                             maxlength="2000"
-                            placeholder="Escribe algo…"
+                            placeholder="Comparte tu opinión o pregunta lo que quieras…"
                             class="w-full rounded-xl border-slate-600 bg-slate-800/80 text-sm text-slate-100 shadow-sm placeholder:text-slate-500 focus:border-emerald-500 focus:ring-emerald-500"
                         ></textarea>
                         <button
@@ -71,7 +74,7 @@
                         <a href="{{ route('login') }}" class="font-medium text-emerald-400 underline hover:text-emerald-300">
                             Inicia sesión
                         </a>
-                        para comentar.
+                        para unirte a la conversación.
                     </p>
                 @endauth
             </section>

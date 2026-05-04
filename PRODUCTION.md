@@ -1,6 +1,6 @@
 # Producción — guía y checklist
 
-Referencia operativa para despliegue con usuarios reales. **Última revisión:** 2026-05-03.
+Referencia operativa para despliegue con usuarios reales. **Última revisión:** 2026-05-04.
 
 ## Visión rápida
 
@@ -34,7 +34,8 @@ Comportamiento funcional del feed (orden, mixto 70/30): [ARCHITECTURE.md](ARCHIT
 
 - [ ] `npm run build` en CI o imagen.
 - [ ] `CACHE_STORE=redis` si hay picos (tags, métricas).
-- [ ] `QUEUE_CONNECTION=redis` + workers para correo/jobs.
+- [ ] `QUEUE_CONNECTION=redis` (o `database` si aplica) + **workers** para correo, jobs de IA y broadcasts (`ShouldBroadcast`).
+- [ ] Si usas **Reverb** o Pusher: `BROADCAST_CONNECTION` coherente; build de front con `VITE_REVERB_*` o `VITE_PUSHER_*`; proceso `reverb:start` o servicio WS en producción.
 - [ ] Índices — [DATABASE.md](DATABASE.md), [PERFORMANCE.md](PERFORMANCE.md).
 
 ### Infraestructura
@@ -76,10 +77,13 @@ Comportamiento funcional del feed (orden, mixto 70/30): [ARCHITECTURE.md](ARCHIT
 
 Centralizado en `AppServiceProvider`; rutas en `routes/web.php` y `routes/auth.php`. Tabla: [SECURITY.md](SECURITY.md#rate-limiting-por-nombre-referencia).
 
-## Colas (`QUEUE_CONNECTION=redis`)
+## Colas
 
-1. `.env`: `QUEUE_CONNECTION=redis`, `REDIS_*` coherentes.
-2. Supervisor (ejemplo):
+1. `.env`: `QUEUE_CONNECTION=redis` **o** `database` (tablas `jobs`, `failed_jobs` migradas). Redis suele ser preferible en producción multi-instancia.
+2. Uno o más procesos `php artisan queue:work` con la misma conexión que la app.
+3. Tras desplegar: `php artisan queue:restart`.
+
+Ejemplo Supervisor con Redis:
 
 ```ini
 [program:entre-sabores-worker]
@@ -92,7 +96,7 @@ numprocs=2
 stdout_logfile=/var/www/entre-sabores/storage/logs/worker.log
 ```
 
-3. Tras desplegar: `php artisan queue:restart`.
+En la imagen Docker de este repo, un proceso **`queue-worker`** equivalente ya está definido en Supervisor — véase [DOCKER.md](DOCKER.md#supervisor-un-solo-contenedor-app).
 
 ## Cabeceras de seguridad
 
@@ -139,18 +143,18 @@ BD diaria + política de retención; storage si es local. Probar restauración.
 - [ ] Logs sin picos de errores.
 - [ ] Backups verificados.
 
-## Tiempo real (Soketi / Pusher)
+## Tiempo real (Reverb / Soketi / Pusher)
 
-1. **Backend:** `BROADCAST_CONNECTION=pusher` y variables `PUSHER_APP_*` alineadas con el servidor WebSocket (Soketi, Pusher Cloud, etc.).
-2. **Colas y workers:** los eventos `ShouldBroadcast` generan jobs en la cola por defecto. **Varias réplicas PHP** requieren la misma `QUEUE_CONNECTION` (típicamente **Redis**) y uno o más procesos `php artisan queue:work redis` (o Horizon). Sin workers, los WS no salen aunque HTTP responda.
-3. **Escalado horizontal:** Soketi/Pusher absorben conexiones; los cuellos habituales son **Redis** (cola + opcionalmente backend del broadcaster), **workers** insuficientes (backlog), y **rate** de jobs `BroadcastEvent`. Escalar workers antes que réplicas PHP si la cola crece.
-4. **Frontend:** en la **misma** build que despliegas, el `.env` para Vite debe incluir `VITE_PUSHER_APP_KEY` (y host/puerto si no es Pusher Cloud).
-5. **HTTPS:** detrás de proxy, coherencia de `PUSHER_SCHEME` / `wss` y cookies para `/broadcasting/auth`.
-6. **Coste / superficie:** eventos acotados (detalle de post + canal privado por usuario); sin WS en el feed completo.
+1. **Backend:** `BROADCAST_CONNECTION=reverb` (Laravel Reverb en el mismo proyecto) **o** `pusher` con variables `PUSHER_APP_*` alineadas con Soketi, Pusher Cloud, etc.
+2. **Colas y workers:** los eventos `ShouldBroadcast` generan jobs en la cola por defecto. **Varias réplicas PHP** requieren la misma `QUEUE_CONNECTION` y uno o más procesos `php artisan queue:work` (o Horizon). Sin workers, los WS no salen aunque HTTP responda.
+3. **Escalado horizontal:** el servidor WS absorbe conexiones; los cuellos habituales son **Redis** (cola), **workers** insuficientes (backlog de broadcasts y de análisis IA), y **rate** de jobs `BroadcastEvent`. Escalar workers antes que réplicas PHP si la cola crece.
+4. **Frontend:** en la **misma** build que despliegas, Vite debe recibir **`VITE_REVERB_APP_KEY`** (y host/puerto según despliegue) para Reverb, o **`VITE_PUSHER_APP_KEY`** + host/puerto para Soketi/Pusher.
+5. **HTTPS:** detrás de proxy, coherencia de esquema `wss` y cookies para `/broadcasting/auth`; si Echo usa el puerto dedicado de Reverb (p. ej. 9090), abrir firewall/balanceador según política.
+6. **Coste / superficie:** eventos acotados (detalle de post: likes, comentarios, análisis listo + canal privado por usuario); sin WS en el feed completo.
 
 **Métricas:** con Redis de caché activo, `GET /internal/metrics` puede exponer `broadcasts_emitted_last_minute`; logs `broadcast.emitted` en canal `structured` para latencia del dispatch local.
 
-Ejemplo local con Soketi: `PUSHER_HOST=127.0.0.1`, `PUSHER_PORT=6001`, `PUSHER_SCHEME=http` y en el cliente las `VITE_PUSHER_*` equivalentes.
+Ejemplo **Reverb** local/Docker: variables `REVERB_APP_*` y `VITE_REVERB_*` alineadas; servidor `php artisan reverb:start`. Ejemplo **Soketi**: `PUSHER_HOST=127.0.0.1`, `PUSHER_PORT=6001`, `PUSHER_SCHEME=http` y `VITE_PUSHER_*` equivalentes.
 
 ## Documentación relacionada
 

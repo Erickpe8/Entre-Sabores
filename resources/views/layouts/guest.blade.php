@@ -8,12 +8,9 @@
         <title>{{ $title ?? config('app.name', 'Entre Sabores') }}</title>
         <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
-
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-['Inter'] text-slate-100 antialiased">
+    <body class="font-sans text-slate-100 antialiased">
         <main class="min-h-[100dvh] px-4 py-6 sm:px-6 sm:py-8 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 overflow-y-auto">
             <div class="grid lg:grid-cols-2 gap-8 lg:gap-10 w-full max-w-6xl mx-auto items-start lg:items-center min-h-[100dvh] lg:min-h-0">
                 <section class="flex items-start lg:items-center justify-center w-full">

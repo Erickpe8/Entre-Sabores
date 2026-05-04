@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\GeneratePostAnalysisJob;
 use App\Models\Post;
 use App\Models\User;
 use Database\Seeders\TagSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class PostReanalyzeTest extends TestCase
@@ -39,6 +41,8 @@ class PostReanalyzeTest extends TestCase
 
     public function test_owner_can_queue_reanalyze_and_clears_ai_analysis(): void
     {
+        Queue::fake();
+
         $owner = User::factory()->create();
         $post = Post::factory()->create([
             'user_id' => $owner->id,
@@ -58,5 +62,9 @@ class PostReanalyzeTest extends TestCase
 
         $post->refresh();
         $this->assertNull($post->ai_analysis);
+
+        Queue::assertPushed(GeneratePostAnalysisJob::class, function (GeneratePostAnalysisJob $job) use ($post): bool {
+            return $job->postId === $post->id;
+        });
     }
 }

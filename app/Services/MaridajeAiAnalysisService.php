@@ -25,13 +25,17 @@ class MaridajeAiAnalysisService
     {
         $apiKey = config('services.maridaje_ai.api_key');
         if (! is_string($apiKey) || $apiKey === '') {
-            Log::debug('MaridajeAiAnalysisService: MARIDAJE_AI_API_KEY no configurada; se omite el análisis.');
+            Log::warning('MaridajeAiAnalysisService: MARIDAJE_AI_API_KEY ausente o vacía en config (revisar .env y php artisan config:cache).');
 
             return null;
         }
 
         $text = trim(strip_tags((string) $description));
         if ($text === '' || mb_strlen($text) < 12) {
+            Log::info('MaridajeAiAnalysisService: descripción vacía o demasiado corta para analizar.', [
+                'length' => mb_strlen($text),
+            ]);
+
             return null;
         }
 
@@ -43,7 +47,11 @@ class MaridajeAiAnalysisService
 
         try {
             $quotedDescription = json_encode($text, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
+        } catch (JsonException $e) {
+            Log::warning('MaridajeAiAnalysisService: no se pudo codificar descripción para prompt.', [
+                'message' => $e->getMessage(),
+            ]);
+
             return null;
         }
 

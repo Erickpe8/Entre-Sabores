@@ -4,13 +4,13 @@ import {
     heartSvgHtml,
     esc,
     formatStory,
-    ICON_COMMENT,
     flashLikeAnimation,
+    buildInteractionStatsHtml,
     countryPreviewMetaHtml,
     relativeTimeEs,
 } from './social/postCard.js';
 import { renderCommentsTreeHtml, setupCommentInteractions } from './social/commentThread.js';
-import { bindMaridajeFlip, buildWallModalFlipHtml } from './social/maridajeFlip.js';
+import { bindMaridajeFlip, buildMaridajeFrontInteractionBar, buildWallModalFlipHtml } from './social/maridajeFlip.js';
 
 const CLS = {
     secondary:
@@ -23,23 +23,23 @@ const CLS = {
 const SORT_UX = {
     recent: {
         title: 'Recientes',
-        hint: 'Publicaciones recomendadas según tu actividad.',
+        hint: 'Un mix pensado para ti: ves primero lo que suele interesarte más.',
     },
     popular: {
         title: 'Populares',
-        hint: 'Las publicaciones con más interacción.',
+        hint: 'Publicaciones que están generando más conversación y reacciones.',
     },
     trending: {
         title: 'Tendencia',
-        hint: 'Lo más relevante en los últimos días.',
+        hint: 'Temas y publicaciones que están destacando en los últimos días.',
     },
 };
 
 /** Ayuda cuando el feed es solo «Siguiendo» (evita repetir frases con el badge). */
 const SORT_UX_FOLLOWING_HINT = {
-    recent: 'Cronología entre las cuentas que sigues.',
-    popular: 'Mayor interacción entre las cuentas que sigues.',
-    trending: 'Lo más relevante en los últimos días, solo entre cuentas que sigues.',
+    recent: 'Orden cronológico solo entre las personas que sigues.',
+    popular: 'Lo que más conversación está generando entre tus cuentas seguidas.',
+    trending: 'Publicaciones relevantes de los últimos días, solo entre quienes sigues.',
 };
 
 function showToast(message, variant = 'info') {
@@ -516,7 +516,7 @@ export function initWall() {
             const validationHint = document.getElementById('create-post-validation-hint');
             if (validationHint) {
                 validationHint.textContent =
-                    selectedCreateTags.size === 0 ? 'Selecciona al menos una etiqueta para publicar.' : '';
+                    selectedCreateTags.size === 0 ? 'Elige al menos una etiqueta antes de publicar.' : '';
             }
         });
     }
@@ -571,7 +571,7 @@ export function initWall() {
             btn.dataset.liked = liked ? '1' : '0';
             btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
             btn.classList.toggle('text-rose-500', liked);
-            btn.classList.toggle('text-slate-500', !liked);
+            btn.classList.toggle('text-slate-400', !liked);
             const span = btn.querySelector('[data-like-count]');
             if (span) {
                 span.textContent = String(likesCount);
@@ -633,7 +633,7 @@ export function initWall() {
         } catch (e) {
             applyLikeState(postId, previousLiked, previousCount);
             console.error(e);
-            showToast('No se pudo actualizar el me gusta.', 'error');
+            showToast('No pudimos guardar tu «me gusta». Inténtalo de nuevo.', 'error');
         } finally {
             setLikeButtonsBusy(postId, false);
         }
@@ -1000,18 +1000,17 @@ export function initWall() {
                 config.authUserId != null &&
                 Number(config.authUserId) === Number(p.user?.id);
 
-            const likeToolbar = `
-                <div class="flex flex-wrap items-center gap-6 border-y border-slate-700 py-3">
-                    <button type="button" class="wall-like-btn inline-flex items-center gap-2 rounded-full px-2 py-1.5 text-sm font-medium transition hover:bg-slate-800/90 ${modalLiked ? 'text-rose-500' : 'text-slate-400'}" data-like-post-id="${p.id}" data-liked="${modalLiked ? '1' : '0'}" aria-pressed="${modalLiked ? 'true' : 'false'}" aria-label="Me gusta">
-                        <span class="wall-like-svg-wrap">${heartSvgHtml(modalLiked)}</span>
-                        <span data-like-count class="tabular-nums">${modalLikesCount}</span>
-                    </button>
-                    <span class="inline-flex items-center gap-2 text-sm text-slate-400">
-                        ${ICON_COMMENT}
-                        <span class="tabular-nums"><span id="wall-modal-comments-count">${p.comments_count ?? 0}</span> comentarios</span>
-                    </span>
-                </div>
-            `;
+            const interactionBarHtml = buildMaridajeFrontInteractionBar(
+                buildInteractionStatsHtml(
+                    {
+                        ...p,
+                        liked: modalLiked,
+                        likes_count: modalLikesCount,
+                        comments_count: p.comments_count ?? 0,
+                    },
+                    { commentsCountId: 'wall-modal-comments-count', comfortable: true },
+                ),
+            );
 
             modalBody.innerHTML = `
                 <div class="space-y-4" data-modal-post-id="${p.id}">
@@ -1022,13 +1021,13 @@ export function initWall() {
                         tagsLine,
                         titleHtml: esc(p.title),
                         descriptionStoryHtml: formatStory(p.description),
-                        likeToolbar,
+                        interactionBarHtml,
                         aiAnalysis: p.ai_analysis ?? null,
                         canReanalyze: canReanalyzeMaridaje,
                     })}
                     <div>
                         <h3 class="font-semibold text-slate-200 mb-2">Comentarios</h3>
-                        <div id="wall-modal-comments" class="wall-modal-comments-scroll max-h-[min(420px,55vh)] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-700/60 bg-slate-950/50 p-3 shadow-inner">${commentsHtml}</div>
+                        <div id="wall-modal-comments" class="rounded-xl border border-slate-700/60 bg-slate-950/50 p-3 shadow-inner">${commentsHtml}</div>
                         ${commentForm}
                     </div>
                 </div>
@@ -1236,7 +1235,7 @@ export function initWall() {
         const titleLen = plainTextFromEditable(titleEditable);
         const descLen = plainTextFromEditable(descEditable);
         if (!titleLen || !descLen) {
-            showToast('Escribe un título y una descripción.', 'error');
+            showToast('Necesitamos un título y una descripción para publicar.', 'error');
 
             return;
         }
@@ -1244,10 +1243,10 @@ export function initWall() {
         if (selectedCreateTags.size === 0) {
             openTagPanel();
             if (createErrors) {
-                createErrors.textContent = 'Selecciona al menos una etiqueta.';
+                createErrors.textContent = 'Elige al menos una etiqueta para clasificar tu publicación.';
                 createErrors.classList.remove('hidden');
             }
-            showToast('Selecciona al menos una etiqueta.', 'error');
+                showToast('Elige al menos una etiqueta para clasificar tu publicación.', 'error');
 
             return;
         }
@@ -1268,7 +1267,7 @@ export function initWall() {
             // No fijar Content-Type manualmente: FormData necesita boundary; Axios lo añade solo.
             const { data } = await axios.post(config.postStoreUrl, fd);
             const post = data.post;
-            showToast('Publicación creada.', 'success');
+            showToast('Tu publicación ya está en el muro.', 'success');
             closeCreateModal();
             resetCreateForm();
             if (feedEl && post) {
@@ -1292,9 +1291,9 @@ export function initWall() {
                     createErrors.innerHTML = lines.map((l) => `<p>${esc(l)}</p>`).join('');
                     createErrors.classList.remove('hidden');
                 }
-                showToast(lines[0] || 'Revisa los datos del formulario.', 'error');
+                showToast(lines[0] || 'Revisa los datos e inténtalo de nuevo.', 'error');
             } else {
-                showToast('No se pudo crear la publicación. Intenta de nuevo.', 'error');
+                showToast('No pudimos publicar ahora. Comprueba tu conexión e inténtalo otra vez.', 'error');
             }
         } finally {
             submitBtn?.removeAttribute('disabled');

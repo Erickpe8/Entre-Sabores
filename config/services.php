@@ -36,9 +36,9 @@ return [
     ],
 
     /*
-    | Análisis de maridaje (API compatible OpenAI: POST {base_url}/chat/completions).
-    | Ej.: OpenAI https://api.openai.com/v1 o DeepSeek https://api.deepseek.com/v1 (p. ej. modelo deepseek-chat).
-    | Sin MARIDAJE_AI_API_KEY el Job omite la llamada y ai_analysis queda null.
+    | Análisis de maridaje — API compatible OpenAI (POST {base_url}/chat/completions).
+    | Credenciales solo vía .env (MARIDAJE_AI_*); nunca en código ni en el frontend.
+    | Sin API key el servicio devuelve null; el Job persiste un fallback en posts.ai_analysis.
     */
     'maridaje_ai' => [
         'api_key' => env('MARIDAJE_AI_API_KEY'),

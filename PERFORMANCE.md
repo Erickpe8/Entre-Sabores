@@ -1,6 +1,6 @@
 # Rendimiento y escalado
 
-**Última revisión:** 2026-05-03.
+**Última revisión:** 2026-05-04.
 
 ## Terminología UI vs backend
 
@@ -23,7 +23,7 @@ Los chips del muro se llaman **Recientes**, **Populares**, **Tendencia**; el bac
 ### Modos
 
 - **Exploración global** (`globalExploreFeed`): `simplePaginate`, columnas acotadas, filtros con subconsulta para etiquetas AND.
-- **Mixto 70/30** (`mixedOrGlobalRecent`): usuario autenticado, FYP, `sort=recent`, con seguidos — dos trozos (seguidos recientes + global por score) + padding opcional. Ver [ARCHITECTURE.md](ARCHITECTURE.md#feed-del-muro-wallfeedservice).
+- **Mixto 70/30** (`mixedOrGlobalRecent`): usuario autenticado, FYP, `sort=recent`, con seguidos — dos trozos (seguidos recientes + global por **engagement + score de maridaje** en el tramo de descubrimiento) + padding opcional. Ver [ARCHITECTURE.md](ARCHITECTURE.md#feed-del-muro-wallfeedservice).
 - **Siguiendo** (`followingFeed`): filtro por `follows`, mismo `applySort` según `sort`.
 
 ### Paginación conocida

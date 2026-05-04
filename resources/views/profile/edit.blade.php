@@ -37,12 +37,12 @@
                                 rel="noopener noreferrer"
                                 class="inline-flex items-center gap-1.5 text-xs text-green-400 hover:text-green-300 hover:underline"
                             >
-                                <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0" aria-hidden="true"></i>
+                                <x-ui.icon name="external-link" class="w-3.5 h-3.5 shrink-0" />
                                 Ver perfil público
                             </a>
 
                             <div class="flex items-center justify-center gap-2 text-gray-400 text-sm">
-                                <i data-lucide="map-pin" class="w-4 h-4 text-green-400 shrink-0" aria-hidden="true"></i>
+                                <x-ui.icon name="map-pin" class="w-4 h-4 text-green-400 shrink-0" />
                                 <span>{{ $user->country ?? '—' }}</span>
                             </div>
                         </div>
@@ -50,13 +50,13 @@
                         <div class="mt-3 w-full space-y-3 text-sm text-gray-400 border-t border-white/10 pt-4">
                             @if ($user->birthdate)
                                 <div class="flex items-center justify-center gap-2">
-                                    <i data-lucide="cake" class="w-4 h-4 text-green-400 shrink-0" aria-hidden="true"></i>
+                                    <x-ui.icon name="cake" class="w-4 h-4 text-green-400 shrink-0" />
                                     <span class="text-gray-300">{{ $user->birthdate->age }} años</span>
                                 </div>
                             @endif
 
                             <div class="flex items-center justify-center gap-2 text-center">
-                                <i data-lucide="calendar" class="w-4 h-4 text-green-400 shrink-0" aria-hidden="true"></i>
+                                <x-ui.icon name="calendar" class="w-4 h-4 text-green-400 shrink-0" />
                                 <span>
                                     Miembro desde
                                     <span class="text-gray-300 font-medium">
@@ -83,7 +83,7 @@
                             <div class="mt-3 flex flex-wrap gap-2 justify-center w-full">
                                 @foreach ($user->preferences as $pref)
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs rounded-full bg-green-400/20 text-green-300 border border-green-400/30">
-                                        <i data-lucide="{{ $preferenceIcons[$pref] ?? 'star' }}" class="w-3.5 h-3.5 text-green-400 shrink-0" aria-hidden="true"></i>
+                                        <x-ui.icon :name="$preferenceIcons[$pref] ?? 'star'" class="w-3.5 h-3.5 text-green-400 shrink-0" />
                                         <span>{{ $pref }}</span>
                                     </span>
                                 @endforeach
@@ -98,7 +98,7 @@
                                     rel="noopener noreferrer"
                                     class="flex items-center gap-2 text-pink-400 hover:scale-105 transition"
                                 >
-                                    <i class="fab fa-instagram text-lg" aria-hidden="true"></i>
+                                    <x-ui.icon name="brand-instagram" class="h-5 w-5 shrink-0" />
                                     <span class="text-sm">{{ '@'.$user->instagram }}</span>
                                 </a>
                             @endif
@@ -110,7 +110,7 @@
                                     rel="noopener noreferrer"
                                     class="flex items-center gap-2 text-sky-400 hover:scale-105 transition"
                                 >
-                                    <i class="fab fa-linkedin text-lg" aria-hidden="true"></i>
+                                    <x-ui.icon name="brand-linkedin" class="h-5 w-5 shrink-0" />
                                     <span class="text-sm">{{ $user->linkedin }}</span>
                                 </a>
                             @endif
@@ -312,8 +312,8 @@
 
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="instagram" class="block text-sm font-medium text-gray-300 mb-1">
-                                        <i class="fab fa-instagram text-pink-400 mr-1" aria-hidden="true"></i>
+                                    <label for="instagram" class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-300 mb-1">
+                                        <x-ui.icon name="brand-instagram" class="h-4 w-4 text-pink-400 shrink-0" />
                                         Instagram
                                     </label>
                                     <input
@@ -329,8 +329,8 @@
                                 </div>
 
                                 <div>
-                                    <label for="linkedin" class="block text-sm font-medium text-gray-300 mb-1">
-                                        <i class="fab fa-linkedin text-sky-400 mr-1" aria-hidden="true"></i>
+                                    <label for="linkedin" class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-300 mb-1">
+                                        <x-ui.icon name="brand-linkedin" class="h-4 w-4 text-sky-400 shrink-0" />
                                         LinkedIn
                                     </label>
                                     <input
@@ -385,120 +385,5 @@
             modal-id="avatarCropModal"
         />
 
-        <script>
-            (function () {
-                const input = document.getElementById('username');
-                const status = document.getElementById('username-availability');
-                const preview = document.getElementById('username-url-preview');
-                if (!input || !status) return;
-                const checkUrl = input.getAttribute('data-check-url');
-                if (!checkUrl) return;
-                const debounceMs = 500;
-                const originalUsername = (input.dataset.original || '').trim().toLowerCase();
-                let timer = null;
-                let lastChecked = null;
-                let abortController = null;
-
-                function setStatus(message, className) {
-                    status.textContent = message;
-                    status.className = 'mt-1 text-xs min-h-[1.25rem] ' + (className || 'text-gray-500');
-                }
-
-                function showDefaultState() {
-                    setStatus('', 'text-gray-500');
-                }
-
-                function showLoading() {
-                    setStatus('Comprobando...', 'text-gray-500');
-                }
-
-                function showAvailable() {
-                    setStatus('Disponible', 'text-green-400');
-                }
-
-                function showTaken() {
-                    setStatus('No disponible', 'text-red-400');
-                }
-
-                function showError() {
-                    setStatus('No se pudo comprobar. Reintenta.', 'text-amber-400/90');
-                }
-
-                async function validateUsername(raw) {
-                    const normalized = raw.toLowerCase();
-
-                    if (normalized === originalUsername) {
-                        showDefaultState();
-                        lastChecked = null;
-                        return;
-                    }
-
-                    if (normalized === lastChecked) {
-                        return;
-                    }
-
-                    if (raw.length < 3) {
-                        setStatus('Mínimo 3 caracteres.', 'text-amber-400/90');
-                        return;
-                    }
-                    if (raw.length > 30) {
-                        setStatus('Máximo 30 caracteres.', 'text-red-400');
-                        return;
-                    }
-                    if (!/^[a-z0-9_-]+$/.test(raw)) {
-                        setStatus('Solo minúsculas, números, guiones y guion bajo.', 'text-amber-400/90');
-                        return;
-                    }
-
-                    if (abortController) {
-                        abortController.abort();
-                    }
-                    abortController = new AbortController();
-
-                    showLoading();
-                    try {
-                        const response = await axios.get(checkUrl, {
-                            params: { username: raw },
-                            signal: abortController.signal,
-                            headers: {
-                                Accept: 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest',
-                            },
-                        });
-
-                        lastChecked = normalized;
-                        if (response.data?.available) {
-                            showAvailable();
-                            return;
-                        }
-
-                        showTaken();
-                    } catch (error) {
-                        if (error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED') {
-                            return;
-                        }
-
-                        if (error?.response?.status === 422) {
-                            setStatus('Formato no válido.', 'text-red-400');
-                            return;
-                        }
-
-                        showError();
-                    }
-                }
-
-                function scheduleValidation() {
-                    const raw = (input.value || '').trim();
-                    if (preview) {
-                        preview.textContent = raw || originalUsername;
-                    }
-
-                    if (timer) clearTimeout(timer);
-                    timer = setTimeout(() => validateUsername(raw), debounceMs);
-                }
-
-                input.addEventListener('input', scheduleValidation);
-            })();
-        </script>
     </div>
 </x-app-layout>
