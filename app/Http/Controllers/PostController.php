@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
-use App\Jobs\AnalyzePostJob;
 use App\Jobs\GeneratePostAnalysisJob;
 use App\Models\Post;
 use App\Services\ContentGuard;
@@ -60,7 +59,7 @@ class PostController extends Controller
             'food' => $validated['food'] ?? null,
             'drink' => $validated['drink'] ?? null,
             'image_path' => $imagePath,
-            'status' => Post::STATUS_PENDING,
+            'status' => Post::STATUS_ACTIVE,
             'analysis_status' => Post::ANALYSIS_STATUS_PENDING,
             'analysis_result' => null,
             'ai_analysis' => null,
@@ -72,7 +71,7 @@ class PostController extends Controller
         OperationalLogger::postCreated($post, $request, count($tagIds));
         OperationalMetrics::incrementPostsCreated();
 
-        $this->queueReanalysis($post);
+        $this->queueMaridajeAnalysis($post);
 
         $post->load([
             'user:id,first_name,last_name,username,profile_photo',
@@ -122,8 +121,8 @@ class PostController extends Controller
     {
         $this->authorize('update', $post);
 
-        $this->markAnalysisAsPending($post);
-        $this->queueReanalysis($post);
+        $this->markMaridajeAnalysisPending($post);
+        $this->queueMaridajeAnalysis($post);
 
         return response()->json([
             'ok' => true,
@@ -148,8 +147,8 @@ class PostController extends Controller
         $tagIds = array_values(array_unique($validated['tags']));
         $post->tags()->sync($tagIds);
 
-        $this->markAnalysisAsPending($post);
-        $this->queueReanalysis($post);
+        $this->markMaridajeAnalysisPending($post);
+        $this->queueMaridajeAnalysis($post);
 
         $post->load([
             'user:id,first_name,last_name,username,profile_photo',
@@ -164,10 +163,12 @@ class PostController extends Controller
         ]);
     }
 
-    private function markAnalysisAsPending(Post $post): void
+    /**
+     * Reinicia solo el análisis de maridaje (IA secundaria). El post sigue visible (status active).
+     */
+    private function markMaridajeAnalysisPending(Post $post): void
     {
         $post->forceFill([
-            'status' => Post::STATUS_PENDING,
             'analysis_status' => Post::ANALYSIS_STATUS_PENDING,
             'analysis_result' => null,
             'moderation_reason' => null,
@@ -175,9 +176,8 @@ class PostController extends Controller
         ])->save();
     }
 
-    private function queueReanalysis(Post $post): void
+    private function queueMaridajeAnalysis(Post $post): void
     {
-        AnalyzePostJob::dispatch($post->id)->afterCommit();
         GeneratePostAnalysisJob::dispatch($post->id)->afterCommit();
     }
 
