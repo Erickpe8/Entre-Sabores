@@ -22,7 +22,14 @@ class WallFeedService
         'posts.user_id',
         'posts.title',
         'posts.description',
+        'posts.content',
+        'posts.food',
+        'posts.drink',
         'posts.ai_analysis',
+        'posts.status',
+        'posts.analysis_status',
+        'posts.analysis_result',
+        'posts.moderation_reason',
         'posts.image_path',
         'posts.created_at',
     ];
@@ -241,6 +248,18 @@ class WallFeedService
                     ->orderBy('sort_order'),
             ])
             ->withCount(['comments', 'likes']);
+
+        if (auth()->check()) {
+            $query->where(function (Builder $sub): void {
+                $sub->where('posts.status', Post::STATUS_ACTIVE)
+                    ->orWhere(function (Builder $own): void {
+                        $own->where('posts.user_id', auth()->id())
+                            ->whereIn('posts.status', [Post::STATUS_PENDING, Post::STATUS_ACTIVE]);
+                    });
+            });
+        } else {
+            $query->where('posts.status', Post::STATUS_ACTIVE);
+        }
 
         if (auth()->check()) {
             $query->withExists([

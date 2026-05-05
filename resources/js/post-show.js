@@ -1,4 +1,5 @@
 import { ensureEcho } from './echo.js';
+import { resetAppChromeState } from './ui/appChromeReset.js';
 import { renderCard, heartSvgHtml, flashLikeAnimation } from './social/postCard.js';
 import { mountPostShowMaridajeFlip } from './social/maridajeFlip.js';
 import {
@@ -38,6 +39,8 @@ export function initPostShow() {
         return;
     }
     postShowPageInitialized = true;
+
+    resetAppChromeState();
 
     const axios = window.axios;
     if (!axios) {
@@ -165,6 +168,7 @@ export function initPostShow() {
     }
 
     const channel = Echo.channel(`post.${config.postId}`);
+    const moderationChannel = Echo.channel('posts.moderation');
 
     channel.listen('.post.like.updated', (e) => {
         if (Number(e.post_id) !== Number(config.postId)) {
@@ -211,10 +215,24 @@ export function initPostShow() {
         }
     });
 
+    moderationChannel.listen('.post.moderation.updated', (e) => {
+        if (Number(e?.post_id) !== Number(config.postId)) {
+            return;
+        }
+
+        if ((e?.status || '') === 'rejected') {
+            showToast(toastEl, 'La publicación fue retirada por moderación automática.');
+            window.setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 900);
+        }
+    });
+
     window.addEventListener(
         'beforeunload',
         () => {
             Echo.leave(`post.${config.postId}`);
+            Echo.leave('posts.moderation');
         },
         { once: true },
     );

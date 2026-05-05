@@ -27,7 +27,7 @@ class CommentResource extends JsonResource
                 'id' => $user->id,
                 'name' => trim($user->first_name.' '.$user->last_name),
                 'username' => $user->username,
-                'avatar' => $user->profile_photo_url,
+                'avatar' => $user->profile_photo_thumb_url,
             ],
         ];
     }

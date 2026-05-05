@@ -1,6 +1,6 @@
 # Entre Sabores
 
-Red social gastronómica orientada al intercambio cultural (proyecto COIL México–Colombia): publicaciones con etiquetas, muro con exploración y modo «siguiendo», likes, comentarios en hilos, perfiles públicos, notificaciones y **análisis de maridaje asistido por IA** (opcional según configuración de API).
+Red social gastronómica orientada al intercambio cultural (proyecto COIL México–Colombia): publicaciones con etiquetas, muro con exploración y modo «siguiendo», likes, comentarios en hilos, perfiles públicos, notificaciones y **análisis de maridaje asistido por IA** (opcional según configuración de API). La documentación técnica está centralizada y enlazada desde **[DOCUMENTACION.md](DOCUMENTACION.md)** y los demás `.md` del repositorio (arquitectura, backend, frontend, Docker, seguridad, etc.).
 
 ## Feed del muro (lectura rápida)
 
@@ -33,10 +33,11 @@ Los nombres de chips no coinciden literalmente con los valores de `sort` (son et
 
 | Documento | Contenido |
 |-----------|-----------|
+| [DOCUMENTACION.md](DOCUMENTACION.md) | **Guía técnica integral** (arquitectura, flujo IA, colas, modelo de datos, UX, broadcasting, buenas prácticas) — lectura recomendada para entrega o revisión académica |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Decisiones de arquitectura, **WallFeedService**, feed 70/30, **IA maridaje**, broadcasting |
 | [BACKEND.md](BACKEND.md) | Requests, servicios, policies, rate limiting, jobs y broadcasting |
 | [FRONTEND.md](FRONTEND.md) | Vite, módulos UI (`resources/js/ui/`), Echo, muro (`wall.js`), CSP |
-| [DATABASE.md](DATABASE.md) | Tablas (`posts.ai_analysis`, …), migraciones |
+| [DATABASE.md](DATABASE.md) | Tablas (`posts.status`, `analysis_status`, `analysis_result`, `moderation_reason`, `ai_analysis`, soft deletes), migraciones |
 | [CHANGELOG.md](CHANGELOG.md) | Historial |
 | [PRODUCTION.md](PRODUCTION.md) | Despliegue, colas, Reverb, Redis, salud, métricas, backups |
 | [SECURITY.md](SECURITY.md) | Superficie de seguridad, CSP |
@@ -64,6 +65,14 @@ php artisan serve
 Para **colas** (`QUEUE_CONNECTION=database`), en otra terminal: `php artisan queue:work`. El script `composer run dev` incluye servidor, cola, logs y Vite según `composer.json`.
 
 Script Composer útil: `composer setup` (instala dependencias, migraciones, build de front).
+
+## Moderación automática (IA)
+
+- Al crear/editar un post, el registro entra en `status=pending` y `analysis_status=pending`.
+- Se encola el job de moderación (`AnalyzePostJob`) y, en paralelo, el análisis de maridaje (`GeneratePostAnalysisJob`).
+- Si la moderación marca `flagged=true`, el post pasa a `rejected`, guarda `moderation_reason`/`analysis_result` y se aplica soft delete.
+- Si pasa moderación, el post queda `active` con `analysis_status=completed`.
+- Frontend (Blade + Axios) muestra estado **“Analizando contenido…”** y actualiza por WebSocket cuando termina.
 
 ## Pruebas
 

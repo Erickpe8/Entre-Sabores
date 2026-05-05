@@ -1,6 +1,8 @@
 # Arquitectura — Entre Sabores
 
-Decisiones técnicas y estructura lógica. **Última revisión documental:** 2026-05-04.
+> **Guía integral (IA, persistencia, UX):** [DOCUMENTACION.md](DOCUMENTACION.md)
+
+Decisiones técnicas y estructura lógica. **Última revisión documental:** 2026-05-05.
 
 ## Visión
 
@@ -105,6 +107,7 @@ Las rutas suelen servir Blade con config JS (`wallConfig`, …) usando **rutas r
 | `GET /posts/{post}` | Detalle HTML o JSON según `Accept`. |
 | `POST /posts` | Crear publicación (policy + throttle `create-post`). |
 | `POST /posts/{post}/reanalyze` | Reencolar análisis de maridaje (dueño, throttle `maridaje-reanalyze`). |
+| `GET /posts/{post}/reanalyze` | Redirección segura (evita 405 si se abre como enlace); el cierre real del análisis es vía POST. |
 | `GET /health` | Salud ampliada (DB, caché, cola); token opcional. |
 | `GET /internal/metrics` | Snapshot de métricas operativas; token opcional. |
 

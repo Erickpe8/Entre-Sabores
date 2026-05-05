@@ -1,6 +1,7 @@
 @php($isWall = request()->routeIs('dashboard'))
 @php($isProfileArea = request()->routeIs('settings.profile') || request()->routeIs('settings.account') || request()->routeIs('profile.show'))
-@php($navDark = $isWall || $isProfileArea)
+@php($isPostShow = request()->routeIs('posts.show'))
+@php($navDark = $isWall || $isProfileArea || $isPostShow)
 @php($feedFollowing = $isWall && request()->boolean('following'))
 @php($centerInactive = $navDark
     ? 'inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium text-slate-400 transition hover:bg-white/8 hover:text-slate-100'

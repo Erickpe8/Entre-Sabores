@@ -1,6 +1,8 @@
 # Base de datos
 
-**Última revisión:** 2026-05-04.
+> **Modelo lógico y campo `ai_analysis`:** [DOCUMENTACION.md](DOCUMENTACION.md) (sección «Modelo de datos»).
+
+**Última revisión:** 2026-05-05.
 
 ## Motor
 
@@ -10,7 +12,13 @@
 ## Esquema principal (orden lógico)
 
 1. **`users`** — Identidad, `username` único, perfil, preferencias JSON, país, redes.
-2. **`posts`** — Evolución desde legacy; migración grande **refactor_posts_for_tags_and_comment_threads** añade descripción, imagen, hilos; parte del cambio es **irreversible** (`down()` excepción). Columna JSON **`ai_analysis`**: resultado del análisis de maridaje (p. ej. `score` numérico usado en el ranking del feed); migración `2026_05_05_100000_add_ai_analysis_to_posts_table`.
+2. **`posts`** — Evolución desde legacy; migración grande **refactor_posts_for_tags_and_comment_threads** añade descripción, imagen, hilos; parte del cambio es **irreversible** (`down()` excepción). Campos de análisis/moderación:
+   - `status` (`pending`, `active`, `rejected`)
+   - `analysis_status` (`pending`, `processing`, `completed`, `failed`)
+   - `analysis_result` (json)
+   - `moderation_reason` (json nullable)
+   - `ai_analysis` (json de maridaje)
+   - `deleted_at` (soft deletes)
 3. **`tags`** — Tipos (país, tipo de comida, experiencia, bebida); `iso_code` en países para banderas (`/public/flags`).
 4. **`post_tag`** — N:M; índice en `tag_id` para filtros del feed.
 5. **`comments`** — `parent_id` para hilos.
@@ -22,20 +30,23 @@
 Además de los anteriores:
 
 - **`posts_user_id_created_at_index`** — feed por autor / orden temporal.
+- **`posts_status_analysis_status_updated_at_index`** — consultas por estado de moderación/análisis.
 - **`notifications_notifiable_read_index`** — listados y filtros por `read_at`.
 
 Migraciones de referencia: `add_likes_follows_post_tag_indexes`, `2026_05_03_100000_add_performance_indexes_posts_notifications`.
 
 ## Datos de referencia
 
-Seeders: países, catálogo amplio de etiquetas (`TagSeeder`), datos de ejemplo opcionales.
+- **`DatabaseSeeder`:** en **producción** ejecuta solo catálogo idempotente (`CountrySeeder`, `TagSeeder`); no borra usuarios. En **`local`** también puede ejecutar `DevUserSeeder` (si existe) y `PostSeeder` (datos demo).
+- Arranque Docker **modo completo** (`DOCKER_LIGHT_START=0`, típico sin `APP_ENV=local`): migraciones + `db:seed` con la misma política — ver [DOCKER.md](DOCKER.md).
 
 ## Observaciones
 
 | Tema | Nota |
 |------|------|
 | Rollback | Migración grande de posts/tags puede impedir `migrate:rollback` limpio; backups antes de desplegar en equipos nuevos. |
-| Borrado en cascada | Revisar políticas si se añaden borrados masivos de usuarios o posts. |
+| Borrado en cascada | Revisar políticas si se añaden borrados masivos de usuarios o posts; con soft deletes en `posts`, el borrado lógico no elimina físicamente hijos automáticamente. |
+| Moderación automática | Los posts nuevos/editados pueden entrar en `pending` hasta completar `AnalyzePostJob`; el feed público debe considerar `status=active`. |
 
 ## Referencias
 

@@ -52,6 +52,10 @@ class GeneratePostAnalysisJob implements ShouldQueue
             'ai_analysis_is_null' => $post->ai_analysis === null,
         ]);
 
+        $post->forceFill([
+            'analysis_status' => Post::ANALYSIS_STATUS_PROCESSING,
+        ])->save();
+
         // CASO A: ya hay análisis (idempotencia / carrera)
         if ($post->ai_analysis !== null) {
             Log::info('maridaje.job.skip_existing_analysis', [
@@ -123,7 +127,16 @@ class GeneratePostAnalysisJob implements ShouldQueue
             'reason' => $reason,
             'detail' => $detail,
         ]);
-        $this->persistAnalysis($post, $payload, 'fallback', $reason);
+        $post->forceFill([
+            'analysis_status' => Post::ANALYSIS_STATUS_FAILED,
+            'analysis_result' => [
+                'error' => $reason,
+                'detail' => $detail,
+                'fallback' => $payload,
+                'failed_at' => now()->toIso8601String(),
+            ],
+            'ai_analysis' => null,
+        ])->save();
     }
 
     /**
@@ -146,6 +159,8 @@ class GeneratePostAnalysisJob implements ShouldQueue
     private function persistAnalysis(Post $post, array $analysis, string $source, ?string $fallbackReason = null): void
     {
         $post->forceFill([
+            'analysis_status' => Post::ANALYSIS_STATUS_COMPLETED,
+            'analysis_result' => $analysis,
             'ai_analysis' => $analysis,
         ]);
 
@@ -221,6 +236,18 @@ class GeneratePostAnalysisJob implements ShouldQueue
 
     public function failed(?Throwable $exception): void
     {
+        $post = Post::query()->find($this->postId);
+        if ($post !== null) {
+            $post->forceFill([
+                'analysis_status' => Post::ANALYSIS_STATUS_FAILED,
+                'analysis_result' => [
+                    'error' => $exception?->getMessage(),
+                    'failed_at' => now()->toIso8601String(),
+                ],
+                'ai_analysis' => null,
+            ])->save();
+        }
+
         Log::error('maridaje.job.failed_permanent', [
             'post_id' => $this->postId,
             'message' => $exception?->getMessage(),

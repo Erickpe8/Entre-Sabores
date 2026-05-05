@@ -222,6 +222,8 @@
             <form id="create-post-form" class="flex min-h-0 flex-1 flex-col" enctype="multipart/form-data">
                 <input type="hidden" name="title" id="create-post-field-title" value="" autocomplete="off" />
                 <input type="hidden" name="description" id="create-post-field-description" value="" />
+                <input type="hidden" name="composer_mode" id="create-post-composer-mode" value="create" />
+                <input type="hidden" name="edit_post_id" id="create-post-edit-id" value="" />
 
                 <div class="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-2 sm:px-7">
                     <div id="create-post-errors" class="mb-4 hidden rounded-2xl border border-red-500/30 bg-red-950/50 px-4 py-3 text-sm text-red-100"></div>

@@ -15,22 +15,24 @@
             </aside>
 
             <main class="lg:col-span-2 space-y-6">
-                <nav class="flex flex-wrap gap-2 border-b border-white/10 pb-3" aria-label="Secciones del perfil">
-                    <button
-                        type="button"
-                        data-profile-tab="posts"
-                        class="profile-tab-btn rounded-full px-4 py-2 text-sm font-medium bg-emerald-500/25 text-emerald-100 ring-1 ring-emerald-400/40"
-                    >
-                        Publicaciones
-                    </button>
-                    <button
-                        type="button"
-                        data-profile-tab="likes"
-                        class="profile-tab-btn rounded-full px-4 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5"
-                    >
-                        Me gusta
-                    </button>
-                </nav>
+                @if ($isProfileOwner)
+                    <nav class="flex flex-wrap gap-2 border-b border-white/10 pb-3 transition-colors duration-200" aria-label="Secciones del perfil">
+                        <button
+                            type="button"
+                            data-profile-tab="posts"
+                            class="profile-tab-btn rounded-full px-4 py-2 text-sm font-medium bg-emerald-500/25 text-emerald-100 ring-1 ring-emerald-400/40"
+                        >
+                            Publicaciones
+                        </button>
+                        <button
+                            type="button"
+                            data-profile-tab="likes"
+                            class="profile-tab-btn rounded-full px-4 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5"
+                        >
+                            Me gusta
+                        </button>
+                    </nav>
+                @endif
 
                 <div id="profile-panel-posts" data-profile-panel="posts" class="space-y-6">
                     <textarea id="profile-posts-config" class="sr-only" readonly tabindex="-1" aria-hidden="true">@json($profilePostsConfig)</textarea>
@@ -59,12 +61,23 @@
                     </div>
                 </div>
 
-                <div id="profile-panel-likes" data-profile-panel="likes" class="hidden space-y-6">
-                    <div class="bg-white/5 backdrop-blur rounded-2xl p-8 border border-white/10 text-center text-slate-400 text-sm">
-                        Próximamente: publicaciones a las que este usuario dio «me gusta».
-                    </div>
-                </div>
+                @if ($isProfileOwner && $profileLikesConfig !== null)
+                    <div id="profile-panel-likes" data-profile-panel="likes" class="hidden space-y-6">
+                        <textarea id="profile-likes-config" class="sr-only" readonly tabindex="-1" aria-hidden="true">@json($profileLikesConfig)</textarea>
 
+                        <div class="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10 shadow-lg shadow-black/20">
+                            <h2 class="text-white text-lg font-semibold mb-4">
+                                Me gusta
+                            </h2>
+                            <p id="profile-likes-status" class="text-xs text-gray-500 mb-4 min-h-[1rem]" aria-live="polite"></p>
+                            <div
+                                id="profile-likes-grid"
+                                class="grid gap-4 sm:grid-cols-2 min-h-0"
+                            ></div>
+                            <div id="profile-likes-sentinel" class="h-4 w-full" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                @endif
             </main>
         </div>
     </div>

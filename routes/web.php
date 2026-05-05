@@ -24,6 +24,10 @@ Route::get('/welcome', function () {
     return view('welcome');
 })->name('welcome');
 
+Route::view('/explorar', 'explore')->name('explore');
+
+Route::view('/como-funciona', 'how-it-works')->name('how-it-works');
+
 Route::get('/health', HealthController::class)
     ->middleware('throttle:120,1')
     ->name('health');
@@ -44,7 +48,6 @@ Route::get('/posts/filter', [WallController::class, 'filter'])
     ->middleware('throttle:feed-filter')
     ->name('posts.filter');
 
-// GET /posts?search=… → muro con búsqueda (alineado con descubrimiento tipo red social).
 Route::get('/posts', function (Request $request) {
     if (! auth()->check()) {
         return redirect()->route('welcome');
@@ -83,6 +86,13 @@ Route::post('/posts', [PostController::class, 'store'])
     ->middleware(['auth', 'throttle:create-post'])
     ->name('posts.store');
 
+Route::patch('/posts/{post}', [PostController::class, 'update'])
+    ->middleware(['auth', 'throttle:create-post'])
+    ->name('posts.update');
+
+Route::put('/posts/{post}', [PostController::class, 'update'])
+    ->middleware(['auth', 'throttle:create-post']);
+
 Route::get('/username/availability', UsernameAvailabilityController::class)
     ->middleware('throttle:username-check')
     ->name('username.availability');
@@ -90,6 +100,10 @@ Route::get('/username/availability', UsernameAvailabilityController::class)
 Route::get('/user/{username}', function (string $username) {
     return redirect()->route('profile.show', ['username' => $username], 301);
 })->where('username', '[a-z0-9_-]+');
+
+Route::middleware(['auth', 'throttle:profile-posts-json'])
+    ->get('/profile/likes', [ProfileController::class, 'likedPosts'])
+    ->name('profile.likes');
 
 Route::get('/profile/{username}', [UserController::class, 'show'])
     ->where('username', '[a-z0-9_-]+')

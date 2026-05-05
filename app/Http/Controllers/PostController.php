@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
+use App\Jobs\AnalyzePostJob;
 use App\Jobs\GeneratePostAnalysisJob;
 use App\Models\Post;
 use App\Support\OperationalLogger;
@@ -28,7 +30,14 @@ class PostController extends Controller
         $post = $request->user()->posts()->create([
             'title' => $validated['title'],
             'description' => $validated['description'],
+            'content' => $validated['description'],
+            'food' => $validated['food'] ?? null,
+            'drink' => $validated['drink'] ?? null,
             'image_path' => $imagePath,
+            'status' => Post::STATUS_PENDING,
+            'analysis_status' => Post::ANALYSIS_STATUS_PENDING,
+            'analysis_result' => null,
+            'ai_analysis' => null,
         ]);
 
         $tagIds = array_values(array_unique($validated['tags']));
@@ -37,7 +46,7 @@ class PostController extends Controller
         OperationalLogger::postCreated($post, $request, count($tagIds));
         OperationalMetrics::incrementPostsCreated();
 
-        GeneratePostAnalysisJob::dispatch($post->id)->afterCommit();
+        $this->queueReanalysis($post);
 
         $post->load([
             'user:id,first_name,last_name,username,profile_photo',
@@ -87,14 +96,63 @@ class PostController extends Controller
     {
         $this->authorize('update', $post);
 
-        $post->forceFill(['ai_analysis' => null])->save();
-
-        GeneratePostAnalysisJob::dispatch($post->id)->afterCommit();
+        $this->markAnalysisAsPending($post);
+        $this->queueReanalysis($post);
 
         return response()->json([
             'ok' => true,
             'message' => 'Hemos puesto el análisis en cola; en unos momentos estará listo.',
         ]);
+    }
+
+    public function update(UpdatePostRequest $request, Post $post): JsonResponse
+    {
+        $this->authorize('update', $post);
+
+        $validated = $request->validated();
+
+        $post->forceFill([
+            'title' => (string) $validated['title'],
+            'description' => (string) $validated['description'],
+            'content' => (string) $validated['description'],
+            'food' => $validated['food'] ?? null,
+            'drink' => $validated['drink'] ?? null,
+        ])->save();
+
+        $tagIds = array_values(array_unique($validated['tags']));
+        $post->tags()->sync($tagIds);
+
+        $this->markAnalysisAsPending($post);
+        $this->queueReanalysis($post);
+
+        $post->load([
+            'user:id,first_name,last_name,username,profile_photo',
+            'tags' => fn ($q) => $q->orderBy('type')->orderBy('sort_order'),
+        ]);
+        $post->loadCount(['comments', 'likes']);
+
+        return response()->json([
+            'ok' => true,
+            'message' => 'Post actualizado, re-analizando...',
+            'post' => (new PostResource($post))->resolve(),
+        ]);
+    }
+
+    private function markAnalysisAsPending(Post $post): void
+    {
+        $post->forceFill([
+            'status' => Post::STATUS_PENDING,
+            'analysis_status' => Post::ANALYSIS_STATUS_PENDING,
+            'analysis_result' => null,
+            'moderation_reason' => null,
+            'ai_analysis' => null,
+        ])->save();
+    }
+
+    private function queueReanalysis(Post $post): void
+    {
+        AnalyzePostJob::dispatch($post->id)->afterCommit();
+        GeneratePostAnalysisJob::dispatch($post->id)->afterCommit();
     }
 
     private function hydratePostForShow(Post $post): Post

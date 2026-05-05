@@ -1,6 +1,8 @@
 # Rendimiento y escalado
 
-**Última revisión:** 2026-05-04.
+> **Contexto de ranking con `score` (IA):** [DOCUMENTACION.md](DOCUMENTACION.md) · Feed detallado: [ARCHITECTURE.md](ARCHITECTURE.md#feed-del-muro-wallfeedservice).
+
+**Última revisión:** 2026-05-05.
 
 ## Terminología UI vs backend
 

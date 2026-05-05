@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Events\CommentCreated;
+use App\Services\ProfilePhotoService;
 use App\Events\NotificationRecorded;
 use App\Events\PostLiked;
 use App\Listeners\Broadcasting\SendCommentCreatedBroadcast;
@@ -28,7 +29,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(ProfilePhotoService::class, function ($app) {
+            return new ProfilePhotoService(
+                $app->make('image')
+            );
+        });
     }
 
     /**

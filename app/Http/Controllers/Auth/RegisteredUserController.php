@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
+use App\Services\ProfilePhotoService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -25,7 +25,7 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      */
-    public function store(RegisterRequest $request): RedirectResponse
+    public function store(RegisterRequest $request, ProfilePhotoService $profilePhotos): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -35,12 +35,9 @@ class RegisteredUserController extends Controller
             User::normalizeInstagramHandle($validated['instagram'] ?? null)
         );
 
-        $file = $request->file('profile_photo');
-        $filename = 'avatar_'.time().'.jpg';
-        $photoPath = Storage::disk('public')->putFileAs(
+        $photoPath = $profilePhotos->storeFromUploadedFile(
+            $request->file('profile_photo'),
             'profiles/'.$username,
-            $file,
-            $filename
         );
 
         $instagramProfile = User::normalizeInstagramHandle($validated['instagram'] ?? null);

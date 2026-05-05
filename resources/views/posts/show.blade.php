@@ -4,7 +4,7 @@
     :og-image="$ogImage"
     :og-url="$ogUrl"
 >
-    <div id="post-show-page" class="min-h-[100dvh] bg-slate-950 text-slate-100">
+    <div id="post-show-page" class="w-full flex-1 bg-slate-950 text-slate-100">
         <textarea id="post-show-config" class="sr-only" readonly tabindex="-1" aria-hidden="true">@json($postShowConfig)</textarea>
         <textarea id="post-show-json" class="sr-only" readonly tabindex="-1" aria-hidden="true">@json($postPayload)</textarea>
 
@@ -29,6 +29,14 @@
             <noscript>
                 <article class="mt-8 rounded-xl border border-slate-700/80 bg-slate-900/80 p-6">
                     <h1 class="text-2xl font-bold text-slate-50">{{ $post->title }}</h1>
+                    @if ($post->display_country !== null)
+                        <div class="mt-3 inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/70 px-3 py-1 text-xs text-slate-300">
+                            @if (!empty($post->display_country['flag_url']))
+                                <img src="{{ $post->display_country['flag_url'] }}" alt="" class="h-3.5 w-5 rounded-sm object-cover object-left" width="20" height="14" loading="lazy" decoding="async" />
+                            @endif
+                            <span>{{ $post->display_country['name'] }}</span>
+                        </div>
+                    @endif
                     <div class="mt-4 whitespace-pre-wrap text-slate-300">{{ strip_tags($post->description) }}</div>
                     <p class="mt-6 text-sm text-slate-500">Activa JavaScript en tu navegador para ver comentarios y usar las interacciones de la publicación.</p>
                 </article>
