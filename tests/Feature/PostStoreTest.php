@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Post;
 use App\Models\Tag;
 use App\Models\User;
 use Database\Seeders\TagSeeder;
@@ -27,7 +28,8 @@ class PostStoreTest extends TestCase
         ]);
 
         $response->assertCreated()
-            ->assertJsonPath('post.title', 'Maridaje de prueba');
+            ->assertJsonPath('post.title', 'Maridaje de prueba')
+            ->assertJsonPath('post.status', Post::STATUS_ACTIVE);
     }
 
     public function test_authenticated_user_can_create_post_with_image(): void

@@ -62,9 +62,11 @@ class PostUpdateTest extends TestCase
             ])
             ->assertOk()
             ->assertJsonPath('ok', true)
-            ->assertJsonPath('post.analysis_status', Post::ANALYSIS_STATUS_PENDING);
+            ->assertJsonPath('post.analysis_status', Post::ANALYSIS_STATUS_PENDING)
+            ->assertJsonPath('post.status', Post::STATUS_ACTIVE);
 
         $post->refresh();
+        $this->assertSame(Post::STATUS_ACTIVE, $post->status);
         $this->assertSame('Título actualizado', $post->title);
         $this->assertSame('Texto actualizado', $post->description);
         $this->assertSame('Texto actualizado', $post->content);
