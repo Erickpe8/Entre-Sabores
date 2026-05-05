@@ -8,19 +8,45 @@ use App\Http\Resources\PostResource;
 use App\Jobs\AnalyzePostJob;
 use App\Jobs\GeneratePostAnalysisJob;
 use App\Models\Post;
+use App\Services\ContentGuard;
 use App\Support\OperationalLogger;
 use App\Support\OperationalMetrics;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class PostController extends Controller
 {
-    public function store(StorePostRequest $request): JsonResponse
+    public function store(StorePostRequest $request, ContentGuard $contentGuard): JsonResponse
     {
         $this->authorize('create', Post::class);
 
         $validated = $request->validated();
+        $guardResult = $contentGuard->inspectPostPayload(
+            $validated['title'] ?? null,
+            $validated['description'] ?? null,
+        );
+
+        if ($guardResult['blocked'] === true) {
+            Log::channel('structured')->warning('post.content_guard.blocked', [
+                'user_id' => $request->user()?->id,
+                'ip' => $request->ip(),
+                'title_excerpt' => mb_substr((string) ($validated['title'] ?? ''), 0, 120),
+                'description_excerpt' => mb_substr((string) ($validated['description'] ?? ''), 0, 280),
+                'reasons' => $guardResult['reasons'],
+            ]);
+
+            return response()->json([
+                'message' => 'Esta combinación no encaja con nuestro menú 🍽️',
+                'errors' => [
+                    'description' => ['Detectamos instrucciones fuera de contexto. Ajusta el texto y vuelve a intentarlo.'],
+                ],
+                'guard' => [
+                    'blocked' => true,
+                ],
+            ], 422);
+        }
 
         $imagePath = null;
         if ($request->hasFile('image')) {
