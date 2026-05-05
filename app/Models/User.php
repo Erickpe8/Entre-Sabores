@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 #[Fillable(['first_name', 'last_name', 'username', 'email', 'password', 'country', 'description', 'profile_photo', 'instagram', 'linkedin', 'birthdate', 'preferences'])]
@@ -34,6 +35,16 @@ class User extends Authenticatable
     public function likes(): HasMany
     {
         return $this->hasMany(Like::class);
+    }
+
+    /**
+     * Publicaciones a las que este usuario dio «me gusta» (tabla pivote `likes`).
+     *
+     * @return BelongsToMany<Post, $this>
+     */
+    public function likedPosts(): BelongsToMany
+    {
+        return $this->belongsToMany(Post::class, 'likes')->withTimestamps();
     }
 
     /**
@@ -165,7 +176,7 @@ class User extends Authenticatable
 
     /**
      * URL pública de la foto de perfil (disco public) o imagen por defecto.
-     * Ruta en BD: p. ej. "profiles/archivo.jpg" relativa a storage/app/public (sin prefijo storage/).
+     * Ruta en BD: p. ej. "profiles/{usuario}/avatar.webp" relativa al disco public.
      */
     protected function profilePhotoUrl(): Attribute
     {
@@ -177,6 +188,51 @@ class User extends Authenticatable
 
             return '/storage/'.ltrim($normalized, '/');
         });
+    }
+
+    /**
+     * Variante pequeña (p. ej. listados); si no existe, coincide con la foto principal.
+     */
+    protected function profilePhotoThumbUrl(): Attribute
+    {
+        return Attribute::get(function (): string {
+            return $this->publicUrlForProfileVariant((string) config('profile_photo.filenames.thumb', 'avatar_thumb.webp'))
+                ?? $this->profile_photo_url;
+        });
+    }
+
+    /**
+     * Variante media (p. ej. cabeceras compactas).
+     */
+    protected function profilePhotoMediumUrl(): Attribute
+    {
+        return Attribute::get(function (): string {
+            return $this->publicUrlForProfileVariant((string) config('profile_photo.filenames.medium', 'avatar_medium.webp'))
+                ?? $this->profile_photo_url;
+        });
+    }
+
+    /**
+     * @return string|null URL bajo /storage/… o null si el archivo no está en disco
+     */
+    private function publicUrlForProfileVariant(string $filename): ?string
+    {
+        $base = self::normalizePublicDiskPath($this->profile_photo);
+        if ($base === null) {
+            return null;
+        }
+
+        $dir = dirname($base);
+        if ($dir === '.' || $dir === '') {
+            return null;
+        }
+
+        $relative = $dir.'/'.$filename;
+        if (! Storage::disk('public')->exists($relative)) {
+            return null;
+        }
+
+        return '/storage/'.ltrim($relative, '/');
     }
 
     /**

@@ -31,8 +31,6 @@ class RegistrationTest extends TestCase
     {
         Storage::fake('public');
 
-        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7YQxQAAAAASUVORK5CYII=');
-
         $response = $this->post('/register', [
             'first_name' => 'Test',
             'last_name' => 'Apellido',
@@ -40,7 +38,7 @@ class RegistrationTest extends TestCase
             'password' => 'password',
             'password_confirmation' => 'password',
             'country' => 'Colombia',
-            'profile_photo' => UploadedFile::fake()->createWithContent('profile.png', $png),
+            'profile_photo' => UploadedFile::fake()->image('profile.jpg', 40, 40),
             'description' => 'Bio de prueba',
         ]);
 
@@ -61,7 +59,10 @@ class RegistrationTest extends TestCase
 
         $photoPath = (string) $user->profile_photo;
         $this->assertStringContainsString('profiles/'.$user->username.'/', $photoPath);
+        $this->assertStringEndsWith('avatar.webp', $photoPath);
         Storage::disk('public')->assertExists($photoPath);
+        Storage::disk('public')->assertExists(dirname($photoPath).'/avatar_thumb.webp');
+        Storage::disk('public')->assertExists(dirname($photoPath).'/avatar_medium.webp');
 
         $this->assertNotSame('testapellido', $user->username, 'El username no debe ser el slug de nombre+apellido; debe ser creativo o desde Instagram.');
         $this->assertStringStartsWith('test', $user->username);

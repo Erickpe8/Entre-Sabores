@@ -1,6 +1,8 @@
 # Frontend — Blade, Vite y JavaScript
 
-**Última revisión:** 2026-05-04.
+> **Guía integral (Echo, análisis sin polling):** [DOCUMENTACION.md](DOCUMENTACION.md)
+
+**Última revisión:** 2026-05-05.
 
 ## Principios
 

@@ -1,6 +1,8 @@
 # Backend — Laravel
 
-Convenciones, puntos de extensión y contratos del feed. **Última revisión:** 2026-05-04.
+> **Guía integral (servicio IA, job, JSON):** [DOCUMENTACION.md](DOCUMENTACION.md)
+
+Convenciones, puntos de extensión y contratos del feed. **Última revisión:** 2026-05-05.
 
 ## Estructura relevante
 
@@ -22,10 +24,25 @@ Otros requests destacados: `StorePostRequest`, `StorePostCommentRequest`, `UserP
 |-------|-----|
 | `config/services.php` / `.env` | Claves `MARIDAJE_AI_*` (URL base, modelo, API key, timeouts, límites de reintentos). |
 | `MaridajeAiAnalysisService` | Llama al proveedor HTTP; devuelve estructura normalizada para guardar en `posts.ai_analysis`. |
-| `GeneratePostAnalysisJob` | Encola el análisis; al terminar actualiza el post y puede emitir `PostAnalysisGenerated` → broadcast. |
+| `GeneratePostAnalysisJob` | Encola el análisis; al terminar actualiza el post y puede emitir `PostAnalysisGeneratedBroadcast` → WebSocket (`post.analysis.generated`). |
 | `PostController::reanalyze` | `POST /posts/{post}/reanalyze` — solo el dueño; throttle **`maridaje-reanalyze`** (8/min por usuario). |
 
 Sin worker de colas activo, los jobs de análisis y los `ShouldBroadcast` no se procesan — ver [DOCKER.md](DOCKER.md#supervisor-un-solo-contenedor-app) y [PRODUCTION.md](PRODUCTION.md#colas).
+
+## Moderación IA de contenido (automática)
+
+| Pieza | Rol |
+|-------|-----|
+| `AIService` | Construye prompt de moderación, llama API IA y normaliza JSON (`flagged`, `reasons`, `confidence`, `summary`). |
+| `AnalyzePostJob` | Flujo asíncrono de moderación: `pending -> processing -> completed/failed`; puede marcar `status=rejected` y aplicar soft delete. |
+| `PostRejectedNotification` | Notifica al autor cuando su post se retira automáticamente por políticas. |
+| `PostModerationUpdatedBroadcast` | Evento WS (`post.moderation.updated`) para actualizar UI sin recarga. |
+
+Estados usados en `posts`:
+
+- `status`: `pending`, `active`, `rejected`
+- `analysis_status`: `pending`, `processing`, `completed`, `failed`
+- `analysis_result` (json), `moderation_reason` (json nullable), `deleted_at` (soft deletes)
 
 ## Feed HTTP — contrato
 
@@ -53,6 +70,14 @@ Ejemplos relevantes al dominio social:
 
 - Posts: `PostPolicy` en rutas que lo declaren.
 - Comentarios: validación de `parent_id` acotada al mismo post en `StorePostCommentRequest`.
+- Edición de posts: `PostController::update` usa `authorize('update', $post)` (solo dueño).
+
+## Edición de posts (create vs update)
+
+- Ruta creación: `POST /posts`
+- Ruta edición: `PATCH /posts/{post}` (y `PUT /posts/{post}` compatible)
+- Request de edición: `UpdatePostRequest` (título, descripción, etiquetas y campos opcionales).
+- Tras editar: se invalida análisis previo y se reenfila moderación + maridaje.
 
 ## Buenas prácticas observadas
 

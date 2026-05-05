@@ -16,13 +16,46 @@ const SVG_ANALYSIS_HEADING = `<svg class="h-5 w-5 shrink-0 text-emerald-300/95" 
 const MARIDAJE_NAV_HINT_HTML = `Puedes alternar entre la publicación y el análisis con los botones <span class="font-medium text-slate-400">Ver análisis</span> y <span class="font-medium text-slate-400">Volver</span>.`;
 
 /**
+ * Altura natural de una cara del flip (caras apiladas con position:absolute).
+ *
+ * @param {HTMLElement} faceEl
+ */
+function measureMaridajeFaceHeight(faceEl) {
+    if (!faceEl) {
+        return 0;
+    }
+    const rect = faceEl.getBoundingClientRect();
+
+    return Math.ceil(Math.max(faceEl.scrollHeight, rect.height));
+}
+
+/**
+ * Ajusta la altura del contenedor 3D al contenido de la cara visible (evita huecos en el front y compresión en el back).
+ *
+ * @param {HTMLElement} sceneRoot — [data-maridaje-flip-root]
+ */
+export function syncMaridajeFlipHeight(sceneRoot) {
+    const inner = sceneRoot.querySelector('.post-maridaje-flip-inner');
+    const front = sceneRoot.querySelector('.post-maridaje-front');
+    const back = sceneRoot.querySelector('.post-maridaje-back');
+    if (!inner || !front || !back) {
+        return;
+    }
+
+    const flipped = inner.classList.contains('is-maridaje-flipped');
+    const active = flipped ? back : front;
+    const h = measureMaridajeFaceHeight(active);
+    inner.style.height = `${Math.max(0, h)}px`;
+}
+
+/**
  * Barra inferior del post (muro / detalle): stats a la izquierda, «Ver análisis» a la derecha.
  *
  * @param {string} statsLeftHtml — HTML de like + comentarios ({@link buildInteractionStatsHtml})
  */
 export function buildMaridajeFrontInteractionBar(statsLeftHtml) {
     return `
-        <div class="post-maridaje-actions-bar mt-1 flex flex-col gap-3 border-t border-slate-700/60 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div class="post-maridaje-actions-bar mt-1 flex flex-col gap-2.5 border-t border-slate-700/60 pt-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <div class="flex min-w-0 flex-wrap items-center gap-5 sm:flex-1">${statsLeftHtml}</div>
             <div class="flex shrink-0 items-center justify-start sm:justify-end">
                 <button type="button" class="maridaje-btn-show-analysis inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-emerald-600/90 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-900/25 transition-all duration-200 ease-out hover:bg-emerald-500 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70">
@@ -162,7 +195,7 @@ export function buildWallModalFlipHtml(p) {
                 <div class="post-maridaje-flip-inner rounded-xl">
                     <div class="post-maridaje-front rounded-xl border border-slate-700/80 bg-slate-900/60 shadow-inner shadow-black/30 overflow-hidden">
                         ${p.heroImg}
-                        <div class="space-y-4 p-4">
+                        <div class="space-y-3 px-4 py-3">
                             ${p.userHeaderModal}
                             <div>
                                 <h2 class="text-xl font-bold text-slate-50">${p.titleHtml}</h2>
@@ -174,7 +207,7 @@ export function buildWallModalFlipHtml(p) {
                     </div>
                     <div class="post-maridaje-back flex w-full flex-col rounded-xl border border-emerald-900/40 bg-slate-950/95 shadow-inner shadow-black/40">
                         ${buildBackToolbarHtml(p.canReanalyze)}
-                        <div class="w-full overflow-visible px-5 pb-6 pt-1" data-maridaje-ai-slot>
+                        <div class="w-full overflow-visible px-5 pb-5 pt-1" data-maridaje-ai-slot>
                             ${slotInner}
                         </div>
                     </div>
@@ -234,7 +267,7 @@ export function mountPostShowMaridajeFlip(mountEl, post, articleEl, io) {
         'post-maridaje-back flex w-full flex-col rounded-xl border border-emerald-900/40 bg-slate-950/95 shadow-inner shadow-black/40';
     back.innerHTML =
         buildBackToolbarHtml(canReanalyze) +
-        `<div class="w-full overflow-visible px-5 pb-6 pt-1" data-maridaje-ai-slot>${renderAiAnalysisSectionsHtml(post.ai_analysis ?? null)}</div>`;
+        `<div class="w-full overflow-visible px-5 pb-5 pt-1" data-maridaje-ai-slot>${renderAiAnalysisSectionsHtml(post.ai_analysis ?? null)}</div>`;
 
     inner.appendChild(front);
     inner.appendChild(back);
@@ -273,6 +306,8 @@ export function mountPostShowMaridajeFlip(mountEl, post, articleEl, io) {
  */
 export function bindMaridajeFlip(sceneRoot, opts) {
     const inner = sceneRoot.querySelector('.post-maridaje-flip-inner');
+    const front = sceneRoot.querySelector('.post-maridaje-front');
+    const back = sceneRoot.querySelector('.post-maridaje-back');
     const slot = sceneRoot.querySelector('[data-maridaje-ai-slot]');
 
     if (!inner || !slot) {
@@ -281,11 +316,25 @@ export function bindMaridajeFlip(sceneRoot, opts) {
 
     let latestAnalysis = opts.initialAnalysis ?? null;
 
+    /** Refuerzo tras fuentes / layout asíncrono */
+    function scheduleHeightSync() {
+        window.requestAnimationFrame(() => {
+            syncMaridajeFlipHeight(sceneRoot);
+            window.requestAnimationFrame(() => syncMaridajeFlipHeight(sceneRoot));
+        });
+    }
+
     function showFront() {
+        if (front) {
+            inner.style.height = `${Math.max(0, measureMaridajeFaceHeight(front))}px`;
+        }
         inner.classList.remove('is-maridaje-flipped');
     }
 
     function showBack() {
+        if (back) {
+            inner.style.height = `${Math.max(0, measureMaridajeFaceHeight(back))}px`;
+        }
         inner.classList.add('is-maridaje-flipped');
     }
 
@@ -299,6 +348,7 @@ export function bindMaridajeFlip(sceneRoot, opts) {
         }
         latestAnalysis = a;
         slot.innerHTML = renderAiAnalysisSectionsHtml(a);
+        scheduleHeightSync();
     }
 
     /** @param {MouseEvent} e */
@@ -327,6 +377,7 @@ export function bindMaridajeFlip(sceneRoot, opts) {
             e.stopPropagation();
             showBack();
             slot.innerHTML = renderAiAnalysisSectionsHtml(null);
+            scheduleHeightSync();
             void (async () => {
                 try {
                     await opts.axios.post(opts.reanalyzeUrl);
@@ -334,12 +385,33 @@ export function bindMaridajeFlip(sceneRoot, opts) {
                 } catch {
                     opts.onNotify?.('No pudimos iniciar un nuevo análisis. Inténtalo de nuevo.', 'error');
                     slot.innerHTML = renderAiAnalysisSectionsHtml(latestAnalysis);
+                    scheduleHeightSync();
                 }
             })();
         }
     }
 
     sceneRoot.addEventListener('click', onRootClick);
+
+    scheduleHeightSync();
+    if (document.fonts?.ready) {
+        void document.fonts.ready.then(() => syncMaridajeFlipHeight(sceneRoot));
+    }
+
+    /** @type {ResizeObserver | null} */
+    let flipResizeObserver = null;
+    if (typeof ResizeObserver !== 'undefined' && front && back) {
+        flipResizeObserver = new ResizeObserver(() => syncMaridajeFlipHeight(sceneRoot));
+        flipResizeObserver.observe(front);
+        flipResizeObserver.observe(back);
+    }
+
+    let resizeDebounce = 0;
+    function onWindowResize() {
+        window.clearTimeout(resizeDebounce);
+        resizeDebounce = window.setTimeout(() => syncMaridajeFlipHeight(sceneRoot), 120);
+    }
+    window.addEventListener('resize', onWindowResize, { passive: true });
 
     let echoChannel = null;
     const wsHandler = (payload) => {
@@ -354,6 +426,10 @@ export function bindMaridajeFlip(sceneRoot, opts) {
     return () => {
         sceneRoot.removeEventListener('click', onRootClick);
         inner.classList.remove('is-maridaje-flipped');
+        inner.style.height = '';
+        window.removeEventListener('resize', onWindowResize);
+        window.clearTimeout(resizeDebounce);
+        flipResizeObserver?.disconnect();
         if (echoChannel != null) {
             echoChannel.stopListening('.post.analysis.generated', wsHandler);
         }

@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Requests\UserPostsRequest;
+use App\Http\Resources\PostResource;
+use App\Models\Post;
+use App\Services\ProfilePhotoService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +19,50 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    /**
+     * Publicaciones que el usuario autenticado marcó con «me gusta» (orden por fecha del like).
+     */
+    public function likedPosts(UserPostsRequest $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $perPage = $request->integer('per_page', 10);
+        $page = $request->integer('page', 1);
+
+        $query = Post::query()
+            ->join('likes', function ($join) use ($user) {
+                $join->on('posts.id', '=', 'likes.post_id')
+                    ->where('likes.user_id', '=', $user->id);
+            })
+            ->with([
+                'user:id,first_name,last_name,username,profile_photo',
+                'tags' => fn ($q) => $q->orderBy('type')->orderBy('sort_order'),
+            ])
+            ->withCount(['comments', 'likes'])
+            ->orderByDesc('likes.created_at')
+            ->orderByDesc('likes.id')
+            ->select('posts.*');
+
+        $posts = $query->paginate($perPage, ['posts.*'], 'page', $page);
+
+        return response()->json([
+            'posts' => collect($posts->items())
+                ->map(function (Post $post) {
+                    $post->setAttribute('liked_by_me', true);
+
+                    return (new PostResource($post))->resolve();
+                })
+                ->values()
+                ->all(),
+            'meta' => [
+                'current_page' => $posts->currentPage(),
+                'last_page' => $posts->lastPage(),
+                'has_more' => $posts->hasMorePages(),
+                'total' => $posts->total(),
+            ],
+        ]);
+    }
+
     /**
      * Display the user's profile form.
      */
@@ -37,7 +86,7 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request, ProfilePhotoService $profilePhotos): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -70,11 +119,6 @@ class ProfileController extends Controller
         unset($validated['profile_photo_base64']);
 
         if (is_string($base64) && $base64 !== '') {
-            $mime = null;
-            if (preg_match('#^data:image/(jpeg|jpg|png);base64,#i', $base64, $matches) === 1) {
-                $mime = strtolower($matches[1]);
-            }
-
             $image = $base64;
             $image = (string) preg_replace('/^data:image\/\w+;base64,/', '', $image);
             $image = str_replace(' ', '+', $image);
@@ -94,18 +138,11 @@ class ProfileController extends Controller
             }
 
             $directory = 'profiles/'.$targetUsername;
-            $extension = $mime === 'png' ? 'png' : 'jpg';
-            $fileName = 'avatar_'.time().'.'.$extension;
-            $path = $directory.'/'.$fileName;
-
-            Storage::disk('public')->put($path, $imageDecoded);
 
             $previousPath = $validated['profile_photo'] ?? $user->profile_photo;
-            if ($previousPath && $previousPath !== $path && Storage::disk('public')->exists($previousPath)) {
-                Storage::disk('public')->delete($previousPath);
-            }
+            $profilePhotos->deleteStoredPhoto($previousPath);
 
-            $validated['profile_photo'] = $path;
+            $validated['profile_photo'] = $profilePhotos->storeFromBinary($imageDecoded, $directory);
         }
 
         $user->fill($validated);

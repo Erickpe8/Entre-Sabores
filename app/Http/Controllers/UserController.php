@@ -31,6 +31,8 @@ class UserController extends Controller
             ->whereHas('post', fn ($q) => $q->where('user_id', $user->id))
             ->count();
 
+        $isProfileOwner = auth()->check() && (int) auth()->id() === (int) $user->id;
+
         return view('profile.show', [
             'user' => $user,
             'followersCount' => (int) $user->followers_count,
@@ -38,12 +40,21 @@ class UserController extends Controller
             'postsCount' => (int) $user->posts_count,
             'likesReceived' => (int) $likesReceived,
             'viewerFollows' => $viewerFollows,
+            'isProfileOwner' => $isProfileOwner,
             'profilePostsConfig' => [
                 'postsUrl' => route('users.posts.index', ['username' => $user->username], false),
                 'postPublicBase' => '/posts',
                 'loginUrl' => route('login', [], false),
                 'isAuthenticated' => auth()->check(),
             ],
+            'profileLikesConfig' => $isProfileOwner
+                ? [
+                    'likesUrl' => route('profile.likes', [], false),
+                    'postPublicBase' => '/posts',
+                    'loginUrl' => route('login', [], false),
+                    'isAuthenticated' => true,
+                ]
+                : null,
         ]);
     }
 

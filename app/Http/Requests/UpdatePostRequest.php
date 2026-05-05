@@ -4,11 +4,19 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StorePostRequest extends FormRequest
+class UpdatePostRequest extends FormRequest
 {
     public function authorize(): bool
     {
         return $this->user() !== null;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $content = $this->input('content');
+        if (is_string($content) && ! $this->has('description')) {
+            $this->merge(['description' => $content]);
+        }
     }
 
     /**
@@ -23,7 +31,7 @@ class StorePostRequest extends FormRequest
             'drink' => ['nullable', 'string', 'max:120'],
             'tags' => ['required', 'array', 'min:1'],
             'tags.*' => ['required', 'integer', 'exists:tags,id'],
-            'image' => ['nullable', 'image', 'max:5120'],
         ];
     }
 }
+

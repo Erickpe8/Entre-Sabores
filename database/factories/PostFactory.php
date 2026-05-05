@@ -23,7 +23,14 @@ class PostFactory extends Factory
             'user_id' => User::factory(),
             'title' => fake()->sentence(4),
             'description' => fake()->paragraphs(3, true),
+            'content' => fake()->paragraphs(3, true),
+            'food' => fake()->randomElement(['Tacos', 'Arepa', 'Empanada', 'Ceviche']),
+            'drink' => fake()->randomElement(['Café', 'Agua panela', 'Vino', 'Chocolate']),
             'image_path' => null,
+            'status' => Post::STATUS_ACTIVE,
+            'analysis_status' => Post::ANALYSIS_STATUS_COMPLETED,
+            'analysis_result' => null,
+            'moderation_reason' => null,
         ];
     }
 

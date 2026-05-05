@@ -4,8 +4,17 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **`docker-compose.yml`**: variable de entorno opcional **`DOCKER_ALWAYS_BUILD_ASSETS`** pasada al servicio `app` (coherente con `docker/start.sh`).
+- **Moderación automática IA**: `AIService`, `AnalyzePostJob`, `PostRejectedNotification`, `PostModerationUpdatedBroadcast`, estados de post (`status`, `analysis_status`, `analysis_result`, `moderation_reason`) y soft delete en `posts`.
+- **Edición reutilizable de publicaciones**: el mismo compositor Blade/JS para crear y editar (Axios), con modo `create|edit`, precarga de etiquetas y reanálisis al actualizar.
+- **Accessor en Post**: `display_country` con fallback de país (tag del post -> `user.country`) para mantener bandera consistente.
+
 ### Changed
 
+- **Documentación** (2026-05-05): revisión transversal de **todos los `.md`**: referencias cruzadas a **[DOCUMENTACION.md](DOCUMENTACION.md)** (guía técnica integral), fechas de revisión unificadas, corrección del nombre **`PostAnalysisGeneratedBroadcast`** en [BACKEND.md](BACKEND.md), tabla índice en `DOCUMENTACION.md`, [DOCKER.md](DOCKER.md) actualizado con **Node/npm en imagen**, **`docker/start.sh`** (build de assets si falta `public/build/manifest.json`, variable **`DOCKER_ALWAYS_BUILD_ASSETS`**, modo completo con **`db:seed`** de catálogo), [DATABASE.md](DATABASE.md) alineado con **`DatabaseSeeder`** (prod vs local), [ARCHITECTURE.md](ARCHITECTURE.md) con **`GET /posts/{post}/reanalyze`** (redirección anti-405).
+- **UI notificaciones**: scroll del panel con track transparente (sin fondo opaco).
 - **Documentación** (2026-05-04): alineación con **sin Alpine.js** (módulos vanilla en `resources/js/ui/`), **Laravel Reverb** + variables `VITE_REVERB_*`, **worker de colas en Supervisor** ([DOCKER.md](DOCKER.md)), columna **`posts.ai_analysis`**, ranking **Populares/Tendencia/mixto** con `engagementWithMaridajeExpression()`, ruta **`POST /posts/{post}/reanalyze`**, broadcast **`post.analysis.generated`**, y checklist de producción (colas + broadcasting).
 - **Documentación** (`README.md`, `ARCHITECTURE.md`, `BACKEND.md`, `FRONTEND.md`, `DATABASE.md`, `PERFORMANCE.md`, `SECURITY.md`, `PRODUCTION.md`): revisión completa alineada con el comportamiento real del sistema — **WallFeedService** (ramas «siguiendo», mixto 70/30 con `sort=recent`, exploración global y `sort` popular/trending), parámetros HTTP `sort` y `following`, observabilidad y Docker; referencias cruzadas sin duplicar contenido entre archivos.
 - **UX del feed (documentado)**: la experiencia «tipo para ti» se explica como combinación de **FYP** (fuente del feed) + chip **Recientes** (`sort=recent`, mezcla 70/30 cuando aplica); los chips se denominan **Recientes / Populares / Tendencia** para no repetir el concepto del **FYP** en la misma pantalla.

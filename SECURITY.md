@@ -1,6 +1,8 @@
 # Seguridad
 
-Política práctica y superficie de ataque. **Última revisión:** 2026-05-04.
+> **Buenas prácticas y secretos (API IA solo servidor):** [DOCUMENTACION.md](DOCUMENTACION.md)
+
+Política práctica y superficie de ataque. **Última revisión:** 2026-05-05.
 
 ## Medidas implementadas (resumen)
 

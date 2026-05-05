@@ -2,6 +2,7 @@ import './bootstrap';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 
+import { initAppChromePageshow, resetAppChromeState } from './ui/appChromeReset.js';
 import { initMobileNav } from './ui/mobileNav.js';
 import { initDropdowns } from './ui/dropdowns.js';
 import { initModals } from './ui/modals.js';
@@ -12,6 +13,9 @@ import { initUsernameAvailability } from './ui/usernameAvailability.js';
 import { initAvatarCroppers } from './ui/avatarCropper.js';
 
 window.Cropper = Cropper;
+
+resetAppChromeState();
+initAppChromePageshow();
 
 initMobileNav();
 initDropdowns();

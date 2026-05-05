@@ -166,7 +166,7 @@ export function renderCard(post, options = {}) {
         : '';
     const user = post.user || {};
     const profileUrl = esc(user.profile_url || '#');
-    const avatarUrl = esc(user.avatar || '');
+    const avatarUrl = esc(user.avatar_thumb || user.avatar || '');
     const username = user.username ? esc(String(user.username)) : '';
     const userTitle = username
         ? `<span class="text-slate-100">@${username}</span>`

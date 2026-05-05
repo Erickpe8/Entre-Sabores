@@ -6,20 +6,26 @@
         <p class="mt-2 text-sm text-slate-400">Únete a la comunidad gastronómica.</p>
     </div>
 
-    <form id="register-form" method="POST" action="{{ route('register') }}" enctype="multipart/form-data" class="space-y-4">
+    @php
+        $stepTwoHasErrors = $errors->has('profile_photo') || $errors->has('description');
+    @endphp
+
+    <form id="register-form" method="POST" action="{{ route('register') }}" enctype="multipart/form-data" class="space-y-4" novalidate>
         @csrf
 
-        <div id="step-1" class="space-y-4">
+        <div id="step-1" class="space-y-4 {{ $stepTwoHasErrors ? 'hidden' : '' }}">
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label for="first_name" class="mb-2 block text-sm font-semibold text-slate-100">Nombre</label>
                     <input id="first_name" class="w-full px-3 py-2.5 text-sm rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-green-400" type="text" name="first_name" value="{{ old('first_name') }}" required autofocus autocomplete="given-name" />
+                    <p id="first_name_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
                     <x-input-error :messages="$errors->get('first_name')" class="mt-2 text-sm" />
                 </div>
 
                 <div>
                     <label for="last_name" class="mb-2 block text-sm font-semibold text-slate-100">Apellido</label>
                     <input id="last_name" class="w-full px-3 py-2.5 text-sm rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-green-400" type="text" name="last_name" value="{{ old('last_name') }}" required autocomplete="family-name" />
+                    <p id="last_name_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
                     <x-input-error :messages="$errors->get('last_name')" class="mt-2 text-sm" />
                 </div>
             </div>
@@ -27,6 +33,7 @@
             <div>
                 <label for="email" class="mb-2 block text-sm font-semibold text-slate-100">Correo electrónico</label>
                 <input id="email" class="w-full px-3 py-2.5 text-sm rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-green-400" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" />
+                <p id="email_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
                 <x-input-error :messages="$errors->get('email')" class="mt-2 text-sm" />
             </div>
 
@@ -34,12 +41,14 @@
                 <div>
                     <label for="password" class="mb-2 block text-sm font-semibold text-slate-100">Contraseña</label>
                     <input id="password" class="w-full px-3 py-2.5 text-sm rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-green-400" type="password" name="password" required autocomplete="new-password" />
+                    <p id="password_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
                     <x-input-error :messages="$errors->get('password')" class="mt-2 text-sm" />
                 </div>
 
                 <div>
                     <label for="password_confirmation" class="mb-2 block text-sm font-semibold text-slate-100">Confirmar contraseña</label>
                     <input id="password_confirmation" class="w-full px-3 py-2.5 text-sm rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-green-400" type="password" name="password_confirmation" required autocomplete="new-password" />
+                    <p id="password_confirmation_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
                     <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-sm" />
                 </div>
             </div>
@@ -59,6 +68,7 @@
                     <option value="Paraguay" @selected(old('country') === 'Paraguay')>Paraguay</option>
                     <option value="Uruguay" @selected(old('country') === 'Uruguay')>Uruguay</option>
                 </select>
+                <p id="country_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
                 <x-input-error :messages="$errors->get('country')" class="mt-2 text-sm" />
             </div>
 
@@ -67,7 +77,7 @@
             </button>
         </div>
 
-        <div id="step-2" class="hidden space-y-5 max-w-md">
+        <div id="step-2" class="{{ $stepTwoHasErrors ? '' : 'hidden' }} space-y-5 max-w-md">
             <button type="button" id="openEditor"
                 class="w-full py-3 rounded-xl bg-gradient-to-r from-green-400 to-blue-500 text-white font-semibold hover:opacity-90 transition">
                 Seleccionar y editar foto
@@ -81,6 +91,7 @@
 
             <input type="hidden" id="profile_photo_base64" name="profile_photo_base64">
             <input id="profile_photo" type="file" name="profile_photo" class="hidden" required>
+            <p id="profile_photo_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
             <x-input-error :messages="$errors->get('profile_photo')" class="mt-2 text-sm" />
 
             <div>
@@ -90,6 +101,7 @@
                     name="description"
                     placeholder="Cuéntanos sobre ti..."
                     class="w-full rounded-xl bg-gray-800 border border-gray-600 px-4 py-3 text-white resize-none h-24 custom-scroll focus:outline-none focus:ring-2 focus:ring-green-400">{{ old('description') }}</textarea>
+                <p id="description_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
                 <x-input-error :messages="$errors->get('description')" class="mt-2 text-sm" />
             </div>
 

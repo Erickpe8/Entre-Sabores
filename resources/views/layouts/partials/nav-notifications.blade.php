@@ -1,5 +1,5 @@
 @php($navUnreadCount = (int) auth()->user()->unread_notifications_count)
-@php($navDark = request()->routeIs('dashboard') || request()->routeIs('settings.profile') || request()->routeIs('settings.account') || request()->routeIs('profile.show'))
+@php($navDark = request()->routeIs('dashboard') || request()->routeIs('settings.profile') || request()->routeIs('settings.account') || request()->routeIs('profile.show') || request()->routeIs('posts.show'))
 
 <div
     id="nav-notifications-root"
@@ -50,7 +50,7 @@
         </div>
         <div
             id="nav-notifications-list"
-            class="max-h-[min(55vh,22rem)] overflow-y-auto overscroll-contain"
+            class="max-h-[min(55vh,22rem)] overflow-y-auto overscroll-contain scrollbar-transparent"
         ></div>
         <p
             id="nav-notifications-empty"

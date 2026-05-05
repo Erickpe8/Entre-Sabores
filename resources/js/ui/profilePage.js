@@ -13,6 +13,8 @@ function initProfileTabs() {
         return;
     }
 
+    let likesModuleStarted = false;
+
     const activate = (id) => {
         panels.forEach((p) => {
             p.classList.toggle('hidden', p.getAttribute('data-profile-panel') !== id);
@@ -30,7 +32,14 @@ function initProfileTabs() {
     };
 
     buttons.forEach((btn) => {
-        btn.addEventListener('click', () => activate(btn.getAttribute('data-profile-tab') || 'posts'));
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-profile-tab') || 'posts';
+            activate(id);
+            if (id === 'likes' && !likesModuleStarted && document.getElementById('profile-likes-grid')) {
+                likesModuleStarted = true;
+                void import('../profileLikes.js').then((m) => m.initProfileLikes());
+            }
+        });
     });
 }
 

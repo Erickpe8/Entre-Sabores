@@ -47,4 +47,11 @@ return [
         'timeout' => env('MARIDAJE_AI_TIMEOUT', 90),
     ],
 
+    'content_moderation_ai' => [
+        'api_key' => env('CONTENT_MODERATION_AI_API_KEY'),
+        'base_url' => env('CONTENT_MODERATION_AI_BASE_URL', 'https://api.openai.com/v1'),
+        'model' => env('CONTENT_MODERATION_AI_MODEL', 'gpt-4o-mini'),
+        'timeout' => env('CONTENT_MODERATION_AI_TIMEOUT', 45),
+    ],
+
 ];

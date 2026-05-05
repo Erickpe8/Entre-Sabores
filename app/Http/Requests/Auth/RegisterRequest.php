@@ -37,7 +37,7 @@ class RegisterRequest extends FormRequest
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class, 'email')],
             'password' => ['required', 'confirmed', 'min:8', Password::defaults()],
             'country' => ['required', 'string', Rule::in(self::COUNTRIES)],
-            'profile_photo' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'profile_photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'description' => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -57,7 +57,7 @@ class RegisterRequest extends FormRequest
             'country.in' => 'Selecciona un país válido de la lista.',
             'profile_photo.required' => 'La foto de perfil es obligatoria.',
             'profile_photo.image' => 'La foto de perfil debe ser una imagen válida.',
-            'profile_photo.mimes' => 'La foto de perfil debe estar en formato JPG o PNG.',
+            'profile_photo.mimes' => 'La foto de perfil debe estar en formato JPG, PNG o WebP.',
             'profile_photo.max' => 'La foto de perfil no puede superar los 2 MB.',
             'description.max' => 'La descripción no puede superar los 500 caracteres.',
             'instagram.regex' => 'El usuario de Instagram solo puede incluir letras, números, puntos y guiones bajos.',

@@ -242,6 +242,27 @@
         height: 0;
         display: none;
     }
+
+    /** Scroll visible pero con track transparente */
+    .scrollbar-transparent {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+    }
+
+    .scrollbar-transparent::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .scrollbar-transparent::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-transparent::-webkit-scrollbar-thumb {
+        background-color: rgba(148, 163, 184, 0.45);
+        border-radius: 9999px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
 }
 
 /* Voltear tarjeta: análisis IA (solo clic en botones; hover = ligera elevación) */
@@ -258,16 +279,19 @@
 }
 
 .post-maridaje-flip-inner {
-    display: grid;
-    grid-template-areas: 'stack';
+    position: relative;
+    width: 100%;
     transform-style: preserve-3d;
-    transition: transform 520ms cubic-bezier(0.32, 0.72, 0.28, 1);
+    transition:
+        transform 520ms cubic-bezier(0.32, 0.72, 0.28, 1),
+        height 480ms cubic-bezier(0.32, 0.72, 0.28, 1);
 }
 
 .post-maridaje-front,
 .post-maridaje-back {
-    grid-area: stack;
-    align-self: start;
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 100%;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
@@ -308,6 +332,7 @@
 
 @media (prefers-reduced-motion: reduce) {
     .post-maridaje-flip-inner {
+        transition-property: transform;
         transition-duration: 120ms;
     }
 

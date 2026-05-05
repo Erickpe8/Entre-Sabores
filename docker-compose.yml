@@ -29,6 +29,7 @@ services:
       REDIS_PORT: 6379
       DOCKER_LIGHT_START: "${DOCKER_LIGHT_START:-}"
       DOCKER_RUN_SEED: "${DOCKER_RUN_SEED:-}"
+      DOCKER_ALWAYS_BUILD_ASSETS: "${DOCKER_ALWAYS_BUILD_ASSETS:-}"
     depends_on:
       mysql:
         condition: service_healthy

@@ -1,6 +1,8 @@
 # Producción — guía y checklist
 
-Referencia operativa para despliegue con usuarios reales. **Última revisión:** 2026-05-04.
+> **Flujo IA y colas en producto:** [DOCUMENTACION.md](DOCUMENTACION.md)
+
+Referencia operativa para despliegue con usuarios reales. **Última revisión:** 2026-05-05.
 
 ## Visión rápida
 
@@ -158,6 +160,7 @@ Ejemplo **Reverb** local/Docker: variables `REVERB_APP_*` y `VITE_REVERB_*` alin
 
 ## Documentación relacionada
 
+- [DOCUMENTACION.md](DOCUMENTACION.md) — narrativa completa del sistema (IA, datos, UX).
 - [SECURITY.md](SECURITY.md) — riesgos.
 - [PERFORMANCE.md](PERFORMANCE.md) — rendimiento del feed.
-- [DOCKER.md](DOCKER.md) — stack local.
+- [DOCKER.md](DOCKER.md) — stack local, Supervisor, build de assets en contenedor.

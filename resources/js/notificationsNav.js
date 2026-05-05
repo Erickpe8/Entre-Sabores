@@ -166,6 +166,7 @@ export function initNotificationsNav() {
         if (!row?.dataset.notificationId) {
             return;
         }
+        setNotificationsDropdown(false);
         const id = row.dataset.notificationId;
         axios.post(`/notifications/${id}/read`).then(() => refreshUnreadOnly()).catch(() => {});
     });
@@ -203,6 +204,10 @@ export function initNotificationsNav() {
             }
         }, 100);
     }
+
+    window.addEventListener('entre-sabores:close-notifications', () => {
+        setNotificationsDropdown(false);
+    });
 
     if (panel) {
         panel.setAttribute('aria-hidden', 'true');

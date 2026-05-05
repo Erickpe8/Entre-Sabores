@@ -10,7 +10,11 @@ import {
     relativeTimeEs,
 } from './social/postCard.js';
 import { renderCommentsTreeHtml, setupCommentInteractions } from './social/commentThread.js';
-import { bindMaridajeFlip, buildMaridajeFrontInteractionBar, buildWallModalFlipHtml } from './social/maridajeFlip.js';
+import {
+    bindMaridajeFlip,
+    buildMaridajeFrontInteractionBar,
+    buildWallModalFlipHtml,
+} from './social/maridajeFlip.js';
 
 const CLS = {
     secondary:
@@ -98,6 +102,8 @@ export function initWall() {
     const fabCreatePost = document.getElementById('wall-fab-create-post');
     const createCloseBtn = document.getElementById('create-post-close');
     const createCancelBtn = document.getElementById('create-post-cancel');
+    const createTitleEl = document.getElementById('create-post-title');
+    const createSubmitBtn = document.getElementById('create-post-submit');
     const imageInput = document.getElementById('create-post-field-image');
     const imageZone = document.getElementById('create-post-image-zone');
     const imageEmpty = document.getElementById('create-post-image-empty');
@@ -108,6 +114,10 @@ export function initWall() {
     const descEditable = document.getElementById('create-post-editable-description');
     const hiddenTitle = document.getElementById('create-post-field-title');
     const hiddenDesc = document.getElementById('create-post-field-description');
+    const composerModeInput = document.getElementById('create-post-composer-mode');
+    const editPostIdInput = document.getElementById('create-post-edit-id');
+    const foodInput = document.getElementById('create-post-field-food');
+    const drinkInput = document.getElementById('create-post-field-drink');
     const tagPillsEl = document.getElementById('create-post-card-tag-pills');
     const tagPanel = document.getElementById('create-post-tag-panel');
     const tagPanelDismiss = document.getElementById('create-post-tag-panel-dismiss');
@@ -151,6 +161,43 @@ export function initWall() {
     let modalCommentAbort = null;
     /** @type {(() => void) | null} */
     let modalFlipCleanup = null;
+    const composerState = {
+        mode: 'create',
+        postId: null,
+    };
+
+    const Echo = window.Echo;
+    if (Echo) {
+        const moderationChannel = Echo.channel('posts.moderation');
+        moderationChannel.listen('.post.moderation.updated', (event) => {
+            const postId = Number(event?.post_id);
+            if (!Number.isFinite(postId)) {
+                return;
+            }
+
+            const postCards = document.querySelectorAll(`article[data-post-id="${postId}"]`);
+            if ((event?.status || '') === 'rejected') {
+                postCards.forEach((node) => node.remove());
+
+                const modalPostId = Number(modalBody?.querySelector('[data-modal-post-id]')?.dataset?.modalPostId);
+                if (Number.isFinite(modalPostId) && modalPostId === postId) {
+                    closeModal();
+                }
+
+                showToast(
+                    'Tu post fue retirado automáticamente por políticas de contenido.',
+                    'error',
+                );
+                return;
+            }
+
+            if ((event?.status || '') === 'active') {
+                showToast('Análisis completado: publicación activa.', 'success');
+            } else if ((event?.analysis_status || '') === 'processing') {
+                showToast('Analizando contenido...', 'info');
+            }
+        });
+    }
 
     function revokeCreateImageUrl() {
         if (createImageObjectUrl) {
@@ -952,19 +999,27 @@ export function initWall() {
             const metaJoinedModal = metaPieces.join(
                 '<span class="text-slate-600" aria-hidden="true">·</span>',
             );
+            const canEditPost = p.can_edit === true;
             const userHeaderModal = `
-                <div class="flex gap-3">
-                    <a href="${esc(p.user.profile_url)}" class="wall-post-user-avatar shrink-0 rounded-full ring-1 ring-slate-600/70 outline-none transition hover:ring-emerald-500/50 focus-visible:ring-2 focus-visible:ring-emerald-400/60" aria-label="Ver perfil: @${esc(p.user.username)}">
-                        <img src="${esc(p.user.avatar)}" alt="" class="h-12 w-12 rounded-full object-cover bg-slate-800" width="48" height="48" loading="lazy" decoding="async" />
-                    </a>
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate font-semibold text-slate-100">@${esc(p.user.username)}</p>
-                        ${
-                            metaJoinedModal !== ''
-                                ? `<div class="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] leading-tight">${metaJoinedModal}</div>`
-                                : ''
-                        }
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex min-w-0 flex-1 gap-3">
+                        <a href="${esc(p.user.profile_url)}" class="wall-post-user-avatar shrink-0 rounded-full ring-1 ring-slate-600/70 outline-none transition hover:ring-emerald-500/50 focus-visible:ring-2 focus-visible:ring-emerald-400/60" aria-label="Ver perfil: @${esc(p.user.username)}">
+                            <img src="${esc(p.user.avatar_medium || p.user.avatar_thumb || p.user.avatar)}" alt="" class="h-12 w-12 rounded-full object-cover bg-slate-800" width="48" height="48" loading="lazy" decoding="async" />
+                        </a>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate font-semibold text-slate-100">@${esc(p.user.username)}</p>
+                            ${
+                                metaJoinedModal !== ''
+                                    ? `<div class="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] leading-tight">${metaJoinedModal}</div>`
+                                    : ''
+                            }
+                        </div>
                     </div>
+                    ${
+                        canEditPost
+                            ? `<button type="button" id="wall-post-edit-trigger" class="inline-flex shrink-0 items-center rounded-full border border-cyan-500/40 px-3 py-1.5 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-500/10">Editar post</button>`
+                            : ''
+                    }
                 </div>`;
 
             const tagsLine = (p.tags || [])
@@ -1047,6 +1102,13 @@ export function initWall() {
                 });
             }
 
+            const editTriggerBtn = document.getElementById('wall-post-edit-trigger');
+            if (canEditPost && editTriggerBtn) {
+                editTriggerBtn.addEventListener('click', () => {
+                    openComposerForEdit(p);
+                });
+            }
+
             modalCommentAbort?.abort();
             modalCommentAbort = new AbortController();
             setupCommentInteractions(
@@ -1079,6 +1141,29 @@ export function initWall() {
         document.body.classList.remove('overflow-hidden');
     }
 
+    function setComposerMode(mode, postId = null) {
+        composerState.mode = mode === 'edit' ? 'edit' : 'create';
+        composerState.postId = composerState.mode === 'edit' ? Number(postId) : null;
+
+        if (composerModeInput) {
+            composerModeInput.value = composerState.mode;
+        }
+        if (editPostIdInput) {
+            editPostIdInput.value =
+                composerState.mode === 'edit' && Number.isFinite(composerState.postId)
+                    ? String(composerState.postId)
+                    : '';
+        }
+        if (createTitleEl) {
+            createTitleEl.textContent =
+                composerState.mode === 'edit' ? 'Editar publicación' : 'Nueva publicación';
+        }
+        if (createSubmitBtn) {
+            createSubmitBtn.textContent =
+                composerState.mode === 'edit' ? 'Guardar cambios' : 'Publicar';
+        }
+    }
+
     function openCreateModal() {
         if (!createModal) {
             return;
@@ -1099,6 +1184,7 @@ export function initWall() {
     function resetCreateForm() {
         closeTagPanel();
         createForm?.reset();
+        setComposerMode('create');
         selectedCreateTags.clear();
         selectedTagMeta.clear();
         if (tagInput) {
@@ -1136,11 +1222,48 @@ export function initWall() {
         if (hiddenDesc) {
             hiddenDesc.value = '';
         }
+        if (foodInput) {
+            foodInput.value = '';
+        }
+        if (drinkInput) {
+            drinkInput.value = '';
+        }
         if (createErrors) {
             createErrors.classList.add('hidden');
             createErrors.textContent = '';
         }
         scheduleSyncEditableCard();
+    }
+
+    function openComposerForEdit(post) {
+        resetCreateForm();
+        setComposerMode('edit', post.id);
+
+        if (titleEditable) {
+            titleEditable.textContent = post.title || '';
+            updateCeEmptyClass(titleEditable);
+        }
+        if (descEditable) {
+            descEditable.textContent = post.description || '';
+            updateCeEmptyClass(descEditable);
+        }
+        if (foodInput) {
+            foodInput.value = post.food || '';
+        }
+        if (drinkInput) {
+            drinkInput.value = post.drink || '';
+        }
+
+        selectedCreateTags.clear();
+        selectedTagMeta.clear();
+        (post.tags || []).forEach((tag) => addSelectedTag(tag));
+        scheduleSyncEditableCard();
+
+        closeModal();
+        openCreateModal();
+        window.requestAnimationFrame(() => {
+            titleEditable?.focus();
+        });
     }
 
     function applyImageFile(file) {
@@ -1264,13 +1387,39 @@ export function initWall() {
         }
 
         try {
-            // No fijar Content-Type manualmente: FormData necesita boundary; Axios lo añade solo.
-            const { data } = await axios.post(config.postStoreUrl, fd);
+            const isEdit = composerState.mode === 'edit' && Number.isFinite(composerState.postId);
+            const targetPostId = isEdit ? Number(composerState.postId) : null;
+            const requestUrl = isEdit ? `${config.postBaseUrl}/${targetPostId}` : config.postStoreUrl;
+
+            let response;
+            if (isEdit) {
+                fd.append('_method', 'PUT');
+                response = await axios.post(requestUrl, fd);
+            } else {
+                response = await axios.post(requestUrl, fd);
+            }
+
+            const data = response.data || {};
             const post = data.post;
-            showToast('Tu publicación ya está en el muro.', 'success');
+            showToast(
+                isEdit ? 'Post actualizado, re-analizando...' : 'Analizando contenido...',
+                'info',
+            );
             closeCreateModal();
             resetCreateForm();
-            if (feedEl && post) {
+            if (feedEl && post && isEdit) {
+                const existing = feedEl.querySelector(`article[data-post-id="${post.id}"]`);
+                const replacement = renderCard(post, {
+                    onOpenDetail: (id) => {
+                        void openModal(id);
+                    },
+                });
+                if (existing) {
+                    existing.replaceWith(replacement);
+                } else {
+                    feedEl.insertBefore(replacement, feedEl.firstChild);
+                }
+            } else if (feedEl && post) {
                 feedEl.insertBefore(
                     renderCard(post, {
                         onOpenDetail: (id) => {
@@ -1280,7 +1429,11 @@ export function initWall() {
                     feedEl.firstChild,
                 );
             }
-            setFeedStatus('Nueva publicación añadida al feed.');
+            setFeedStatus(
+                isEdit
+                    ? 'Publicación actualizada y enviada a reanálisis.'
+                    : 'Nueva publicación añadida al feed.',
+            );
         } catch (err) {
             const res = err.response;
             if (res?.status === 422 && res.data?.errors) {

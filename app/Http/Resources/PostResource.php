@@ -34,11 +34,17 @@ class PostResource extends JsonResource
             : null;
 
         $analysis = is_array($this->ai_analysis) ? $this->ai_analysis : null;
+        $analysisStatus = is_string($this->analysis_status) ? $this->analysis_status : Post::ANALYSIS_STATUS_PENDING;
+        $analysisResult = is_array($this->analysis_result) ? $this->analysis_result : null;
 
         $base = [
             'id' => $this->id,
             'title' => $this->title,
+            'content' => $this->content ?? $this->description,
             'description' => $this->description,
+            'food' => $this->food,
+            'drink' => $this->drink,
+            'status' => $this->status,
             'excerpt' => self::makeExcerpt($this->description),
             'image_url' => $this->image_url,
             'comments_count' => (int) ($this->comments_count ?? 0),
@@ -46,8 +52,12 @@ class PostResource extends JsonResource
             'engagement_score' => ((int) ($this->likes_count ?? 0)) * 2 + ((int) ($this->comments_count ?? 0)) * 3,
             'liked' => auth()->check() && (bool) data_get($this->resource, 'liked_by_me', false),
             'created_at' => $this->created_at?->toIso8601String(),
+            'analysis_status' => $analysisStatus,
+            'analysis_result' => $analysisResult,
+            'moderation_reason' => $this->moderation_reason,
             'ai_analysis' => $this->ai_analysis,
             'maridaje_highlighted' => self::isMaridajeHighlighted($analysis),
+            'can_edit' => auth()->check() && auth()->id() === (int) $this->user_id,
             'tags' => $tags instanceof Collection
                 ? $tags->map(fn ($t) => [
                     'id' => $t->id,
@@ -68,6 +78,8 @@ class PostResource extends JsonResource
                 'name' => trim($user->first_name.' '.$user->last_name),
                 'username' => $user->username,
                 'avatar' => $user->profile_photo_url,
+                'avatar_thumb' => $user->profile_photo_thumb_url,
+                'avatar_medium' => $user->profile_photo_medium_url,
                 'profile_url' => route('profile.show', ['username' => $user->username]),
                 'country' => self::userCountryMeta($user->country),
             ],

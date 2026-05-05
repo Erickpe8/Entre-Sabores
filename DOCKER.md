@@ -1,6 +1,10 @@
 # Entre Sabores — desarrollo con Docker
 
-Stack: **PHP 8.4 (FPM)**, **Nginx**, **MySQL 8**, **phpMyAdmin** y **Redis** (caché/colas o futuros workers).
+> **Narrativa IA + colas (contexto producto):** [DOCUMENTACION.md](DOCUMENTACION.md)
+
+Stack: **PHP 8.4 (FPM)**, **Nginx**, **MySQL 8**, **phpMyAdmin** y **Redis** (caché/colas o futuros workers). La imagen incluye **Node.js y npm** para poder ejecutar `npm ci` + `npm run build` **dentro del contenedor** cuando haga falta (p. ej. volumen que oculta `public/build`).
+
+**Última revisión:** 2026-05-05.
 
 ## Rendimiento en desarrollo (Docker)
 
@@ -22,8 +26,9 @@ Stack: **PHP 8.4 (FPM)**, **Nginx**, **MySQL 8**, **phpMyAdmin** y **Redis** (ca
 
 Docker Compose sustituye estas claves al leer `docker-compose.yml`:
 
-- **`DOCKER_LIGHT_START`** — `1` = arranque rápido (sin caches de config/ruta/vistas en el `start`). `0` = igual que antes (optimize + caches + migraciones; seed en local si aplica al modo completo).
-- **`DOCKER_RUN_SEED`** — `1` = ejecutar `db:seed` en el arranque cuando el modo ligero está activo (útil la primera vez).
+- **`DOCKER_LIGHT_START`** — `1` = arranque rápido (sin `config:cache` / `route:cache` / `view:cache` en el `start`; solo `migrate --force`). `0` = modo producción en contenedor: `optimize:clear`, caches Laravel, `migrate`, **`db:seed`** (catálogo en prod; demos solo en `local`).
+- **`DOCKER_RUN_SEED`** — `1` = ejecutar `db:seed` en arranque **solo si** el modo ligero está activo (útil la primera vez en dev).
+- **`DOCKER_ALWAYS_BUILD_ASSETS`** — `1` | `true` | `yes` = forzar `npm ci && npm run build` aunque exista `public/build/manifest.json`.
 
 ### Cómo medir mejoras
 
@@ -91,14 +96,9 @@ Docker Compose sustituye estas claves al leer `docker-compose.yml`:
    docker compose exec app composer update
    ```
 
-6. **Frontend (Vite)** no está en los contenedores: en el host, con Node instalado:
-
-   ```bash
-   npm install
-   npm run dev
-   ```
-
-   Para solo assets de producción: `npm run build` (genera `public/build` en el volumen compartido).
+6. **Frontend (Vite):**
+   - **En el host:** `npm install`, `npm run dev` (desarrollo) o `npm run build` (genera `public/build`).
+   - **En el contenedor:** `docker/start.sh` ejecuta automáticamente **`npm ci && npm run build`** si falta `public/build/manifest.json` o si `DOCKER_ALWAYS_BUILD_ASSETS=1` (la imagen incluye Node/npm). Así se recupera el build cuando un bind mount tapa los assets empaquetados en la imagen.
 
 ## Variables útiles (`.env` o entorno al invocar compose)
 
@@ -106,6 +106,7 @@ Docker Compose sustituye estas claves al leer `docker-compose.yml`:
 - `APP_PORT` — mapea el puerto de Nginx (por defecto 8080).
 - `PMA_PORT` — phpMyAdmin (por defecto 8081).
 - `DB_PORT_EXPOSED` / `REDIS_PORT_EXPOSED` — si necesitas evitar colisiones con instancias locales.
+- `DOCKER_LIGHT_START`, `DOCKER_RUN_SEED`, `DOCKER_ALWAYS_BUILD_ASSETS` — ver sección *Rendimiento en desarrollo* arriba y `docker/start.sh`.
 
 ## Conexión desde el host a MySQL
 

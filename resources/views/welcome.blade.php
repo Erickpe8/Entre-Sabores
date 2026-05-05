@@ -38,29 +38,7 @@
 <body class="min-h-[100dvh] bg-slate-950 font-sans text-white antialiased">
     <section class="relative flex min-h-[100dvh] flex-col overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/95">
 
-        <header class="relative z-20">
-            <div class="mx-auto flex w-full max-w-[1400px] items-center gap-3 px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-7">
-                <a href="/" class="flex shrink-0 items-center gap-2 sm:gap-3 whitespace-nowrap">
-                    <img
-                        src="{{ asset('favicon.png') }}"
-                        alt="Logo Entre Sabores"
-                        class="h-9 w-9 object-contain sm:h-10 sm:w-10"
-                    >
-                    <span class="hidden sm:inline text-lg font-extrabold tracking-tight">Entre Sabores</span>
-                </a>
-
-                <nav class="hidden items-center gap-8 text-base font-semibold text-white/90 lg:flex">
-                    <a href="#" class="transition hover:text-cyan-300">Inicio</a>
-                    <a href="#explorar" class="transition hover:text-cyan-300">Explorar</a>
-                    <a href="#como-funciona" class="transition hover:text-cyan-300">Cómo funciona</a>
-                </nav>
-
-                <div class="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
-                    <a href="{{ route('login') }}" class="btn h-10 sm:h-12 btn-outline px-3 sm:px-6 text-sm sm:text-base">Iniciar sesión</a>
-                    <a href="{{ route('register') }}" class="btn h-10 sm:h-12 bg-gradient-to-r from-cyan-300 to-emerald-300 px-3 sm:px-6 text-sm sm:text-base font-bold text-slate-900 shadow-md shadow-cyan-500/20 hover:brightness-110">Registrarse</a>
-                </div>
-            </div>
-        </header>
+        @include('layouts.partials.marketing-header', ['active' => null])
 
         <main class="relative z-10 mx-auto flex w-full max-w-[1400px] flex-1 flex-col items-center justify-between gap-10 px-8 pt-10 pb-12 lg:flex-row lg:gap-10 xl:gap-16 lg:py-16">
             <div class="-mt-6 max-w-2xl space-y-5 text-center lg:-mt-10 lg:text-left">
