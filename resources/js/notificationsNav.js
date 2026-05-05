@@ -32,6 +32,21 @@ function showRealtimeToast(message, themeDark) {
     }, 5200);
 }
 
+function resolveAvatarUrl(raw) {
+    const value = String(raw || '').trim();
+    if (!value) {
+        return '/images/default.png';
+    }
+
+    const isAbsoluteHttp = /^https?:\/\//i.test(value);
+    const isAbsoluteLocal = value.startsWith('/') || value.startsWith('data:image/');
+    if (isAbsoluteHttp || isAbsoluteLocal) {
+        return value;
+    }
+
+    return '/images/default.png';
+}
+
 /** Evita doble init si el bundle se cargara dos veces (defensa). */
 let notificationsNavInitialized = false;
 
@@ -136,13 +151,14 @@ export function initNotificationsNav() {
                     const url = esc(d.url || '#');
                     const title = esc(d.title || 'Actividad');
                     const body = esc(d.body || '');
+                    const avatarUrl = esc(resolveAvatarUrl(d.actor_avatar));
                     const read = n.read === true;
                     const when = esc(formatNotifTime(n.created_at));
                     const rowVisual = read ? styles.rowRead : styles.rowUnread;
 
                     return `
 <a href="${url}" class="notification-row flex gap-3 px-3 py-3 text-left transition ${rowVisual} border-b ${styles.rowBorder} last:border-0" data-notification-id="${esc(n.id)}">
-    <img src="${esc(d.actor_avatar || '')}" alt="" width="40" height="40" class="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ${styles.ring} ${styles.imgBg}" loading="lazy" />
+    <img src="${avatarUrl}" alt="" width="40" height="40" class="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ${styles.ring} ${styles.imgBg}" loading="lazy" />
     <span class="min-w-0 flex-1">
         <span class="block text-sm font-medium ${styles.title} leading-snug">${title}</span>
         <span class="block text-xs ${styles.body} mt-0.5 line-clamp-2">${body}</span>
@@ -275,8 +291,9 @@ export function initNotificationsNav() {
 
     if (Echo && uid != null) {
         Echo.private(`user.${uid}`).listen('.notification.created', (payload) => {
-            updateBadge(badge, payload.unread_count ?? 0);
-            showRealtimeToast(String(payload.title || 'Nueva notificación'), themeDark);
+            const safePayload = payload ?? {};
+            updateBadge(badge, safePayload.unread_count ?? 0);
+            showRealtimeToast(String(safePayload.title || 'Nueva notificación'), themeDark);
             window.dispatchEvent(new CustomEvent('entre-sabores:notifications-refresh'));
         });
 

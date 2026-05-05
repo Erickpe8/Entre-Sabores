@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Feed del muro: mezcla seguidos/popular, ranking por engagement y filtros de exploración.
@@ -22,17 +23,12 @@ class WallFeedService
         'posts.user_id',
         'posts.title',
         'posts.description',
-        'posts.content',
-        'posts.food',
-        'posts.drink',
-        'posts.ai_analysis',
-        'posts.status',
-        'posts.analysis_status',
-        'posts.analysis_result',
-        'posts.moderation_reason',
         'posts.image_path',
         'posts.created_at',
     ];
+
+    /** @var array<string, bool>|null */
+    private static ?array $postColumnPresence = null;
 
     public static function engagementScoreExpression(): string
     {
@@ -44,6 +40,10 @@ class WallFeedService
      */
     public static function aiAnalysisScoreSql(): string
     {
+        if (! self::postColumnExists('ai_analysis')) {
+            return '0';
+        }
+
         return match (DB::connection()->getDriverName()) {
             'sqlite' => 'CAST(json_extract(posts.ai_analysis, \'$.score\') AS INTEGER)',
             'pgsql' => '(CASE WHEN posts.ai_analysis IS NULL THEN NULL ELSE (posts.ai_analysis::jsonb->>\'score\')::integer END)',
@@ -238,8 +238,15 @@ class WallFeedService
 
     private function baseQuery(): Builder
     {
+        $columns = self::POST_COLUMNS;
+        foreach (['content', 'food', 'drink', 'ai_analysis', 'status', 'analysis_status', 'analysis_result', 'moderation_reason'] as $optional) {
+            if (self::postColumnExists($optional)) {
+                $columns[] = 'posts.'.$optional;
+            }
+        }
+
         $query = Post::query()
-            ->select(self::POST_COLUMNS)
+            ->select($columns)
             ->with([
                 'user:id,first_name,last_name,username,profile_photo',
                 'tags' => fn ($q) => $q
@@ -249,16 +256,18 @@ class WallFeedService
             ])
             ->withCount(['comments', 'likes']);
 
-        if (auth()->check()) {
-            $query->where(function (Builder $sub): void {
-                $sub->where('posts.status', Post::STATUS_ACTIVE)
-                    ->orWhere(function (Builder $own): void {
-                        $own->where('posts.user_id', auth()->id())
-                            ->whereIn('posts.status', [Post::STATUS_PENDING, Post::STATUS_ACTIVE]);
-                    });
-            });
-        } else {
-            $query->where('posts.status', Post::STATUS_ACTIVE);
+        if (self::postColumnExists('status')) {
+            if (auth()->check()) {
+                $query->where(function (Builder $sub): void {
+                    $sub->where('posts.status', Post::STATUS_ACTIVE)
+                        ->orWhere(function (Builder $own): void {
+                            $own->where('posts.user_id', auth()->id())
+                                ->whereIn('posts.status', [Post::STATUS_PENDING, Post::STATUS_ACTIVE]);
+                        });
+                });
+            } else {
+                $query->where('posts.status', Post::STATUS_ACTIVE);
+            }
         }
 
         if (auth()->check()) {
@@ -268,6 +277,24 @@ class WallFeedService
         }
 
         return $query;
+    }
+
+    private static function postColumnExists(string $column): bool
+    {
+        if (self::$postColumnPresence === null) {
+            self::$postColumnPresence = [];
+
+            try {
+                $listing = Schema::getColumnListing('posts');
+                foreach ($listing as $name) {
+                    self::$postColumnPresence[(string) $name] = true;
+                }
+            } catch (\Throwable) {
+                // Si no podemos inspeccionar esquema, asumimos columnas legacy mínimas.
+            }
+        }
+
+        return self::$postColumnPresence[$column] ?? false;
     }
 
     private function applyExploreFilters(Builder $query, FilterPostsRequest $request): void
