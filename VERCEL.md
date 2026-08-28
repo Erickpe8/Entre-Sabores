@@ -73,14 +73,14 @@ Copia [.env.vercel.example](.env.vercel.example) como guía. Mínimo en Vercel D
 
 | Variable | Notas |
 |----------|-------|
-| `APP_KEY` | `php artisan key:generate --show` |
-| `APP_URL` | URL de producción |
+| `APP_KEY` | **Obligatoria** — `php artisan key:generate --show` |
+| `APP_URL` | URL de producción (`https://entre-sabores.vercel.app`) |
 | `TRUSTED_PROXIES` | `*` detrás del proxy de Vercel |
 | `DB_*` | MySQL externo |
-| `REDIS_URL` o `REDIS_HOST` + credenciales | Sesión, caché y cola |
-| `SESSION_DRIVER` | `redis` |
-| `CACHE_STORE` | `redis` |
-| `QUEUE_CONNECTION` | `redis` o `database` |
+| `REDIS_URL` o `REDIS_HOST` + credenciales | Solo si `SESSION_DRIVER=redis`; si falta, la app hace fallback a `file` |
+| `SESSION_DRIVER` | `file` al inicio; `redis` cuando Upstash esté listo |
+| `CACHE_STORE` | `file` al inicio; `redis` en producción madura |
+| `QUEUE_CONNECTION` | `sync` al inicio; `redis` + cron externo cuando proceda |
 | `CRON_SECRET` | Secreto largo; Vercel lo envía como `Authorization: Bearer` |
 | `VITE_*` | Necesarias en **build** para compilar Echo/Pusher |
 
@@ -202,7 +202,11 @@ Sin Pusher, la app funciona pero sin notificaciones en vivo.
 |---------|----------------|----------|
 | `No Output Directory named "dist"` | Vercel trata el repo como Vite estático; faltan `vercel.json` / `Dockerfile.vercel` en la rama desplegada | Subir esos archivos; Framework Preset → **Other**; Output Directory vacío |
 | Cron `* * * * *` rechazado | Plan Hobby: máx. un cron **diario** | Usar schedule diario en `vercel.json`; cola vía cron externo o Pro |
-| `Could not open input file: artisan` en build | `composer install` ejecuta scripts antes de copiar el código | Corregido en `Dockerfile.vercel` con `--no-scripts` + `package:discover` al final |
+| `Could not open input file: artisan` en build | `composer install` ejecuta scripts antes de copiar el código | `composer install --no-scripts`; `package:discover` en entrypoint con `APP_KEY` real |
+| Build falla en `package:discover` | `APP_KEY` placeholder inválida en imagen | No ejecutar artisan en build; discovery en arranque del contenedor |
+| **500** `Class "config" does not exist` | `config()` usado en `bootstrap/app.php` antes de cargar config | Usar `env('TRUSTED_PROXIES')` en bootstrap, no `config()` |
+| **500** en `/` | `APP_KEY` vacía, Redis/MySQL mal configurados, o excepción Laravel | Revisar logs; definir `APP_KEY`; usar `SESSION_DRIVER=file` hasta tener Upstash; probar `GET /up` |
+| **504** (300 s) | Entrypoint bloqueaba con `config:cache` / `migrate` antes de abrir HTTP | Entrypoint mínimo; no usar `VERCEL_RUN_MIGRATIONS=1` salvo BD lista |
 | 502 tras deploy | Servidor no escucha en `$PORT` | Caddyfile usa `:{$PORT:80}` |
 | Assets sin estilo | Build sin `VITE_*` | Definir variables en Vercel antes del build |
 | Sesión se pierde | `SESSION_DRIVER=file` | Usar `redis` |

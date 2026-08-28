@@ -116,3 +116,6 @@ lerna-debug.log*
 # --- Miscelánea ---
 *.orig
 *.rej
+
+.vercel
+.env*

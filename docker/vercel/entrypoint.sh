@@ -18,18 +18,15 @@ chmod -R ug+rwX storage bootstrap/cache 2>/dev/null || true
 php artisan storage:link --force >/dev/null 2>&1 || true
 
 if [ -n "${APP_KEY:-}" ]; then
-	echo "[vercel] Generando caches de configuración..."
-	php artisan config:cache
-	php artisan route:cache
-	php artisan view:cache
+	echo "[vercel] Registrando service providers..."
+	php artisan package:discover --ansi
 else
-	echo "[vercel] APP_KEY no definida; omitiendo config:cache en arranque."
+	echo "[vercel] APP_KEY no definida; omitiendo package:discover."
 fi
 
-if [ "${VERCEL_RUN_MIGRATIONS:-}" = "1" ]; then
-	echo "[vercel] Ejecutando migraciones..."
-	php artisan migrate --force
-fi
+# No ejecutar config:route:view cache ni migrate aquí: en cold start bloquean
+# el HTTP hasta 300s (504) y config:cache impide leer env() en runtime.
+# Las variables de Vercel se leen en cada request sin .env en disco.
 
 echo "[vercel] Iniciando FrankenPHP..."
 exec "$@"

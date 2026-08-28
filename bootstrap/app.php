@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // env() aquí: config() aún no está disponible en este punto del bootstrap.
         $trusted = env('TRUSTED_PROXIES');
         if (filled($trusted)) {
             $at = str_contains((string) $trusted, ',')
