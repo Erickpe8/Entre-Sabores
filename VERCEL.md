@@ -202,6 +202,7 @@ Sin Pusher, la app funciona pero sin notificaciones en vivo.
 |---------|----------------|----------|
 | `No Output Directory named "dist"` | Vercel trata el repo como Vite estático; faltan `vercel.json` / `Dockerfile.vercel` en la rama desplegada | Subir esos archivos; Framework Preset → **Other**; Output Directory vacío |
 | Cron `* * * * *` rechazado | Plan Hobby: máx. un cron **diario** | Usar schedule diario en `vercel.json`; cola vía cron externo o Pro |
+| `Could not open input file: artisan` en build | `composer install` ejecuta scripts antes de copiar el código | Corregido en `Dockerfile.vercel` con `--no-scripts` + `package:discover` al final |
 | 502 tras deploy | Servidor no escucha en `$PORT` | Caddyfile usa `:{$PORT:80}` |
 | Assets sin estilo | Build sin `VITE_*` | Definir variables en Vercel antes del build |
 | Sesión se pierde | `SESSION_DRIVER=file` | Usar `redis` |

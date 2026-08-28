@@ -46,7 +46,8 @@ RUN composer install \
 	--no-interaction \
 	--no-progress \
 	--prefer-dist \
-	--optimize-autoloader
+	--optimize-autoloader \
+	--no-scripts
 
 FROM dunglas/frankenphp:1-php8.4-bookworm AS app
 
@@ -77,7 +78,8 @@ COPY docker/vercel/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 RUN mkdir -p storage/app/public storage/logs storage/framework/sessions storage/framework/views storage/framework/cache/data bootstrap/cache \
-	&& chmod -R ug+rwX storage bootstrap/cache
+	&& chmod -R ug+rwX storage bootstrap/cache \
+	&& APP_KEY=base64:YnVpbGRwbGFjZWhvbGRlcnVudGltZW9ubHk= php artisan package:discover --ansi
 
 ENV PORT=80 \
 	APP_ENV=production
