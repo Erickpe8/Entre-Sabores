@@ -1,0 +1,679 @@
+{
+    "edges": [
+        {
+            "from": "social.wall",
+            "to": "social.wall.feed",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.wall",
+            "to": "social.posts",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.wall",
+            "to": "social.tags",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.wall.feed",
+            "to": "social.posts",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.posts",
+            "to": "social.tags",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.posts",
+            "to": "ai.moderation",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.posts",
+            "to": "ai.maridaje",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.likes",
+            "to": "social.posts",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.likes",
+            "to": "notifications.inbox",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.likes",
+            "to": "realtime.broadcasting",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.comments",
+            "to": "social.posts",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.comments",
+            "to": "notifications.inbox",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.comments",
+            "to": "realtime.broadcasting",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.follows",
+            "to": "identity.auth",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "social.follows",
+            "to": "notifications.inbox",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "identity.profile",
+            "to": "identity.auth",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "identity.profile",
+            "to": "identity.photos",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "identity.profile",
+            "to": "social.posts",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "ai.moderation",
+            "to": "ai.moderation.engine",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "ai.moderation",
+            "to": "social.posts",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "ai.moderation",
+            "to": "realtime.broadcasting",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "ai.moderation.engine",
+            "to": "ai.moderation",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "ai.maridaje",
+            "to": "ai.maridaje.engine",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "ai.maridaje",
+            "to": "social.posts",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "ai.maridaje",
+            "to": "realtime.broadcasting",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "ai.maridaje.engine",
+            "to": "ai.maridaje",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "notifications.inbox",
+            "to": "realtime.broadcasting",
+            "type": "depends_on",
+            "confidence": 1,
+            "source": "catalog",
+            "inferred": false,
+            "weight": 1
+        },
+        {
+            "from": "identity.photos",
+            "to": "identity.auth",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "notifications.inbox",
+            "to": "identity.auth",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 4
+        },
+        {
+            "from": "identity.auth",
+            "to": "identity.photos",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "social.follows",
+            "to": "identity.auth",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "social.comments",
+            "to": "social.posts",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "social.comments",
+            "to": "identity.auth",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "social.posts",
+            "to": "ai.maridaje",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "social.posts",
+            "to": "ai.moderation",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "social.posts",
+            "to": "platform.observability",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "social.likes",
+            "to": "social.posts",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 4
+        },
+        {
+            "from": "identity.profile",
+            "to": "social.posts",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 4
+        },
+        {
+            "from": "identity.profile",
+            "to": "identity.photos",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "identity.profile",
+            "to": "social.likes",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "identity.profile",
+            "to": "identity.auth",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 5
+        },
+        {
+            "from": "social.wall",
+            "to": "social.tags",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "social.wall",
+            "to": "social.wall.feed",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "social.posts",
+            "to": "social.comments",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "social.posts",
+            "to": "social.tags",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 6
+        },
+        {
+            "from": "ai.moderation",
+            "to": "social.posts",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "ai.moderation",
+            "to": "ai.moderation.engine",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "ai.maridaje",
+            "to": "social.posts",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "ai.maridaje",
+            "to": "ai.maridaje.engine",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "realtime.broadcasting",
+            "to": "social.comments",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "realtime.broadcasting",
+            "to": "platform.observability",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 6
+        },
+        {
+            "from": "realtime.broadcasting",
+            "to": "notifications.inbox",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "realtime.broadcasting",
+            "to": "social.likes",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "social.likes",
+            "to": "identity.auth",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 3
+        },
+        {
+            "from": "social.posts",
+            "to": "identity.auth",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 5
+        },
+        {
+            "from": "ai.moderation.engine",
+            "to": "social.posts",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "social.wall.feed",
+            "to": "social.wall",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "social.wall.feed",
+            "to": "social.posts",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "platform.observability",
+            "to": "social.posts",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "realtime.broadcasting",
+            "to": "identity.auth",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 2
+        },
+        {
+            "from": "realtime.broadcasting",
+            "to": "social.posts",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "ai.maridaje",
+            "to": "identity.auth",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "social.likes",
+            "to": "social.comments",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "social.likes",
+            "to": "social.tags",
+            "type": "uses",
+            "confidence": 0.85,
+            "source": "import-analysis",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
+            "to": "social.posts",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
+            "to": "social.likes",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
+            "to": "social.comments",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
+            "to": "social.follows",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
+            "to": "social.tags",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
+            "to": "identity.auth",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
+            "to": "identity.profile",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
+            "to": "ai.maridaje",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
+            "to": "realtime.broadcasting",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
+            "to": "notifications.inbox",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
+            "to": "platform.observability",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        }
+    ]
+}
