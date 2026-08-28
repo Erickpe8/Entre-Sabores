@@ -58,6 +58,19 @@ Git push / vercel deploy
 
 El `Dockerfile` y `docker-compose.yml` existentes siguen siendo para **desarrollo local**; no los sustituye este flujo.
 
+## Rama de despliegue (solo `main`)
+
+**Política del proyecto:** en Vercel solo se despliega la rama **`main`**. Ni `develop` ni `feature/*` generan build ni URL en Vercel.
+
+| Capa | Configuración |
+|------|----------------|
+| `vercel.json` | `ignoreCommand` omite el build si la rama no es `main`; `git.deploymentEnabled.develop: false` |
+| Vercel Dashboard | **Settings → Git → Production Branch:** `main` |
+| Vercel Dashboard | **Settings → Git:** desactivar *Preview Deployments* para otras ramas (recomendado) |
+| Flujo Git del repo | Integrar en `develop` vía PR; promover a producción con PR **`develop` → `main`** — el push/merge a `main` dispara el deploy |
+
+Los merges a `develop` **no** deben desplegar en Vercel. Solo cuando el código llega a `main`.
+
 ## Requisitos previos
 
 1. Cuenta en [Vercel](https://vercel.com)
@@ -108,7 +121,7 @@ Luego haz **Redeploy** tras subir `vercel.json` y `Dockerfile.vercel` al reposit
 
 ### 2. Configurar variables
 
-Añade las variables de `.env.vercel.example` en **Production** y **Preview**. Las `VITE_*` deben estar disponibles también en el paso de build.
+Añade las variables de `.env.vercel.example` en **Production** (rama `main`). Las `VITE_*` deben estar disponibles también en el paso de build.
 
 ### 3. CLI (alternativa)
 
@@ -116,9 +129,10 @@ Añade las variables de `.env.vercel.example` en **Production** y **Preview**. L
 vercel login
 vercel link
 vercel env pull .env.vercel.local   # opcional, solo desarrollo
-vercel deploy                        # preview
-vercel deploy --prod                 # producción
+vercel deploy --prod                 # producción (solo si apunta a main)
 ```
+
+Evita `vercel deploy` sin `--prod` desde ramas que no sean `main`; el proyecto no usa preview deployments en Vercel.
 
 ### 4. Probar localmente la imagen
 

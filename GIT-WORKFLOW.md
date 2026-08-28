@@ -50,7 +50,7 @@ Cuando `develop` esté listo para liberar:
 - **Base:** `main`
 - **Compare:** `develop`
 
-Merge a `main` (y despliegue según [PRODUCTION.md](PRODUCTION.md)).
+Merge a `main` (dispara despliegue en Vercel — **solo esta rama**; ver [VERCEL.md](VERCEL.md)).
 
 ## Reglas
 
@@ -59,6 +59,7 @@ Merge a `main` (y despliegue según [PRODUCTION.md](PRODUCTION.md)).
 3. **Solo `develop` → `main`** promueve integración a la rama estable.
 4. **No commits directos** en `main` ni `develop` (salvo emergencia acordada en equipo).
 5. **Una tarea, una rama**; no acumular cambios no relacionados.
+6. **Vercel despliega únicamente `main`**; `develop` y features no generan build en Vercel.
 
 ## Nombres sugeridos
 
