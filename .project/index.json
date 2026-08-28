@@ -1,0 +1,1159 @@
+{
+    "truth_rule": "El índice decide QUÉ LEER, no QUÉ ES VERDAD. El código es la fuente de verdad.",
+    "nodes": {
+        "entre-sabores": {
+            "id": "entre-sabores",
+            "type": "project",
+            "name": "Entre Sabores",
+            "summary": "Raíz conceptual del monolito Laravel 13 de la red social gastronómica.",
+            "status": "implemented",
+            "parent": null,
+            "children": [
+                "domain.social",
+                "domain.identity",
+                "domain.ai",
+                "domain.realtime",
+                "domain.notifications",
+                "domain.platform",
+                "domain.infrastructure",
+                "domain.docs",
+                "domain.tests"
+            ],
+            "depends_on": [],
+            "entrypoints": [
+                "README.md",
+                "ARCHITECTURE.md",
+                "bootstrap/app.php"
+            ],
+            "aliases": [
+                "entre sabores",
+                "coil"
+            ]
+        },
+        "domain.social": {
+            "id": "domain.social",
+            "type": "domain",
+            "name": "Red social",
+            "summary": "Muro, publicaciones, likes, comentarios, seguimiento y etiquetas.",
+            "status": "implemented",
+            "parent": "entre-sabores",
+            "children": [
+                "social.wall",
+                "social.posts",
+                "social.likes",
+                "social.comments",
+                "social.follows",
+                "social.tags"
+            ],
+            "depends_on": [],
+            "entrypoints": [
+                "app/Http/Controllers/WallController.php"
+            ],
+            "aliases": [
+                "feed",
+                "social"
+            ]
+        },
+        "domain.identity": {
+            "id": "domain.identity",
+            "type": "domain",
+            "name": "Identidad",
+            "summary": "Auth Breeze, perfiles públicos y ajustes de cuenta.",
+            "status": "implemented",
+            "parent": "entre-sabores",
+            "children": [
+                "identity.auth",
+                "identity.profile"
+            ],
+            "depends_on": [],
+            "entrypoints": [
+                "app/Models/User.php"
+            ],
+            "aliases": [
+                "cuenta",
+                "usuario"
+            ]
+        },
+        "domain.ai": {
+            "id": "domain.ai",
+            "type": "domain",
+            "name": "IA",
+            "summary": "Guardia de contenido, job de moderación y análisis de maridaje.",
+            "status": "implemented",
+            "parent": "entre-sabores",
+            "children": [
+                "ai.moderation",
+                "ai.maridaje"
+            ],
+            "depends_on": [],
+            "entrypoints": [
+                "app/Services/MaridajeAiAnalysisService.php"
+            ],
+            "aliases": [
+                "openai",
+                "analisis"
+            ]
+        },
+        "domain.realtime": {
+            "id": "domain.realtime",
+            "type": "domain",
+            "name": "Tiempo real",
+            "summary": "Reverb/Echo: canales privados y broadcasts de likes, comentarios, notificaciones y IA.",
+            "status": "implemented",
+            "parent": "entre-sabores",
+            "children": [
+                "realtime.broadcasting"
+            ],
+            "depends_on": [],
+            "entrypoints": [
+                "routes/channels.php"
+            ],
+            "aliases": [
+                "websocket",
+                "echo"
+            ]
+        },
+        "domain.notifications": {
+            "id": "domain.notifications",
+            "type": "domain",
+            "name": "Notificaciones",
+            "summary": "Bandeja in-app, payload JSON, observer de conteo y prune.",
+            "status": "implemented",
+            "parent": "entre-sabores",
+            "children": [
+                "notifications.inbox"
+            ],
+            "depends_on": [],
+            "entrypoints": [
+                "app/Support/NotificationApiPayload.php"
+            ],
+            "aliases": [
+                "inbox",
+                "campana"
+            ]
+        },
+        "domain.platform": {
+            "id": "domain.platform",
+            "type": "domain",
+            "name": "Plataforma",
+            "summary": "Marketing, UI Blade/JS, cabeceras de seguridad y observabilidad.",
+            "status": "implemented",
+            "parent": "entre-sabores",
+            "children": [
+                "platform.marketing",
+                "platform.observability",
+                "platform.security",
+                "platform.ui"
+            ],
+            "depends_on": [],
+            "entrypoints": [
+                "resources/js/app.js"
+            ],
+            "aliases": [
+                "ux",
+                "csp"
+            ]
+        },
+        "domain.infrastructure": {
+            "id": "domain.infrastructure",
+            "type": "domain",
+            "name": "Infraestructura",
+            "summary": "Kernel Laravel, datos, Docker y el índice de proyecto.",
+            "status": "implemented",
+            "parent": "entre-sabores",
+            "children": [
+                "infra.kernel",
+                "infra.database",
+                "infra.docker",
+                "infra.project-index"
+            ],
+            "depends_on": [],
+            "entrypoints": [
+                "bootstrap/app.php"
+            ],
+            "aliases": [
+                "kernel",
+                "docker"
+            ]
+        },
+        "domain.docs": {
+            "id": "domain.docs",
+            "type": "domain",
+            "name": "Documentación",
+            "summary": "Markdown técnico del repo; no sustituye el código.",
+            "status": "implemented",
+            "parent": "entre-sabores",
+            "children": [
+                "docs.technical"
+            ],
+            "depends_on": [],
+            "entrypoints": [
+                "ARCHITECTURE.md"
+            ],
+            "aliases": [
+                "docs"
+            ]
+        },
+        "domain.tests": {
+            "id": "domain.tests",
+            "type": "domain",
+            "name": "Pruebas",
+            "summary": "PHPUnit Feature/Unit; señal real de comportamiento.",
+            "status": "implemented",
+            "parent": "entre-sabores",
+            "children": [
+                "tests.suite"
+            ],
+            "depends_on": [],
+            "entrypoints": [
+                "phpunit.xml"
+            ],
+            "aliases": [
+                "phpunit"
+            ]
+        },
+        "social.wall": {
+            "id": "social.wall",
+            "type": "feature",
+            "name": "Muro / feed",
+            "summary": "Dashboard y JSON del feed: FYP vs siguiendo, sort recent/popular/trending.",
+            "status": "implemented",
+            "parent": "domain.social",
+            "children": [
+                "social.wall.feed"
+            ],
+            "depends_on": [
+                "social.wall.feed",
+                "social.posts",
+                "social.tags"
+            ],
+            "entrypoints": [
+                "app/Http/Controllers/WallController.php",
+                "app/Services/WallFeedService.php",
+                "app/Http/Requests/FilterPostsRequest.php",
+                "resources/js/wall.js",
+                "ARCHITECTURE.md"
+            ],
+            "aliases": [
+                "muro",
+                "fyp",
+                "siguiendo",
+                "feed",
+                "para ti",
+                "recientes",
+                "populares",
+                "tendencia"
+            ]
+        },
+        "social.wall.feed": {
+            "id": "social.wall.feed",
+            "type": "service",
+            "name": "WallFeedService",
+            "summary": "Único lugar que decide qué posts salen y en qué orden (mix 70/30, ranking, caché invitado).",
+            "status": "implemented",
+            "parent": "social.wall",
+            "children": [],
+            "depends_on": [
+                "social.posts"
+            ],
+            "entrypoints": [
+                "app/Services/WallFeedService.php"
+            ],
+            "aliases": [
+                "wallfeed",
+                "70/30",
+                "engagement"
+            ]
+        },
+        "social.posts": {
+            "id": "social.posts",
+            "type": "feature",
+            "name": "Publicaciones",
+            "summary": "Alta, edición, detalle, policy e imagen; encola maridaje y aplica ContentGuard al crear.",
+            "status": "implemented",
+            "parent": "domain.social",
+            "children": [],
+            "depends_on": [
+                "social.tags",
+                "ai.moderation",
+                "ai.maridaje"
+            ],
+            "entrypoints": [
+                "app/Http/Controllers/PostController.php",
+                "app/Models/Post.php",
+                "app/Policies/PostPolicy.php",
+                "app/Http/Resources/PostResource.php",
+                "app/Http/Requests/StorePostRequest.php"
+            ],
+            "aliases": [
+                "post",
+                "publicacion",
+                "reanalyze",
+                "comida",
+                "bebida"
+            ]
+        },
+        "social.likes": {
+            "id": "social.likes",
+            "type": "feature",
+            "name": "Likes",
+            "summary": "Toggle de like, modelo Like, evento PostLiked y notificación al autor.",
+            "status": "implemented",
+            "parent": "domain.social",
+            "children": [],
+            "depends_on": [
+                "social.posts",
+                "notifications.inbox",
+                "realtime.broadcasting"
+            ],
+            "entrypoints": [
+                "app/Http/Controllers/PostLikeController.php",
+                "app/Models/Like.php",
+                "app/Events/PostLiked.php"
+            ],
+            "aliases": [
+                "me gusta",
+                "like",
+                "toggle"
+            ]
+        },
+        "social.comments": {
+            "id": "social.comments",
+            "type": "feature",
+            "name": "Comentarios",
+            "summary": "Hilos de comentarios, resource JSON, evento CommentCreated y notificación.",
+            "status": "implemented",
+            "parent": "domain.social",
+            "children": [],
+            "depends_on": [
+                "social.posts",
+                "notifications.inbox",
+                "realtime.broadcasting"
+            ],
+            "entrypoints": [
+                "app/Http/Controllers/PostCommentController.php",
+                "app/Models/Comment.php",
+                "app/Http/Resources/CommentResource.php",
+                "resources/js/social/commentThread.js"
+            ],
+            "aliases": [
+                "comentario",
+                "hilo",
+                "thread",
+                "respuesta"
+            ]
+        },
+        "social.follows": {
+            "id": "social.follows",
+            "type": "feature",
+            "name": "Seguimiento",
+            "summary": "Seguir/dejar de seguir por username y notificación de nuevo seguidor.",
+            "status": "implemented",
+            "parent": "domain.social",
+            "children": [],
+            "depends_on": [
+                "identity.auth",
+                "notifications.inbox"
+            ],
+            "entrypoints": [
+                "app/Http/Controllers/FollowController.php",
+                "app/Notifications/NewFollowerNotification.php"
+            ],
+            "aliases": [
+                "seguir",
+                "follower",
+                "following",
+                "seguido"
+            ]
+        },
+        "social.tags": {
+            "id": "social.tags",
+            "type": "feature",
+            "name": "Etiquetas y países",
+            "summary": "Catálogo de tags (caché), búsqueda, ISO de país y banderas en el post.",
+            "status": "implemented",
+            "parent": "domain.social",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "app/Http/Controllers/TagController.php",
+                "app/Models/Tag.php",
+                "app/Support/CountryNameIsoMap.php"
+            ],
+            "aliases": [
+                "tag",
+                "etiqueta",
+                "pais",
+                "iso",
+                "bandera",
+                "catalogo"
+            ]
+        },
+        "identity.auth": {
+            "id": "identity.auth",
+            "type": "feature",
+            "name": "Autenticación",
+            "summary": "Login, registro, reset, verificación de email y modelo User (Breeze).",
+            "status": "implemented",
+            "parent": "domain.identity",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "app/Http/Controllers/Auth/AuthenticatedSessionController.php",
+                "app/Http/Controllers/Auth/RegisteredUserController.php",
+                "app/Models/User.php",
+                "routes/auth.php"
+            ],
+            "aliases": [
+                "login",
+                "registro",
+                "password",
+                "breeze",
+                "sesion"
+            ]
+        },
+        "identity.profile": {
+            "id": "identity.profile",
+            "type": "feature",
+            "name": "Perfil y cuenta",
+            "summary": "Perfil público, posts del usuario, likes del perfil y settings de cuenta.",
+            "status": "implemented",
+            "parent": "domain.identity",
+            "children": [
+                "identity.photos"
+            ],
+            "depends_on": [
+                "identity.auth",
+                "identity.photos",
+                "social.posts"
+            ],
+            "entrypoints": [
+                "app/Http/Controllers/ProfileController.php",
+                "app/Http/Controllers/UserController.php",
+                "resources/views/profile/show.blade.php",
+                "app/Http/Controllers/UsernameAvailabilityController.php"
+            ],
+            "aliases": [
+                "perfil",
+                "username",
+                "settings",
+                "cuenta",
+                "ajustes"
+            ]
+        },
+        "identity.photos": {
+            "id": "identity.photos",
+            "type": "service",
+            "name": "Foto de perfil",
+            "summary": "Recorte, WebP y comando de migración de avatares (Intervention Image).",
+            "status": "implemented",
+            "parent": "identity.profile",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "app/Services/ProfilePhotoService.php",
+                "app/View/Components/AvatarCropper.php"
+            ],
+            "aliases": [
+                "avatar",
+                "webp",
+                "cropper",
+                "foto"
+            ]
+        },
+        "ai.moderation": {
+            "id": "ai.moderation",
+            "type": "feature",
+            "name": "Moderación de contenido",
+            "summary": "ContentGuard en el alta, AnalyzePostJob + AIService y rechazo con notificación.",
+            "status": "implemented",
+            "parent": "domain.ai",
+            "children": [
+                "ai.moderation.engine"
+            ],
+            "depends_on": [
+                "ai.moderation.engine",
+                "social.posts",
+                "realtime.broadcasting"
+            ],
+            "entrypoints": [
+                "app/Services/ContentGuard.php",
+                "app/Jobs/AnalyzePostJob.php",
+                "app/Services/AIService.php"
+            ],
+            "aliases": [
+                "moderacion",
+                "flagged",
+                "rejected",
+                "content guard",
+                "profanity"
+            ]
+        },
+        "ai.moderation.engine": {
+            "id": "ai.moderation.engine",
+            "type": "service",
+            "name": "AIService de moderación",
+            "summary": "Llama a la API de moderación (config services.content_moderation_ai) y devuelve flagged/reasons.",
+            "status": "implemented",
+            "parent": "ai.moderation",
+            "children": [],
+            "depends_on": [
+                "ai.moderation"
+            ],
+            "entrypoints": [
+                "app/Services/AIService.php"
+            ],
+            "aliases": [
+                "content_moderation_ai",
+                "flagged"
+            ]
+        },
+        "ai.maridaje": {
+            "id": "ai.maridaje",
+            "type": "feature",
+            "name": "Análisis de maridaje",
+            "summary": "Job de maridaje, reanalyze del dueño, broadcast al terminar y UI de volteo.",
+            "status": "implemented",
+            "parent": "domain.ai",
+            "children": [
+                "ai.maridaje.engine"
+            ],
+            "depends_on": [
+                "ai.maridaje.engine",
+                "social.posts",
+                "realtime.broadcasting"
+            ],
+            "entrypoints": [
+                "app/Services/MaridajeAiAnalysisService.php",
+                "app/Jobs/GeneratePostAnalysisJob.php",
+                "app/Http/Controllers/PostController.php",
+                "resources/js/social/maridajeFlip.js"
+            ],
+            "aliases": [
+                "maridaje",
+                "pairing",
+                "score",
+                "afinidad",
+                "reanalyze",
+                "historia"
+            ]
+        },
+        "ai.maridaje.engine": {
+            "id": "ai.maridaje.engine",
+            "type": "service",
+            "name": "MaridajeAiAnalysisService",
+            "summary": "Invoca MARIDAJE_AI_API_KEY y normaliza historia/afinidad/equilibrio/recomendacion/score.",
+            "status": "implemented",
+            "parent": "ai.maridaje",
+            "children": [],
+            "depends_on": [
+                "ai.maridaje"
+            ],
+            "entrypoints": [
+                "app/Services/MaridajeAiAnalysisService.php"
+            ],
+            "aliases": [
+                "maridaje_ai",
+                "score"
+            ]
+        },
+        "realtime.broadcasting": {
+            "id": "realtime.broadcasting",
+            "type": "feature",
+            "name": "Broadcasting",
+            "summary": "Canales user.{id}, listeners Echo y payloads de eventos sociales e IA.",
+            "status": "implemented",
+            "parent": "domain.realtime",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "app/Providers/BroadcastServiceProvider.php",
+                "routes/channels.php",
+                "resources/js/echo.js",
+                "app/Listeners/Broadcasting/SendPostLikedBroadcast.php"
+            ],
+            "aliases": [
+                "reverb",
+                "pusher",
+                "websocket",
+                "echo",
+                "broadcast"
+            ]
+        },
+        "notifications.inbox": {
+            "id": "notifications.inbox",
+            "type": "feature",
+            "name": "Bandeja de notificaciones",
+            "summary": "API de listado/leído, payload estable, observer de unread y comandos prune/sync.",
+            "status": "implemented",
+            "parent": "domain.notifications",
+            "children": [],
+            "depends_on": [
+                "realtime.broadcasting"
+            ],
+            "entrypoints": [
+                "app/Http/Controllers/NotificationController.php",
+                "app/Support/NotificationApiPayload.php",
+                "app/Observers/DatabaseNotificationObserver.php"
+            ],
+            "aliases": [
+                "notificacion",
+                "unread",
+                "prune",
+                "campana",
+                "inbox"
+            ]
+        },
+        "platform.marketing": {
+            "id": "platform.marketing",
+            "type": "feature",
+            "name": "Páginas de marketing",
+            "summary": "Welcome, explorar y cómo funciona (Blade + layout marketing).",
+            "status": "implemented",
+            "parent": "domain.platform",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "resources/views/welcome.blade.php",
+                "resources/views/how-it-works.blade.php",
+                "resources/views/explore.blade.php"
+            ],
+            "aliases": [
+                "welcome",
+                "explorar",
+                "como funciona",
+                "landing"
+            ]
+        },
+        "platform.observability": {
+            "id": "platform.observability",
+            "type": "feature",
+            "name": "Salud y métricas",
+            "summary": "/health, /internal/metrics, logs JSON y contadores Redis/array.",
+            "status": "implemented",
+            "parent": "domain.platform",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "app/Http/Controllers/HealthController.php",
+                "app/Support/OperationalMetrics.php",
+                "app/Support/OperationalLogger.php",
+                "config/monitoring.php"
+            ],
+            "aliases": [
+                "health",
+                "metrics",
+                "loki",
+                "observabilidad"
+            ]
+        },
+        "platform.security": {
+            "id": "platform.security",
+            "type": "feature",
+            "name": "Cabeceras y CSP",
+            "summary": "Middleware SecurityHeaders y config/security.php (CSP, frame, referrer).",
+            "status": "implemented",
+            "parent": "domain.platform",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "app/Http/Middleware/SecurityHeaders.php",
+                "config/security.php",
+                "SECURITY.md"
+            ],
+            "aliases": [
+                "csp",
+                "headers",
+                "xss",
+                "https"
+            ]
+        },
+        "platform.ui": {
+            "id": "platform.ui",
+            "type": "feature",
+            "name": "UI Blade y JS",
+            "summary": "Layouts, componentes Blade, módulos ui/ y bundling Vite/Tailwind (sin Alpine).",
+            "status": "implemented",
+            "parent": "domain.platform",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "resources/js/app.js",
+                "resources/views/layouts/app.blade.php",
+                "resources/views/layouts/navigation.blade.php",
+                "FRONTEND.md"
+            ],
+            "aliases": [
+                "blade",
+                "vite",
+                "tailwind",
+                "layout",
+                "navbar"
+            ]
+        },
+        "infra.kernel": {
+            "id": "infra.kernel",
+            "type": "configuration",
+            "name": "Kernel Laravel",
+            "summary": "bootstrap, providers, rate limits, rutas web/console y config de runtime.",
+            "status": "implemented",
+            "parent": "domain.infrastructure",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "bootstrap/app.php",
+                "app/Providers/AppServiceProvider.php",
+                "routes/web.php"
+            ],
+            "aliases": [
+                "ratelimit",
+                "provider",
+                "middleware",
+                "env"
+            ]
+        },
+        "infra.database": {
+            "id": "infra.database",
+            "type": "infrastructure",
+            "name": "Datos y colas",
+            "summary": "Migraciones de cache/jobs, índices de rendimiento y DatabaseSeeder.",
+            "status": "implemented",
+            "parent": "domain.infrastructure",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "DATABASE.md",
+                "database/seeders/DatabaseSeeder.php"
+            ],
+            "aliases": [
+                "migracion",
+                "seeder",
+                "mysql",
+                "sqlite"
+            ]
+        },
+        "infra.docker": {
+            "id": "infra.docker",
+            "type": "infrastructure",
+            "name": "Docker",
+            "summary": "Compose PHP/Nginx/MySQL/Redis, Supervisor (FPM, Reverb, queue) y Dockerfiles.",
+            "status": "implemented",
+            "parent": "domain.infrastructure",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "docker-compose.yml",
+                "DOCKER.md",
+                "docker/php/supervisord-laravel.conf"
+            ],
+            "aliases": [
+                "nginx",
+                "supervisor",
+                "reverb",
+                "mysql"
+            ]
+        },
+        "infra.project-index": {
+            "id": "infra.project-index",
+            "type": "infrastructure",
+            "name": "Project Intelligence Index",
+            "summary": "Catálogo conceptual, indexer incremental, CLI artisan y hooks git.",
+            "status": "implemented",
+            "parent": "domain.infrastructure",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "app/Support/ProjectIndex/Catalog.php",
+                "app/Support/ProjectIndex/Indexer.php",
+                "app/Support/ProjectIndex/IndexQuery.php",
+                ".project/README.md"
+            ],
+            "aliases": [
+                "indice",
+                "catalog",
+                "stale",
+                "relevant"
+            ]
+        },
+        "docs.technical": {
+            "id": "docs.technical",
+            "type": "documentation",
+            "name": "Documentación técnica",
+            "summary": "Guías md del repo (arquitectura, backend, frontend, producción).",
+            "status": "implemented",
+            "parent": "domain.docs",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "DOCUMENTACION.md",
+                "ARCHITECTURE.md",
+                "README.md"
+            ],
+            "aliases": [
+                "documentacion",
+                "changelog"
+            ]
+        },
+        "tests.suite": {
+            "id": "tests.suite",
+            "type": "test",
+            "name": "Suite PHPUnit",
+            "summary": "Feature y Unit; sqlite en memoria según phpunit.xml.",
+            "status": "implemented",
+            "parent": "domain.tests",
+            "children": [],
+            "depends_on": [],
+            "entrypoints": [
+                "phpunit.xml",
+                "tests/TestCase.php"
+            ],
+            "aliases": [
+                "phpunit",
+                "feature",
+                "unit"
+            ]
+        }
+    },
+    "physical": {
+        ".cursor/rules/": [
+            "infra.project-index"
+        ],
+        "ARCHITECTURE.md": [
+            "entre-sabores",
+            "domain.docs",
+            "social.wall",
+            "docs.technical"
+        ],
+        "BACKEND.md": [
+            "docs.technical"
+        ],
+        "CHANGELOG.md": [
+            "docs.technical"
+        ],
+        "DATABASE.md": [
+            "infra.database",
+            "docs.technical"
+        ],
+        "DOCKER.md": [
+            "infra.docker",
+            "docs.technical"
+        ],
+        "DOCUMENTACION.md": [
+            "domain.docs",
+            "docs.technical"
+        ],
+        "FRONTEND.md": [
+            "platform.ui",
+            "docs.technical"
+        ],
+        "PERFORMANCE.md": [
+            "social.wall",
+            "docs.technical"
+        ],
+        "PRODUCTION.md": [
+            "docs.technical"
+        ],
+        "README.md": [
+            "entre-sabores",
+            "docs.technical"
+        ],
+        "SECURITY.md": [
+            "platform.security",
+            "docs.technical"
+        ],
+        "app/Console/Commands/": [
+            "identity.photos",
+            "infra.project-index",
+            "notifications.inbox"
+        ],
+        "app/Events/": [
+            "social.comments",
+            "notifications.inbox",
+            "social.likes"
+        ],
+        "app/Events/Broadcasting/": [
+            "realtime.broadcasting",
+            "ai.maridaje",
+            "ai.moderation"
+        ],
+        "app/Http/Controllers/": [
+            "infra.kernel",
+            "social.follows",
+            "platform.observability",
+            "domain.notifications",
+            "notifications.inbox",
+            "social.comments",
+            "social.posts",
+            "ai.maridaje",
+            "social.likes",
+            "identity.profile",
+            "social.tags",
+            "domain.social",
+            "social.wall"
+        ],
+        "app/Http/Controllers/Auth/": [
+            "identity.auth"
+        ],
+        "app/Http/Middleware/": [
+            "platform.observability",
+            "platform.security"
+        ],
+        "app/Http/Requests/": [
+            "social.wall",
+            "identity.profile",
+            "social.comments",
+            "social.posts"
+        ],
+        "app/Http/Requests/Auth/": [
+            "identity.auth"
+        ],
+        "app/Http/Resources/": [
+            "social.comments",
+            "social.posts"
+        ],
+        "app/Jobs/": [
+            "domain.ai",
+            "ai.moderation",
+            "ai.maridaje"
+        ],
+        "app/Listeners/Broadcasting/": [
+            "realtime.broadcasting"
+        ],
+        "app/Logging/": [
+            "platform.observability"
+        ],
+        "app/Models/": [
+            "social.comments",
+            "social.tags",
+            "social.likes",
+            "social.posts",
+            "domain.identity",
+            "identity.auth"
+        ],
+        "app/Notifications/": [
+            "social.comments",
+            "social.follows",
+            "social.likes",
+            "ai.moderation"
+        ],
+        "app/Observers/": [
+            "notifications.inbox"
+        ],
+        "app/Policies/": [
+            "social.posts"
+        ],
+        "app/Providers/": [
+            "domain.infrastructure",
+            "infra.kernel",
+            "domain.realtime",
+            "realtime.broadcasting"
+        ],
+        "app/Services/": [
+            "ai.moderation",
+            "ai.moderation.engine",
+            "domain.ai",
+            "ai.maridaje",
+            "ai.maridaje.engine",
+            "identity.photos",
+            "social.wall",
+            "social.wall.feed"
+        ],
+        "app/Support/": [
+            "social.tags",
+            "domain.notifications",
+            "notifications.inbox",
+            "platform.observability"
+        ],
+        "app/Support/ProjectIndex/": [
+            "infra.project-index"
+        ],
+        "app/View/Components/": [
+            "platform.ui",
+            "identity.photos"
+        ],
+        "bootstrap/": [
+            "entre-sabores",
+            "domain.infrastructure",
+            "infra.kernel"
+        ],
+        "bootstrap/cache/": [
+            "domain.infrastructure",
+            "infra.kernel"
+        ],
+        "composer.json": [
+            "infra.kernel"
+        ],
+        "config/": [
+            "infra.kernel",
+            "realtime.broadcasting",
+            "identity.photos",
+            "platform.observability",
+            "social.wall",
+            "platform.security"
+        ],
+        "database/factories/": [
+            "social.tags",
+            "social.posts",
+            "identity.auth"
+        ],
+        "database/migrations/": [
+            "identity.auth",
+            "infra.database",
+            "social.tags",
+            "social.posts",
+            "social.comments",
+            "social.follows",
+            "social.likes",
+            "notifications.inbox"
+        ],
+        "database/seeders/": [
+            "social.tags",
+            "infra.database",
+            "social.posts"
+        ],
+        "docker-compose.yml": [
+            "infra.docker"
+        ],
+        "docker/": [
+            "infra.docker"
+        ],
+        "docker/nginx/": [
+            "infra.docker"
+        ],
+        "docker/php/": [
+            "infra.docker"
+        ],
+        "lang/es/": [
+            "identity.auth"
+        ],
+        "package.json": [
+            "platform.ui"
+        ],
+        "phpunit.xml": [
+            "domain.tests",
+            "tests.suite"
+        ],
+        "resources/css/": [
+            "platform.ui"
+        ],
+        "resources/js/": [
+            "domain.platform",
+            "platform.ui",
+            "realtime.broadcasting",
+            "notifications.inbox",
+            "social.posts",
+            "identity.profile",
+            "social.wall"
+        ],
+        "resources/js/social/": [
+            "social.comments",
+            "ai.maridaje",
+            "social.posts"
+        ],
+        "resources/js/ui/": [
+            "platform.ui",
+            "identity.photos",
+            "identity.profile"
+        ],
+        "resources/views/": [
+            "platform.ui",
+            "platform.marketing"
+        ],
+        "resources/views/auth/": [
+            "identity.auth"
+        ],
+        "resources/views/components/": [
+            "platform.ui",
+            "identity.photos"
+        ],
+        "resources/views/components/ui/": [
+            "platform.ui"
+        ],
+        "resources/views/errors/": [
+            "platform.ui"
+        ],
+        "resources/views/errors/partials/": [
+            "platform.ui"
+        ],
+        "resources/views/layouts/": [
+            "domain.platform",
+            "platform.ui",
+            "platform.marketing"
+        ],
+        "resources/views/layouts/partials/": [
+            "domain.platform",
+            "platform.marketing",
+            "notifications.inbox"
+        ],
+        "resources/views/posts/": [
+            "social.posts"
+        ],
+        "resources/views/profile/": [
+            "identity.profile"
+        ],
+        "resources/views/profile/partials/": [
+            "identity.profile"
+        ],
+        "resources/views/settings/": [
+            "identity.profile"
+        ],
+        "resources/views/settings/partials/": [
+            "identity.profile"
+        ],
+        "resources/views/wall/": [
+            "social.wall"
+        ],
+        "routes/": [
+            "domain.identity",
+            "identity.auth",
+            "domain.realtime",
+            "realtime.broadcasting",
+            "infra.kernel",
+            "domain.social"
+        ],
+        "tailwind.config.js": [
+            "platform.ui"
+        ],
+        "tests/": [
+            "domain.tests",
+            "tests.suite"
+        ],
+        "tests/Feature/": [
+            "domain.tests",
+            "realtime.broadcasting",
+            "tests.suite",
+            "platform.observability",
+            "ai.maridaje",
+            "social.posts",
+            "social.likes",
+            "identity.profile",
+            "social.tags",
+            "social.comments",
+            "social.follows"
+        ],
+        "tests/Feature/Auth/": [
+            "domain.tests",
+            "identity.auth",
+            "tests.suite"
+        ],
+        "tests/Feature/ProjectIndex/": [
+            "domain.tests",
+            "infra.project-index",
+            "tests.suite"
+        ],
+        "tests/Unit/": [
+            "domain.tests",
+            "realtime.broadcasting",
+            "tests.suite",
+            "notifications.inbox"
+        ],
+        "tests/Unit/ProjectIndex/": [
+            "domain.tests",
+            "infra.project-index",
+            "tests.suite"
+        ],
+        "vite.config.js": [
+            "platform.ui"
+        ]
+    }
+}

@@ -1,0 +1,63 @@
+---
+alwaysApply: true
+---
+# Flujo Git (reglas del juego)
+
+Ramas permanentes: **`main`** (producción / estable) y **`develop`** (integración).
+
+## Por tarea
+
+1. Actualizar `main`: `git fetch origin && git checkout main && git pull origin main`
+2. Crear rama **desde `main`**: `git checkout -b feature/<tarea-corta>`
+3. Commits solo en la feature (nunca en `main` ni `develop` directo).
+4. Abrir **PR `feature/*` → `develop`** (base = `develop`, head = tu feature).
+5. Tras merge en `develop` y validación, abrir **PR `develop` → `main`** para liberar.
+
+## Reglas obligatorias
+
+| Regla | Detalle |
+|-------|---------|
+| Origen de features | Siempre ramificar **desde `main` actualizado**, no desde `develop` |
+| Base de cada PR de feature | Target **`develop`** |
+| Promoción a producción | Solo vía PR **`develop` → `main`** |
+| Sin commits directos | No push a `main` ni `develop`; solo merges por PR |
+| Una tarea = una feature | No mezclar tareas no relacionadas en la misma rama |
+| Antes de nueva feature | Si `develop` ya tiene tu trabajo previo, igual **parte de `main`** para la nueva rama |
+
+## Nombres de rama
+
+`feature/<verbo-o-tema>` — ej. `feature/project-index`, `feature/maridaje-reanalyze-ui`
+
+## Tarjeta de tarea
+
+Cuando el usuario pida **la tarjeta para la tarea** (o equivalente: "tarjeta", "card de la tarea", etc.), responder con un bloque markdown listo para copiar y pegar, en este orden:
+
+1. **Título** — nombre de la rama (`feature/...`) como `#` de nivel 1.
+2. **Nombre de la tarea** — título legible en lenguaje natural.
+3. **Descripción** — qué se hace, alcance y contexto breve.
+4. **Objetivo** — para qué sirve o qué problema resuelve.
+
+Plantilla:
+
+```markdown
+# feature/nombre-corto
+
+## Nombre de la tarea
+Título legible de la tarea
+
+## Descripción
+Qué incluye la tarea, alcance y contexto.
+
+## Objetivo
+Qué problema resuelve o qué valor aporta.
+```
+
+Inferir rama, nombre, descripción y objetivo del trabajo actual o de lo que se haya acordado en la conversación. Si falta contexto, preguntar antes de inventar.
+
+## Agente (sin que el usuario lo pida)
+
+- Al **cerrar una tarea** con cambios: confirmar que hay rama `feature/*` (crearla desde `main` si se trabajó en otra).
+- Al **crear PR**: feature → `develop`; no proponer PR directo feature → `main` salvo hotfix acordado.
+- No hacer `git push` a `main`/`develop` ni merge local a esas ramas sin que el usuario lo pida explícitamente.
+
+Documento versionado: [GIT-WORKFLOW.md](../GIT-WORKFLOW.md)

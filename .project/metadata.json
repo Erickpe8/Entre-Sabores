@@ -1,0 +1,16 @@
+{
+    "schema_version": 1,
+    "generated_at": "2026-08-28T13:40:10+00:00",
+    "commit": "95ea86c414c26b8a77fe4cce259800791f6eacf2",
+    "dirty": true,
+    "files_hash": "4874e4a4f49f224fb72459a9f0aff93fdbaa83d4",
+    "catalog_hash": "100bd26d22d6e81600e583fd6f72511c76b47cbe",
+    "mode": "incremental",
+    "node_count": 36,
+    "edge_count": 75,
+    "truth_rule": "El índice decide QUÉ LEER, no QUÉ ES VERDAD. El código es la fuente de verdad.",
+    "warnings": [
+        "working-tree-dirty"
+    ],
+    "unmapped_app_php": []
+}

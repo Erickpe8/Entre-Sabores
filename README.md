@@ -29,6 +29,14 @@ Los nombres de chips no coinciden literalmente con los valores de `sort` (son et
 | Tiempo real | Laravel Echo + protocolo Pusher; **Laravel Reverb** en Docker (alternativa: Pusher Cloud / Soketi) |
 | Base de datos | MySQL (desarrollo con Docker; véase abajo) |
 
+## Estructura (agentes)
+
+Índice de navegación para localizar código sin leer el repo entero: [`.project/README.md`](.project/README.md). Consulta: `php artisan project:query relevant --q="<tarea>"`. El código es la fuente de verdad.
+
+## Flujo Git
+
+Por tarea: rama `feature/*` **desde `main`** → PR a **`develop`** → PR **`develop` → `main`**. Detalle: [GIT-WORKFLOW.md](GIT-WORKFLOW.md).
+
 ## Documentación del repositorio
 
 | Documento | Contenido |

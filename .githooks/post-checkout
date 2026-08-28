@@ -1,0 +1,9 @@
+#!/bin/sh
+# Project Intelligence Index: refresh if stale. Never block git.
+ROOT="$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT" || exit 0
+if [ ! -f "$ROOT/artisan" ]; then
+    exit 0
+fi
+(php "$ROOT/artisan" project:index --if-stale --no-interaction >/dev/null 2>&1) || true
+exit 0
