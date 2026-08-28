@@ -29,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->normalizeBlankManagerDrivers();
+
         $this->app->singleton(ProfilePhotoService::class, function ($app) {
             return new ProfilePhotoService(
                 $app->make('image')
@@ -102,6 +104,28 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(NotificationRecorded::class, SendNotificationCreatedBroadcast::class);
 
         $this->forceHttpsInProduction();
+    }
+
+    /**
+     * Variables definidas pero vacías en Vercel (p. ej. al copiar .env local) hacen que
+     * env('KEY', 'default') devuelva '' y Manager::createDriver() falle con ArgumentCountError.
+     */
+    private function normalizeBlankManagerDrivers(): void
+    {
+        $defaults = [
+            'app.maintenance.driver' => 'file',
+            'broadcasting.default' => 'null',
+            'session.driver' => 'file',
+            'cache.default' => 'file',
+            'queue.default' => 'sync',
+            'logging.default' => 'stack',
+        ];
+
+        foreach ($defaults as $key => $fallback) {
+            if (blank(config($key))) {
+                config([$key => $fallback]);
+            }
+        }
     }
 
     /**

@@ -20,6 +20,7 @@ Ramas permanentes: **`main`** (producción / estable) y **`develop`** (integraci
 | Origen de features | Siempre ramificar **desde `main` actualizado**, no desde `develop` |
 | Base de cada PR de feature | Target **`develop`** |
 | Promoción a producción | Solo vía PR **`develop` → `main`** |
+| Despliegue Vercel | **Solo rama `main`** — ver [VERCEL.md](../VERCEL.md) |
 | Sin commits directos | No push a `main` ni `develop`; solo merges por PR |
 | Una tarea = una feature | No mezclar tareas no relacionadas en la misma rama |
 | Antes de nueva feature | Si `develop` ya tiene tu trabajo previo, igual **parte de `main`** para la nueva rama |
