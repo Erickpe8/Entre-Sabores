@@ -43,7 +43,8 @@ Comportamiento funcional del feed (orden, mixto 70/30): [ARCHITECTURE.md](ARCHIT
 ### Infraestructura
 
 - [ ] Health check `GET /up` en balanceador.
-- [ ] Cron: `* * * * * php artisan schedule:run` (p. ej. `notifications:prune` en `routes/console.php`).
+- [ ] **Vercel:** ver [VERCEL.md](VERCEL.md) (contenedor, MySQL/Redis externos, `CRON_SECRET`, Pusher).
+- [ ] Cron: `* * * * * php artisan schedule:run` (p. ej. `notifications:prune` en `routes/console.php`). En Vercel: cron HTTP `/internal/cron/schedule`.
 - [ ] `php artisan storage:link` si aplica.
 - [ ] Opcional: S3 para medios; Redis con SLA acorde.
 

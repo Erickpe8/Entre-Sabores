@@ -3,6 +3,7 @@
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\InternalMetricsController;
+use App\Http\Controllers\VercelCronController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
@@ -35,6 +36,12 @@ Route::get('/health', HealthController::class)
 Route::get('/internal/metrics', InternalMetricsController::class)
     ->middleware('throttle:30,1')
     ->name('internal.metrics');
+
+Route::get('/internal/cron/schedule', [VercelCronController::class, 'schedule'])
+    ->name('internal.cron.schedule');
+
+Route::get('/internal/cron/queue', [VercelCronController::class, 'queue'])
+    ->name('internal.cron.queue');
 
 Route::get('/tags', [TagController::class, 'index'])
     ->middleware('throttle:tags-index')

@@ -629,7 +629,7 @@
             "id": "platform.observability",
             "type": "feature",
             "name": "Salud y métricas",
-            "summary": "/health, /internal/metrics, logs JSON y contadores Redis/array.",
+            "summary": "/health, /internal/metrics, crons Vercel, logs JSON y contadores Redis/array.",
             "status": "implemented",
             "parent": "domain.platform",
             "children": [],
@@ -736,7 +736,7 @@
             "id": "infra.docker",
             "type": "infrastructure",
             "name": "Docker",
-            "summary": "Compose PHP/Nginx/MySQL/Redis, Supervisor (FPM, Reverb, queue) y Dockerfiles.",
+            "summary": "Compose PHP/Nginx/MySQL/Redis, Supervisor (FPM, Reverb, queue), Dockerfiles y Vercel.",
             "status": "implemented",
             "parent": "domain.infrastructure",
             "children": [],
@@ -744,13 +744,19 @@
             "entrypoints": [
                 "docker-compose.yml",
                 "DOCKER.md",
-                "docker/php/supervisord-laravel.conf"
+                "VERCEL.md",
+                "Dockerfile.vercel",
+                "vercel.json",
+                "docker/php/supervisord-laravel.conf",
+                "docker/vercel/Caddyfile"
             ],
             "aliases": [
                 "nginx",
                 "supervisor",
                 "reverb",
-                "mysql"
+                "mysql",
+                "vercel",
+                "frankenphp"
             ]
         },
         "infra.project-index": {
@@ -1021,6 +1027,9 @@
             "infra.docker"
         ],
         "docker/php/": [
+            "infra.docker"
+        ],
+        "docker/vercel/": [
             "infra.docker"
         ],
         "lang/es/": [

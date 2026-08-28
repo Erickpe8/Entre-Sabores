@@ -1,0 +1,32 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"framework": null,
+	"buildCommand": null,
+	"installCommand": null,
+	"outputDirectory": null,
+	"services": {
+		"web": {
+			"root": ".",
+			"entrypoint": "Dockerfile.vercel",
+			"runtime": "container"
+		}
+	},
+	"rewrites": [
+		{
+			"source": "/(.*)",
+			"destination": {
+				"service": "web"
+			}
+		}
+	],
+	"crons": [
+		{
+			"path": "/internal/cron/schedule",
+			"schedule": "* * * * *"
+		},
+		{
+			"path": "/internal/cron/queue",
+			"schedule": "* * * * *"
+		}
+	]
+}
