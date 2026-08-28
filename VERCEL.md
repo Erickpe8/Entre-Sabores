@@ -43,8 +43,8 @@ Git push / vercel deploy
 | MySQL | **No** — servicio externo |
 | Redis | **No** — Upstash u otro |
 | Reverb (WebSockets) | **No** — usar Pusher Cloud o WS externo |
-| `queue:work` persistente | **No** — Vercel Cron cada minuto |
-| `schedule:run` (cron) | Vercel Cron → `/internal/cron/schedule` |
+| `queue:work` persistente | **No** — cron externo o plan Pro (ver abajo) |
+| `schedule:run` (cron) | Vercel Cron diario → `/internal/cron/schedule` (plan Hobby) |
 
 ## Archivos clave
 
@@ -140,14 +140,38 @@ vercel dev -L
 
 ## Cron y colas
 
-`vercel.json` define dos crons cada minuto:
+### Plan Hobby (límite diario)
 
-| Ruta | Acción |
-|------|--------|
-| `GET /internal/cron/schedule` | `php artisan schedule:run` |
-| `GET /internal/cron/queue` | `queue:work --stop-when-empty --max-time=55` |
+En **Hobby**, Vercel solo permite crons **una vez al día**. `vercel.json` incluye uno:
 
-Vercel envía `Authorization: Bearer <CRON_SECRET>`. El controlador valida contra `config('monitoring.cron_secret')`.
+| Ruta | Schedule | Acción |
+|------|----------|--------|
+| `GET /internal/cron/schedule` | `15 3 * * *` (03:15 UTC) | `php artisan schedule:run` |
+
+Coincide con `notifications:prune` en `routes/console.php` (`dailyAt('03:15')`).
+
+**Colas (IA, broadcasts):** no van en `vercel.json` en Hobby. Opciones:
+
+1. **Cron externo** (gratis): [cron-job.org](https://cron-job.org), EasyCron, etc. → `GET https://tu-app.vercel.app/internal/cron/queue` con cabecera `Authorization: Bearer <CRON_SECRET>` cada 1–5 min.
+2. **`QUEUE_CONNECTION=sync`** — jobs en la misma petición HTTP (solo demos; IA bloquea la respuesta).
+3. **Plan Pro** — añadir en `vercel.json` cron cada minuto para `/internal/cron/queue` (`* * * * *`).
+
+### Plan Pro
+
+Puedes añadir en `vercel.json`:
+
+```json
+{
+  "path": "/internal/cron/queue",
+  "schedule": "* * * * *"
+}
+```
+
+Y opcionalmente cambiar `schedule` a `* * * * *` para el scheduler Laravel completo.
+
+### Autenticación
+
+Vercel envía `Authorization: Bearer <CRON_SECRET>` en crons nativos. Los cron externos deben enviar la misma cabecera manualmente. El controlador valida contra `config('monitoring.cron_secret')`.
 
 **Limitaciones:**
 
@@ -177,6 +201,7 @@ Sin Pusher, la app funciona pero sin notificaciones en vivo.
 | Síntoma | Causa probable | Solución |
 |---------|----------------|----------|
 | `No Output Directory named "dist"` | Vercel trata el repo como Vite estático; faltan `vercel.json` / `Dockerfile.vercel` en la rama desplegada | Subir esos archivos; Framework Preset → **Other**; Output Directory vacío |
+| Cron `* * * * *` rechazado | Plan Hobby: máx. un cron **diario** | Usar schedule diario en `vercel.json`; cola vía cron externo o Pro |
 | 502 tras deploy | Servidor no escucha en `$PORT` | Caddyfile usa `:{$PORT:80}` |
 | Assets sin estilo | Build sin `VITE_*` | Definir variables en Vercel antes del build |
 | Sesión se pierde | `SESSION_DRIVER=file` | Usar `redis` |

@@ -22,11 +22,7 @@
 	"crons": [
 		{
 			"path": "/internal/cron/schedule",
-			"schedule": "* * * * *"
-		},
-		{
-			"path": "/internal/cron/queue",
-			"schedule": "* * * * *"
+			"schedule": "15 3 * * *"
 		}
 	]
 }
