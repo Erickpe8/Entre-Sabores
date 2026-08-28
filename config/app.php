@@ -54,12 +54,6 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Trusted Proxies (Vercel, balanceadores, CDN)
-    |--------------------------------------------------------------------------
-    */
-
     'trusted_proxies' => env('TRUSTED_PROXIES'),
 
     /*

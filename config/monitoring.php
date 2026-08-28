@@ -41,16 +41,6 @@ return [
 
     'metrics_token' => env('METRICS_TOKEN'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Vercel Cron (Bearer CRON_SECRET en Authorization)
-    |--------------------------------------------------------------------------
-    |
-    | Vercel envía Authorization: Bearer <CRON_SECRET> al invocar crons
-    | definidos en vercel.json. Obligatorio en producción en Vercel.
-    |
-    */
-
     'cron_secret' => env('CRON_SECRET'),
 
 ];

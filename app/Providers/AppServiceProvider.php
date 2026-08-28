@@ -106,10 +106,6 @@ class AppServiceProvider extends ServiceProvider
         $this->forceHttpsInProduction();
     }
 
-    /**
-     * Variables definidas pero vacías en Vercel (p. ej. al copiar .env local) hacen que
-     * env('KEY', 'default') devuelva '' y Manager::createDriver() falle con ArgumentCountError.
-     */
     private function normalizeBlankManagerDrivers(): void
     {
         $defaults = [
@@ -128,10 +124,6 @@ class AppServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Evita bloqueos largos (504) si SESSION/CACHE/QUEUE apuntan a Redis sin servicio real
-     * (p. ej. Vercel sin Upstash configurado aún).
-     */
     private function configureStorageFallbacksWhenRedisUnavailable(): void
     {
         if ($this->redisIsConfigured()) {

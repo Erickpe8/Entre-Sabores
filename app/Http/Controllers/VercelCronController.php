@@ -6,9 +6,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 
-/**
- * Endpoints HTTP para Vercel Cron (scheduler y cola sin worker persistente).
- */
 class VercelCronController extends Controller
 {
     public function schedule(Request $request): JsonResponse
