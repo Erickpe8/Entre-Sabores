@@ -373,6 +373,7 @@
         "files": [
             "app/Http/Controllers/HealthController.php",
             "app/Http/Controllers/InternalMetricsController.php",
+            "app/Http/Controllers/VercelCronController.php",
             "app/Http/Middleware/RecordOperationalMetrics.php",
             "app/Logging/ApplyJsonFormatterTap.php",
             "app/Support/OperationalLogger.php",
@@ -381,7 +382,8 @@
             "config/monitoring.php"
         ],
         "tests": [
-            "tests/Feature/HealthCheckTest.php"
+            "tests/Feature/HealthCheckTest.php",
+            "tests/Feature/VercelCronTest.php"
         ]
     },
     "platform.security": {
@@ -483,7 +485,11 @@
         "entrypoints": [
             "docker-compose.yml",
             "DOCKER.md",
-            "docker/php/supervisord-laravel.conf"
+            "VERCEL.md",
+            "Dockerfile.vercel",
+            "vercel.json",
+            "docker/php/supervisord-laravel.conf",
+            "docker/vercel/Caddyfile"
         ],
         "dirs": [],
         "files": [
@@ -493,7 +499,8 @@
             "docker/nginx/web.conf",
             "docker/php/docker-app-entrypoint.sh",
             "docker/php/supervisord-laravel.conf",
-            "docker/start.sh"
+            "docker/start.sh",
+            "docker/vercel/entrypoint.sh"
         ],
         "tests": []
     },

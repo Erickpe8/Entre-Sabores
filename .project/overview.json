@@ -137,7 +137,7 @@
                     "id": "platform.observability",
                     "type": "feature",
                     "name": "Salud y métricas",
-                    "summary": "/health, /internal/metrics, logs JSON y contadores Redis/array."
+                    "summary": "/health, /internal/metrics, crons Vercel, logs JSON y contadores Redis/array."
                 },
                 {
                     "id": "platform.security",
@@ -175,7 +175,7 @@
                     "id": "infra.docker",
                     "type": "infrastructure",
                     "name": "Docker",
-                    "summary": "Compose PHP/Nginx/MySQL/Redis, Supervisor (FPM, Reverb, queue) y Dockerfiles."
+                    "summary": "Compose PHP/Nginx/MySQL/Redis, Supervisor (FPM, Reverb, queue), Dockerfiles y Vercel."
                 },
                 {
                     "id": "infra.project-index",
