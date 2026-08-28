@@ -24,9 +24,5 @@ else
 	echo "[vercel] APP_KEY no definida; omitiendo package:discover."
 fi
 
-# No ejecutar config:route:view cache ni migrate aquí: en cold start bloquean
-# el HTTP hasta 300s (504) y config:cache impide leer env() en runtime.
-# Las variables de Vercel se leen en cada request sin .env en disco.
-
 echo "[vercel] Iniciando FrankenPHP..."
 exec "$@"
