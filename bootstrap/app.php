@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $trusted = env('TRUSTED_PROXIES');
+        $trusted = config('app.trusted_proxies');
         if (filled($trusted)) {
             $at = str_contains((string) $trusted, ',')
                 ? array_values(array_filter(array_map('trim', explode(',', (string) $trusted))))

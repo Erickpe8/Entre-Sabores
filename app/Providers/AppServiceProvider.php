@@ -41,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->configureStorageFallbacksWhenRedisUnavailable();
+
         // Sesiones en tabla + SQLite en solo lectura (típico en Docker) rompe cada request.
         if (config('session.driver') === 'database' && config('database.default') === 'sqlite') {
             config(['session.driver' => 'file']);
@@ -100,6 +102,43 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(NotificationRecorded::class, SendNotificationCreatedBroadcast::class);
 
         $this->forceHttpsInProduction();
+    }
+
+    /**
+     * Evita bloqueos largos (504) si SESSION/CACHE/QUEUE apuntan a Redis sin servicio real
+     * (p. ej. Vercel sin Upstash configurado aún).
+     */
+    private function configureStorageFallbacksWhenRedisUnavailable(): void
+    {
+        if ($this->redisIsConfigured()) {
+            return;
+        }
+
+        if (config('session.driver') === 'redis') {
+            config(['session.driver' => 'file']);
+        }
+
+        if (config('cache.default') === 'redis') {
+            config(['cache.default' => 'file']);
+        }
+
+        if (config('queue.default') === 'redis') {
+            config(['queue.default' => 'sync']);
+        }
+    }
+
+    private function redisIsConfigured(): bool
+    {
+        $url = config('database.redis.default.url');
+
+        if (filled($url)) {
+            return true;
+        }
+
+        $host = (string) config('database.redis.default.host', '');
+
+        return filled($host)
+            && ! in_array($host, ['127.0.0.1', 'localhost', '0.0.0.0'], true);
     }
 
     private function forceHttpsInProduction(): void

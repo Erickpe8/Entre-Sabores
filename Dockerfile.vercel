@@ -82,7 +82,8 @@ RUN mkdir -p storage/app/public storage/logs storage/framework/sessions storage/
 	&& APP_KEY=base64:YnVpbGRwbGFjZWhvbGRlcnVudGltZW9ubHk= php artisan package:discover --ansi
 
 ENV PORT=80 \
-	APP_ENV=production
+	APP_ENV=production \
+	LOG_CHANNEL=stderr
 
 EXPOSE 80
 
