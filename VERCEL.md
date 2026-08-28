@@ -218,7 +218,7 @@ Sin Pusher, la app funciona pero sin notificaciones en vivo.
 | Cron `* * * * *` rechazado | Plan Hobby: máx. un cron **diario** | Usar schedule diario en `vercel.json`; cola vía cron externo o Pro |
 | `Could not open input file: artisan` en build | `composer install` ejecuta scripts antes de copiar el código | `composer install --no-scripts`; `package:discover` en entrypoint con `APP_KEY` real |
 | Build falla en `package:discover` | `APP_KEY` placeholder inválida en imagen | No ejecutar artisan en build; discovery en arranque del contenedor |
-| **500** `Class "config" does not exist` | `config()` usado en `bootstrap/app.php` antes de cargar config | Usar `env('TRUSTED_PROXIES')` en bootstrap, no `config()` |
+| **500** `ArgumentCountError` en `Manager::createDriver()` | `APP_MAINTENANCE_DRIVER` o `BROADCAST_CONNECTION` vacíos en Vercel | Definir `APP_MAINTENANCE_DRIVER=file`; no dejar variables en blanco |
 | **500** en `/` | `APP_KEY` vacía, Redis/MySQL mal configurados, o excepción Laravel | Revisar logs; definir `APP_KEY`; usar `SESSION_DRIVER=file` hasta tener Upstash; probar `GET /up` |
 | **504** (300 s) | Entrypoint bloqueaba con `config:cache` / `migrate` antes de abrir HTTP | Entrypoint mínimo; no usar `VERCEL_RUN_MIGRATIONS=1` salvo BD lista |
 | 502 tras deploy | Servidor no escucha en `$PORT` | Caddyfile usa `:{$PORT:80}` |
