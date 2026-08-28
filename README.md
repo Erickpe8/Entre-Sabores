@@ -17,6 +17,7 @@ Los nombres de chips no coinciden literalmente con los valores de `sort` (son et
 - **Producción**: seguir [PRODUCTION.md](PRODUCTION.md) (checklist) y [SECURITY.md](SECURITY.md). Referencia de variables: [.env.production.example](.env.production.example).
 - **Madurez**: validaciones, policies, rate limits diferenciados, tests de características sociales; observabilidad (logs JSON, métricas Redis, `/health`, `/internal/metrics`) — ver [PRODUCTION.md](PRODUCTION.md).
 - **Docker**: PHP, Nginx, MySQL, Redis, phpMyAdmin; **Supervisor** gestiona FPM, Nginx, **Laravel Reverb** (WebSockets) y **worker de colas** — [DOCKER.md](DOCKER.md).
+- **Vercel**: contenedor FrankenPHP (`Dockerfile.vercel`), servicios externos (MySQL, Redis, S3) — [VERCEL.md](VERCEL.md).
 
 ## Stack
 
@@ -51,6 +52,7 @@ Por tarea: rama `feature/*` **desde `main`** → PR a **`develop`** → PR **`de
 | [SECURITY.md](SECURITY.md) | Superficie de seguridad, CSP |
 | [PERFORMANCE.md](PERFORMANCE.md) | Feed, caché invitados, índices |
 | [DOCKER.md](DOCKER.md) | Stack, Supervisor, colas, puertos |
+| [VERCEL.md](VERCEL.md) | Despliegue en Vercel (contenedor FrankenPHP) |
 | [.env.production.example](.env.production.example) | Variables de referencia para producción |
 
 ## Requisitos rápidos

@@ -81,6 +81,8 @@ Al pedir la tarjeta de una tarea, el agente entrega un markdown para copiar y pe
 | Descripción | Alcance y contexto |
 | Objetivo | Problema que resuelve o valor que aporta |
 
+El agente **también crea la rama** `feature/...` al entregar la tarjeta (conservando cambios locales si los hay).
+
 ## Agentes (Cursor)
 
 Regla always-on: [`.cursor/rules/git-workflow.mdc`](.cursor/rules/git-workflow.mdc)

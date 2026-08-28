@@ -11,4 +11,6 @@ public/hot
 public/storage
 .phpunit.cache
 docs/
+tests/
+.vercel
 docker/mysql/

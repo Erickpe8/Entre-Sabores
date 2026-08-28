@@ -131,6 +131,7 @@ Para que el análisis de maridaje y los broadcasts no se queden en cola sin cons
 
 ## Escalado futuro (referencia)
 
+- **Vercel (producción serverless):** ver [VERCEL.md](../VERCEL.md) — contenedor FrankenPHP, MySQL/Redis externos, cron para colas.
 - **Más capacidad de cola:** añade réplicas de `queue:work` (otro contenedor o más procesos en Supervisor) si el backlog crece; **Redis** + `QUEUE_CONNECTION=redis` es el patrón típico en producción ([PRODUCTION.md](PRODUCTION.md)).
 - Usa el servicio `redis` y en `.env` define `REDIS_HOST=redis`, y opcionalmente `CACHE_STORE=redis` y `QUEUE_CONNECTION=redis` (Laravel admite Predis o extensión `phpredis` si la añades a la imagen).
 - Tareas programadas: contenedor con `php artisan schedule:work` o un cron sidecar.

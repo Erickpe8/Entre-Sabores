@@ -54,6 +54,12 @@ Qué problema resuelve o qué valor aporta.
 
 Inferir rama, nombre, descripción y objetivo del trabajo actual o de lo que se haya acordado en la conversación. Si falta contexto, preguntar antes de inventar.
 
+**Además de la tarjeta**, crear la rama `feature/...` de inmediato:
+
+1. Si ya estás en la rama correcta con cambios, no crear otra.
+2. Si estás en `main` o `develop` (u otra feature), `git checkout -b feature/<nombre>` conservando el working tree.
+3. Si hace falta actualizar `main` primero (`git fetch` + `pull`), hacerlo solo si no hay cambios locales que se perderían; si los hay, crear la rama desde el estado actual y avisar.
+
 ## Agente (sin que el usuario lo pida)
 
 - Al **cerrar una tarea** con cambios: confirmar que hay rama `feature/*` (crearla desde `main` si se trabajó en otra).
