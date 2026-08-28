@@ -1,0 +1,217 @@
+{
+    "project": {
+        "id": "entre-sabores",
+        "name": "Entre Sabores",
+        "summary": "Red social gastronómica (COIL México–Colombia): muro, publicaciones con etiquetas, likes, comentarios, perfiles y análisis de maridaje por IA.",
+        "truth_rule": "El índice decide QUÉ LEER, no QUÉ ES VERDAD. El código es la fuente de verdad."
+    },
+    "truth_rule": "El índice decide QUÉ LEER, no QUÉ ES VERDAD. El código es la fuente de verdad.",
+    "context_budget": "2–5 nodos. Leer entrypoints. Ampliar solo si la tarea es compleja. Validar siempre en código.",
+    "how_to_query": "php artisan project:query relevant --q=\"<tarea>\"",
+    "domains": [
+        {
+            "id": "domain.social",
+            "type": "domain",
+            "name": "Red social",
+            "summary": "Muro, publicaciones, likes, comentarios, seguimiento y etiquetas.",
+            "children": [
+                {
+                    "id": "social.wall",
+                    "type": "feature",
+                    "name": "Muro / feed",
+                    "summary": "Dashboard y JSON del feed: FYP vs siguiendo, sort recent/popular/trending."
+                },
+                {
+                    "id": "social.posts",
+                    "type": "feature",
+                    "name": "Publicaciones",
+                    "summary": "Alta, edición, detalle, policy e imagen; encola maridaje y aplica ContentGuard al crear."
+                },
+                {
+                    "id": "social.likes",
+                    "type": "feature",
+                    "name": "Likes",
+                    "summary": "Toggle de like, modelo Like, evento PostLiked y notificación al autor."
+                },
+                {
+                    "id": "social.comments",
+                    "type": "feature",
+                    "name": "Comentarios",
+                    "summary": "Hilos de comentarios, resource JSON, evento CommentCreated y notificación."
+                },
+                {
+                    "id": "social.follows",
+                    "type": "feature",
+                    "name": "Seguimiento",
+                    "summary": "Seguir/dejar de seguir por username y notificación de nuevo seguidor."
+                },
+                {
+                    "id": "social.tags",
+                    "type": "feature",
+                    "name": "Etiquetas y países",
+                    "summary": "Catálogo de tags (caché), búsqueda, ISO de país y banderas en el post."
+                }
+            ]
+        },
+        {
+            "id": "domain.identity",
+            "type": "domain",
+            "name": "Identidad",
+            "summary": "Auth Breeze, perfiles públicos y ajustes de cuenta.",
+            "children": [
+                {
+                    "id": "identity.auth",
+                    "type": "feature",
+                    "name": "Autenticación",
+                    "summary": "Login, registro, reset, verificación de email y modelo User (Breeze)."
+                },
+                {
+                    "id": "identity.profile",
+                    "type": "feature",
+                    "name": "Perfil y cuenta",
+                    "summary": "Perfil público, posts del usuario, likes del perfil y settings de cuenta."
+                }
+            ]
+        },
+        {
+            "id": "domain.ai",
+            "type": "domain",
+            "name": "IA",
+            "summary": "Guardia de contenido, job de moderación y análisis de maridaje.",
+            "children": [
+                {
+                    "id": "ai.moderation",
+                    "type": "feature",
+                    "name": "Moderación de contenido",
+                    "summary": "ContentGuard en el alta, AnalyzePostJob + AIService y rechazo con notificación."
+                },
+                {
+                    "id": "ai.maridaje",
+                    "type": "feature",
+                    "name": "Análisis de maridaje",
+                    "summary": "Job de maridaje, reanalyze del dueño, broadcast al terminar y UI de volteo."
+                }
+            ]
+        },
+        {
+            "id": "domain.realtime",
+            "type": "domain",
+            "name": "Tiempo real",
+            "summary": "Reverb/Echo: canales privados y broadcasts de likes, comentarios, notificaciones y IA.",
+            "children": [
+                {
+                    "id": "realtime.broadcasting",
+                    "type": "feature",
+                    "name": "Broadcasting",
+                    "summary": "Canales user.{id}, listeners Echo y payloads de eventos sociales e IA."
+                }
+            ]
+        },
+        {
+            "id": "domain.notifications",
+            "type": "domain",
+            "name": "Notificaciones",
+            "summary": "Bandeja in-app, payload JSON, observer de conteo y prune.",
+            "children": [
+                {
+                    "id": "notifications.inbox",
+                    "type": "feature",
+                    "name": "Bandeja de notificaciones",
+                    "summary": "API de listado/leído, payload estable, observer de unread y comandos prune/sync."
+                }
+            ]
+        },
+        {
+            "id": "domain.platform",
+            "type": "domain",
+            "name": "Plataforma",
+            "summary": "Marketing, UI Blade/JS, cabeceras de seguridad y observabilidad.",
+            "children": [
+                {
+                    "id": "platform.marketing",
+                    "type": "feature",
+                    "name": "Páginas de marketing",
+                    "summary": "Welcome, explorar y cómo funciona (Blade + layout marketing)."
+                },
+                {
+                    "id": "platform.observability",
+                    "type": "feature",
+                    "name": "Salud y métricas",
+                    "summary": "/health, /internal/metrics, logs JSON y contadores Redis/array."
+                },
+                {
+                    "id": "platform.security",
+                    "type": "feature",
+                    "name": "Cabeceras y CSP",
+                    "summary": "Middleware SecurityHeaders y config/security.php (CSP, frame, referrer)."
+                },
+                {
+                    "id": "platform.ui",
+                    "type": "feature",
+                    "name": "UI Blade y JS",
+                    "summary": "Layouts, componentes Blade, módulos ui/ y bundling Vite/Tailwind (sin Alpine)."
+                }
+            ]
+        },
+        {
+            "id": "domain.infrastructure",
+            "type": "domain",
+            "name": "Infraestructura",
+            "summary": "Kernel Laravel, datos, Docker y el índice de proyecto.",
+            "children": [
+                {
+                    "id": "infra.kernel",
+                    "type": "configuration",
+                    "name": "Kernel Laravel",
+                    "summary": "bootstrap, providers, rate limits, rutas web/console y config de runtime."
+                },
+                {
+                    "id": "infra.database",
+                    "type": "infrastructure",
+                    "name": "Datos y colas",
+                    "summary": "Migraciones de cache/jobs, índices de rendimiento y DatabaseSeeder."
+                },
+                {
+                    "id": "infra.docker",
+                    "type": "infrastructure",
+                    "name": "Docker",
+                    "summary": "Compose PHP/Nginx/MySQL/Redis, Supervisor (FPM, Reverb, queue) y Dockerfiles."
+                },
+                {
+                    "id": "infra.project-index",
+                    "type": "infrastructure",
+                    "name": "Project Intelligence Index",
+                    "summary": "Catálogo conceptual, indexer incremental, CLI artisan y hooks git."
+                }
+            ]
+        },
+        {
+            "id": "domain.docs",
+            "type": "domain",
+            "name": "Documentación",
+            "summary": "Markdown técnico del repo; no sustituye el código.",
+            "children": [
+                {
+                    "id": "docs.technical",
+                    "type": "documentation",
+                    "name": "Documentación técnica",
+                    "summary": "Guías md del repo (arquitectura, backend, frontend, producción)."
+                }
+            ]
+        },
+        {
+            "id": "domain.tests",
+            "type": "domain",
+            "name": "Pruebas",
+            "summary": "PHPUnit Feature/Unit; señal real de comportamiento.",
+            "children": [
+                {
+                    "id": "tests.suite",
+                    "type": "test",
+                    "name": "Suite PHPUnit",
+                    "summary": "Feature y Unit; sqlite en memoria según phpunit.xml."
+                }
+            ]
+        }
+    ]
+}

@@ -68,7 +68,9 @@ Thumbs.db
 Desktop.ini
 
 # --- Editores e IDEs ---
-/.cursor/
+/.cursor/*
+!/.cursor/rules/
+!/.cursor/rules/**
 /.idea/
 /.vscode/
 /.fleet/
@@ -77,9 +79,11 @@ Desktop.ini
 *.code-workspace
 *.sublime-project
 *.sublime-workspace
-.project
 .classpath
 .settings/
+
+# --- Project Intelligence Index (caché local) ---
+/.project/fingerprints.json
 *.swp
 *.swo
 *~

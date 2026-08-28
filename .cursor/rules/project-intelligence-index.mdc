@@ -1,0 +1,39 @@
+---
+description: Project Intelligence Index — mapa de navegación para agentes (qué leer, no qué es verdad)
+alwaysApply: true
+---
+
+# Project Intelligence Index
+
+El índice decide **qué leer**, no **qué es verdad**. El código es la fuente de verdad. Precisión > tokens.
+
+## Flujo (niveles)
+
+0. `php artisan project:query stale` — si hay índice.
+1. `overview` — mapa de dominios (barato).
+2. `relevant --q="<tarea>"` — 2–5 nodos + entrypoints.
+3. `context {id}` — padre, hijos, deps, files.
+4. **Leer** solo esos entrypoints / files.
+5. Si es compleja: `dependencies` / `files` / `path` y ampliar. Validar en código.
+
+Preferir `php artisan project:query …` a leer JSON crudos. No cargar los 5 JSON de `.project/` de golpe.
+
+## Simple vs compleja
+
+- Simple: relevant → 1–2 entrypoints → código.
+- Compleja: overview + relevant + context + deps; luego código. Si hay duda que afecte corrección, leer código.
+
+## El agente ejecuta esto sin que el usuario lo pida
+
+| Condición | Acción |
+| Se crea módulo/feature real ausente del árbol | Mapear en `app/Support/ProjectIndex/Catalog.php` SOLO rutas existentes. `php artisan project:index --full` |
+| Archivo nuevo de `app/` no aparece en `query path` / filemap | Añadirlo al nodo REAL. `--full` |
+| Move/rename de árbol grande | Actualizar paths rotos. `--full` |
+| Se editó el Catalog en esta tarea | `--full` al cerrar (query incremental NO basta) |
+| `--check` → `catalog-changed` o grafo incoherente | Corregir catálogo si hace falta. `--full` |
+
+NO `--full` en un cambio local ya mapeado (`project:query` ya refresca).
+Cerrar la feature con catálogo alineado al código.
+
+Consultar: `php artisan project:query relevant --q="maridaje"`
+Actualizar: `composer index` o `php artisan project:index --if-stale`

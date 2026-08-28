@@ -1,0 +1,572 @@
+{
+    "social.wall": {
+        "entrypoints": [
+            "app/Http/Controllers/WallController.php",
+            "app/Services/WallFeedService.php",
+            "app/Http/Requests/FilterPostsRequest.php",
+            "resources/js/wall.js",
+            "ARCHITECTURE.md"
+        ],
+        "dirs": [],
+        "files": [
+            "ARCHITECTURE.md",
+            "PERFORMANCE.md",
+            "app/Http/Controllers/WallController.php",
+            "app/Http/Requests/FilterPostsRequest.php",
+            "app/Services/WallFeedService.php",
+            "config/performance.php",
+            "resources/js/wall.js",
+            "resources/views/wall/index.blade.php"
+        ],
+        "tests": []
+    },
+    "social.wall.feed": {
+        "entrypoints": [
+            "app/Services/WallFeedService.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Services/WallFeedService.php"
+        ],
+        "tests": []
+    },
+    "social.posts": {
+        "entrypoints": [
+            "app/Http/Controllers/PostController.php",
+            "app/Models/Post.php",
+            "app/Policies/PostPolicy.php",
+            "app/Http/Resources/PostResource.php",
+            "app/Http/Requests/StorePostRequest.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Http/Controllers/PostController.php",
+            "app/Http/Requests/StorePostRequest.php",
+            "app/Http/Requests/UpdatePostRequest.php",
+            "app/Http/Resources/PostResource.php",
+            "app/Models/Post.php",
+            "app/Policies/PostPolicy.php",
+            "database/factories/PostFactory.php",
+            "database/migrations/2026_04_28_000002_create_posts_table.php",
+            "database/migrations/2026_04_28_100002_refactor_posts_for_tags_and_comment_threads.php",
+            "database/migrations/2026_05_05_100000_add_ai_analysis_to_posts_table.php",
+            "database/migrations/2026_05_05_120000_add_analysis_lifecycle_fields_to_posts_table.php",
+            "database/migrations/2026_05_05_130000_add_moderation_status_fields_to_posts_table.php",
+            "database/seeders/PostSeeder.php",
+            "resources/js/post-show.js",
+            "resources/js/social/postCard.js",
+            "resources/views/posts/show.blade.php"
+        ],
+        "tests": [
+            "tests/Feature/PostStoreTest.php",
+            "tests/Feature/PostUpdateTest.php"
+        ]
+    },
+    "social.likes": {
+        "entrypoints": [
+            "app/Http/Controllers/PostLikeController.php",
+            "app/Models/Like.php",
+            "app/Events/PostLiked.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Events/PostLiked.php",
+            "app/Http/Controllers/PostLikeController.php",
+            "app/Models/Like.php",
+            "app/Notifications/NewLikeNotification.php",
+            "database/migrations/2026_04_28_110000_create_likes_table.php"
+        ],
+        "tests": [
+            "tests/Feature/ProfileLikedPostsTest.php",
+            "tests/Feature/WallSocialFeaturesTest.php"
+        ]
+    },
+    "social.comments": {
+        "entrypoints": [
+            "app/Http/Controllers/PostCommentController.php",
+            "app/Models/Comment.php",
+            "app/Http/Resources/CommentResource.php",
+            "resources/js/social/commentThread.js"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Events/CommentCreated.php",
+            "app/Http/Controllers/PostCommentController.php",
+            "app/Http/Requests/StorePostCommentRequest.php",
+            "app/Http/Resources/CommentResource.php",
+            "app/Models/Comment.php",
+            "app/Notifications/NewCommentNotification.php",
+            "database/migrations/2026_04_28_000003_create_comments_table.php",
+            "resources/js/social/commentThread.js"
+        ],
+        "tests": [
+            "tests/Feature/WallSocialFeaturesTest.php"
+        ]
+    },
+    "social.follows": {
+        "entrypoints": [
+            "app/Http/Controllers/FollowController.php",
+            "app/Notifications/NewFollowerNotification.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Http/Controllers/FollowController.php",
+            "app/Notifications/NewFollowerNotification.php",
+            "database/migrations/2026_04_28_000004_create_follows_table.php"
+        ],
+        "tests": [
+            "tests/Feature/WallSocialFeaturesTest.php"
+        ]
+    },
+    "social.tags": {
+        "entrypoints": [
+            "app/Http/Controllers/TagController.php",
+            "app/Models/Tag.php",
+            "app/Support/CountryNameIsoMap.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Http/Controllers/TagController.php",
+            "app/Models/Country.php",
+            "app/Models/Tag.php",
+            "app/Support/CountryNameIsoMap.php",
+            "database/factories/CountryFactory.php",
+            "database/migrations/2026_04_28_000001_create_countries_table.php",
+            "database/migrations/2026_04_28_100000_create_tags_table.php",
+            "database/migrations/2026_04_28_100001_create_post_tag_table.php",
+            "database/migrations/2026_04_30_100000_add_name_index_to_tags_table.php",
+            "database/migrations/2026_04_30_140000_add_iso_code_to_tags_table.php",
+            "database/migrations/2026_04_30_140001_add_iso_code_to_countries_drop_flag_emoji.php",
+            "database/seeders/CountrySeeder.php",
+            "database/seeders/GastronomyTagsCatalog.php",
+            "database/seeders/TagSeeder.php"
+        ],
+        "tests": [
+            "tests/Feature/TagSearchTest.php"
+        ]
+    },
+    "identity.auth": {
+        "entrypoints": [
+            "app/Http/Controllers/Auth/AuthenticatedSessionController.php",
+            "app/Http/Controllers/Auth/RegisteredUserController.php",
+            "app/Models/User.php",
+            "routes/auth.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Http/Controllers/Auth/AuthenticatedSessionController.php",
+            "app/Http/Controllers/Auth/ConfirmablePasswordController.php",
+            "app/Http/Controllers/Auth/EmailVerificationNotificationController.php",
+            "app/Http/Controllers/Auth/EmailVerificationPromptController.php",
+            "app/Http/Controllers/Auth/NewPasswordController.php",
+            "app/Http/Controllers/Auth/PasswordController.php",
+            "app/Http/Controllers/Auth/PasswordResetLinkController.php",
+            "app/Http/Controllers/Auth/RegisteredUserController.php",
+            "app/Http/Controllers/Auth/VerifyEmailController.php",
+            "app/Http/Requests/Auth/ConfirmPasswordRequest.php",
+            "app/Http/Requests/Auth/ForgotPasswordRequest.php",
+            "app/Http/Requests/Auth/LoginRequest.php",
+            "app/Http/Requests/Auth/RegisterRequest.php",
+            "app/Http/Requests/Auth/ResetPasswordRequest.php",
+            "app/Models/User.php",
+            "database/factories/UserFactory.php",
+            "database/migrations/0001_01_01_000000_create_users_table.php",
+            "lang/es/auth.php",
+            "lang/es/passwords.php",
+            "resources/views/auth/confirm-password.blade.php",
+            "resources/views/auth/forgot-password.blade.php",
+            "resources/views/auth/login.blade.php",
+            "resources/views/auth/register.blade.php",
+            "resources/views/auth/reset-password.blade.php",
+            "resources/views/auth/verify-email.blade.php",
+            "routes/auth.php"
+        ],
+        "tests": [
+            "tests/Feature/Auth/AuthenticationTest.php",
+            "tests/Feature/Auth/EmailVerificationTest.php",
+            "tests/Feature/Auth/PasswordConfirmationTest.php",
+            "tests/Feature/Auth/PasswordResetTest.php",
+            "tests/Feature/Auth/PasswordUpdateTest.php",
+            "tests/Feature/Auth/RegistrationTest.php"
+        ]
+    },
+    "identity.profile": {
+        "entrypoints": [
+            "app/Http/Controllers/ProfileController.php",
+            "app/Http/Controllers/UserController.php",
+            "resources/views/profile/show.blade.php",
+            "app/Http/Controllers/UsernameAvailabilityController.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Http/Controllers/ProfileController.php",
+            "app/Http/Controllers/UserController.php",
+            "app/Http/Controllers/UsernameAvailabilityController.php",
+            "app/Http/Requests/ProfileUpdateRequest.php",
+            "app/Http/Requests/UserPostsRequest.php",
+            "resources/js/profileLikes.js",
+            "resources/js/profilePosts.js",
+            "resources/js/ui/profilePage.js",
+            "resources/js/ui/profileShareModal.js",
+            "resources/js/ui/usernameAvailability.js",
+            "resources/views/profile/edit.blade.php",
+            "resources/views/profile/partials/delete-user-form.blade.php",
+            "resources/views/profile/partials/update-password-form.blade.php",
+            "resources/views/profile/show.blade.php",
+            "resources/views/settings/account.blade.php",
+            "resources/views/settings/partials/settings-nav.blade.php",
+            "resources/views/settings/profile.blade.php"
+        ],
+        "tests": [
+            "tests/Feature/ProfileLikedPostsTest.php",
+            "tests/Feature/ProfileTest.php",
+            "tests/Feature/UsernameAvailabilityTest.php"
+        ]
+    },
+    "identity.photos": {
+        "entrypoints": [
+            "app/Services/ProfilePhotoService.php",
+            "app/View/Components/AvatarCropper.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Console/Commands/MigrateProfilePhotosToWebpCommand.php",
+            "app/Services/ProfilePhotoService.php",
+            "app/View/Components/AvatarCropper.php",
+            "config/image.php",
+            "config/profile_photo.php",
+            "resources/js/ui/avatarCropper.js",
+            "resources/views/components/avatar-cropper.blade.php"
+        ],
+        "tests": []
+    },
+    "ai.moderation": {
+        "entrypoints": [
+            "app/Services/ContentGuard.php",
+            "app/Jobs/AnalyzePostJob.php",
+            "app/Services/AIService.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Events/Broadcasting/PostModerationUpdatedBroadcast.php",
+            "app/Jobs/AnalyzePostJob.php",
+            "app/Notifications/PostRejectedNotification.php",
+            "app/Services/AIService.php",
+            "app/Services/ContentGuard.php"
+        ],
+        "tests": []
+    },
+    "ai.moderation.engine": {
+        "entrypoints": [
+            "app/Services/AIService.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Services/AIService.php"
+        ],
+        "tests": []
+    },
+    "ai.maridaje": {
+        "entrypoints": [
+            "app/Services/MaridajeAiAnalysisService.php",
+            "app/Jobs/GeneratePostAnalysisJob.php",
+            "app/Http/Controllers/PostController.php",
+            "resources/js/social/maridajeFlip.js"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Events/Broadcasting/PostAnalysisGeneratedBroadcast.php",
+            "app/Http/Controllers/PostController.php",
+            "app/Jobs/GeneratePostAnalysisJob.php",
+            "app/Services/MaridajeAiAnalysisService.php",
+            "resources/js/social/maridajeFlip.js"
+        ],
+        "tests": [
+            "tests/Feature/PostReanalyzeTest.php"
+        ]
+    },
+    "ai.maridaje.engine": {
+        "entrypoints": [
+            "app/Services/MaridajeAiAnalysisService.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Services/MaridajeAiAnalysisService.php"
+        ],
+        "tests": []
+    },
+    "realtime.broadcasting": {
+        "entrypoints": [
+            "app/Providers/BroadcastServiceProvider.php",
+            "routes/channels.php",
+            "resources/js/echo.js",
+            "app/Listeners/Broadcasting/SendPostLikedBroadcast.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Events/Broadcasting/CommentCreatedBroadcast.php",
+            "app/Events/Broadcasting/NotificationCreatedBroadcast.php",
+            "app/Events/Broadcasting/PostAnalysisGeneratedBroadcast.php",
+            "app/Events/Broadcasting/PostLikedBroadcast.php",
+            "app/Events/Broadcasting/PostModerationUpdatedBroadcast.php",
+            "app/Listeners/Broadcasting/SendCommentCreatedBroadcast.php",
+            "app/Listeners/Broadcasting/SendNotificationCreatedBroadcast.php",
+            "app/Listeners/Broadcasting/SendPostLikedBroadcast.php",
+            "app/Providers/BroadcastServiceProvider.php",
+            "config/broadcasting.php",
+            "config/reverb.php",
+            "resources/js/echo.js",
+            "routes/channels.php"
+        ],
+        "tests": [
+            "tests/Feature/BroadcastingSocialTest.php",
+            "tests/Unit/BroadcastingPayloadTest.php"
+        ]
+    },
+    "notifications.inbox": {
+        "entrypoints": [
+            "app/Http/Controllers/NotificationController.php",
+            "app/Support/NotificationApiPayload.php",
+            "app/Observers/DatabaseNotificationObserver.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Console/Commands/PruneNotificationsCommand.php",
+            "app/Console/Commands/SyncUnreadNotificationCountsCommand.php",
+            "app/Events/NotificationRecorded.php",
+            "app/Http/Controllers/NotificationController.php",
+            "app/Observers/DatabaseNotificationObserver.php",
+            "app/Support/NotificationApiPayload.php",
+            "database/migrations/2026_04_29_120000_create_notifications_table.php",
+            "database/migrations/2026_05_02_120000_add_unread_notifications_count_to_users_table.php",
+            "resources/js/notificationsNav.js",
+            "resources/views/layouts/partials/nav-notifications.blade.php"
+        ],
+        "tests": [
+            "tests/Unit/NotificationApiPayloadTest.php"
+        ]
+    },
+    "platform.marketing": {
+        "entrypoints": [
+            "resources/views/welcome.blade.php",
+            "resources/views/how-it-works.blade.php",
+            "resources/views/explore.blade.php"
+        ],
+        "dirs": [],
+        "files": [
+            "resources/views/explore.blade.php",
+            "resources/views/how-it-works.blade.php",
+            "resources/views/layouts/marketing.blade.php",
+            "resources/views/layouts/partials/marketing-header.blade.php",
+            "resources/views/welcome.blade.php"
+        ],
+        "tests": []
+    },
+    "platform.observability": {
+        "entrypoints": [
+            "app/Http/Controllers/HealthController.php",
+            "app/Support/OperationalMetrics.php",
+            "app/Support/OperationalLogger.php",
+            "config/monitoring.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Http/Controllers/HealthController.php",
+            "app/Http/Controllers/InternalMetricsController.php",
+            "app/Http/Middleware/RecordOperationalMetrics.php",
+            "app/Logging/ApplyJsonFormatterTap.php",
+            "app/Support/OperationalLogger.php",
+            "app/Support/OperationalMetrics.php",
+            "config/logging.php",
+            "config/monitoring.php"
+        ],
+        "tests": [
+            "tests/Feature/HealthCheckTest.php"
+        ]
+    },
+    "platform.security": {
+        "entrypoints": [
+            "app/Http/Middleware/SecurityHeaders.php",
+            "config/security.php",
+            "SECURITY.md"
+        ],
+        "dirs": [],
+        "files": [
+            "SECURITY.md",
+            "app/Http/Middleware/SecurityHeaders.php",
+            "config/security.php"
+        ],
+        "tests": []
+    },
+    "platform.ui": {
+        "entrypoints": [
+            "resources/js/app.js",
+            "resources/views/layouts/app.blade.php",
+            "resources/views/layouts/navigation.blade.php",
+            "FRONTEND.md"
+        ],
+        "dirs": [
+            "resources/views/components/",
+            "resources/views/errors/"
+        ],
+        "files": [
+            "FRONTEND.md",
+            "app/View/Components/AppLayout.php",
+            "app/View/Components/GuestLayout.php",
+            "package.json",
+            "resources/css/app.css",
+            "resources/js/app.js",
+            "resources/js/bootstrap.js",
+            "resources/js/ui/appChromeReset.js",
+            "resources/js/ui/dropdowns.js",
+            "resources/js/ui/flashMessages.js",
+            "resources/js/ui/mobileNav.js",
+            "resources/js/ui/modals.js",
+            "resources/views/components/ui/icon.blade.php",
+            "resources/views/dashboard.blade.php",
+            "resources/views/errors/partials/http-card.blade.php",
+            "resources/views/layouts/app.blade.php",
+            "resources/views/layouts/guest.blade.php",
+            "resources/views/layouts/navigation.blade.php",
+            "resources/views/layouts/settings.blade.php",
+            "tailwind.config.js",
+            "vite.config.js"
+        ],
+        "tests": []
+    },
+    "infra.kernel": {
+        "entrypoints": [
+            "bootstrap/app.php",
+            "app/Providers/AppServiceProvider.php",
+            "routes/web.php"
+        ],
+        "dirs": [],
+        "files": [
+            "app/Http/Controllers/Controller.php",
+            "app/Providers/AppServiceProvider.php",
+            "bootstrap/app.php",
+            "bootstrap/cache/packages.php",
+            "bootstrap/cache/services.php",
+            "bootstrap/providers.php",
+            "composer.json",
+            "config/app.php",
+            "config/auth.php",
+            "config/cache.php",
+            "config/database.php",
+            "config/filesystems.php",
+            "config/mail.php",
+            "config/queue.php",
+            "config/services.php",
+            "config/session.php",
+            "routes/console.php",
+            "routes/web.php"
+        ],
+        "tests": []
+    },
+    "infra.database": {
+        "entrypoints": [
+            "DATABASE.md",
+            "database/seeders/DatabaseSeeder.php"
+        ],
+        "dirs": [],
+        "files": [
+            "DATABASE.md",
+            "database/migrations/0001_01_01_000001_create_cache_table.php",
+            "database/migrations/0001_01_01_000002_create_jobs_table.php",
+            "database/migrations/2026_04_28_170000_add_likes_follows_post_tag_indexes.php",
+            "database/migrations/2026_05_03_100000_add_performance_indexes_posts_notifications.php",
+            "database/seeders/DatabaseSeeder.php"
+        ],
+        "tests": []
+    },
+    "infra.docker": {
+        "entrypoints": [
+            "docker-compose.yml",
+            "DOCKER.md",
+            "docker/php/supervisord-laravel.conf"
+        ],
+        "dirs": [],
+        "files": [
+            "DOCKER.md",
+            "docker-compose.yml",
+            "docker/nginx/default.conf",
+            "docker/nginx/web.conf",
+            "docker/php/docker-app-entrypoint.sh",
+            "docker/php/supervisord-laravel.conf",
+            "docker/start.sh"
+        ],
+        "tests": []
+    },
+    "infra.project-index": {
+        "entrypoints": [
+            "app/Support/ProjectIndex/Catalog.php",
+            "app/Support/ProjectIndex/Indexer.php",
+            "app/Support/ProjectIndex/IndexQuery.php",
+            ".project/README.md"
+        ],
+        "dirs": [],
+        "files": [
+            ".cursor/rules/project-intelligence-index.mdc",
+            "app/Console/Commands/ProjectIndexCommand.php",
+            "app/Console/Commands/ProjectQueryCommand.php",
+            "app/Support/ProjectIndex/Catalog.php",
+            "app/Support/ProjectIndex/GitHookInstaller.php",
+            "app/Support/ProjectIndex/IndexQuery.php",
+            "app/Support/ProjectIndex/IndexStore.php",
+            "app/Support/ProjectIndex/Indexer.php",
+            "app/Support/ProjectIndex/PhpImportScanner.php"
+        ],
+        "tests": [
+            "tests/Feature/ProjectIndex/ProjectIndexCliTest.php",
+            "tests/Unit/ProjectIndex/ProjectIndexEngineTest.php"
+        ]
+    },
+    "docs.technical": {
+        "entrypoints": [
+            "DOCUMENTACION.md",
+            "ARCHITECTURE.md",
+            "README.md"
+        ],
+        "dirs": [],
+        "files": [
+            "ARCHITECTURE.md",
+            "BACKEND.md",
+            "CHANGELOG.md",
+            "DATABASE.md",
+            "DOCKER.md",
+            "DOCUMENTACION.md",
+            "FRONTEND.md",
+            "PERFORMANCE.md",
+            "PRODUCTION.md",
+            "README.md",
+            "SECURITY.md"
+        ],
+        "tests": []
+    },
+    "tests.suite": {
+        "entrypoints": [
+            "phpunit.xml",
+            "tests/TestCase.php"
+        ],
+        "dirs": [
+            "tests/Feature/"
+        ],
+        "files": [
+            "phpunit.xml"
+        ],
+        "tests": [
+            "tests/Feature/Auth/AuthenticationTest.php",
+            "tests/Feature/Auth/EmailVerificationTest.php",
+            "tests/Feature/Auth/PasswordConfirmationTest.php",
+            "tests/Feature/Auth/PasswordResetTest.php",
+            "tests/Feature/Auth/PasswordUpdateTest.php",
+            "tests/Feature/Auth/RegistrationTest.php",
+            "tests/Feature/ProjectIndex/ProjectIndexCliTest.php",
+            "tests/TestCase.php",
+            "tests/Unit/BroadcastingPayloadTest.php",
+            "tests/Unit/ExampleTest.php",
+            "tests/Unit/NotificationApiPayloadTest.php",
+            "tests/Unit/ProjectIndex/ProjectIndexEngineTest.php"
+        ]
+    }
+}
