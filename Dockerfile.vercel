@@ -1,7 +1,3 @@
-# Imagen de producción para Vercel (Fluid compute + Container Registry).
-# Local: docker build -f Dockerfile.vercel -t entre-sabores-vercel .
-# Docs: VERCEL.md
-
 FROM node:22-bookworm-slim AS assets
 WORKDIR /app
 
