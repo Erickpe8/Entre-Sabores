@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Intervention\Image\Drivers\Gd\Driver as GdImageDriver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -125,6 +126,11 @@ class AppServiceProvider extends ServiceProvider
             if (blank(config($key))) {
                 config([$key => $fallback]);
             }
+        }
+
+        $imageDriver = config('image.driver');
+        if (blank($imageDriver) || ! is_string($imageDriver) || ! class_exists($imageDriver)) {
+            config(['image.driver' => GdImageDriver::class]);
         }
     }
 

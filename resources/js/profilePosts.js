@@ -1,4 +1,6 @@
 import { renderCard } from './social/postCard.js';
+import { setupPostCardInteractions, syncSavedPostButtons } from './social/postCardInteractions.js';
+import { initPostCardMedia } from './social/postCardMedia.js';
 
 export function initProfilePosts() {
     const grid = document.getElementById('profile-posts-grid');
@@ -16,6 +18,19 @@ export function initProfilePosts() {
     }
 
     const config = JSON.parse(cfgEl.textContent);
+    const postBaseUrl = config.postBaseUrl || config.postPublicBase || '/posts';
+
+    setupPostCardInteractions(grid, {
+        axios,
+        postBaseUrl,
+        isAuthenticated: config.isAuthenticated === true,
+        loginUrl: config.loginUrl,
+        onOpenDetail: (id) => {
+            window.location.href = `${config.postPublicBase}/${id}`;
+        },
+    });
+    initPostCardMedia(document);
+
     const state = {
         page: 1,
         loading: false,
@@ -57,6 +72,8 @@ export function initProfilePosts() {
                 grid.appendChild(el);
             });
 
+            syncSavedPostButtons(grid);
+
             state.hasMore = meta.has_more === true;
             if (state.hasMore) {
                 state.page = (meta.current_page || state.page) + 1;
@@ -64,7 +81,7 @@ export function initProfilePosts() {
 
             if (grid.children.length === 0) {
                 grid.innerHTML =
-                    '<p class="col-span-full text-center text-slate-500 text-sm py-10">Aún no hay publicaciones.</p>';
+                    '<p class="col-span-full text-center text-ink-muted text-sm py-10">Aún no hay publicaciones.</p>';
             }
             setStatus(
                 state.hasMore

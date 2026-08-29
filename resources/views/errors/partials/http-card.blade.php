@@ -35,8 +35,8 @@
     @endif
 
     <div class="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <a href="{{ route('welcome') }}" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 sm:w-auto">
-            <span class="inline-flex h-5 w-5 items-center justify-center text-white">
+        <a href="{{ route('welcome') }}" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-3 text-sm font-semibold text-ink transition hover:bg-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 sm:w-auto">
+            <span class="inline-flex h-5 w-5 items-center justify-center text-ink">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" />
                 </svg>
@@ -44,8 +44,8 @@
             <span>Volver al inicio</span>
         </a>
 
-        <a href="{{ url()->full() }}" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 sm:w-auto">
-            <span class="inline-flex h-5 w-5 items-center justify-center text-gray-600">
+        <a href="{{ url()->full() }}" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-warm-200 bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-warm-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 sm:w-auto">
+            <span class="inline-flex h-5 w-5 items-center justify-center text-ink-secondary">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 4.5v6h6m9-1.5a9 9 0 10-2.64 6.36L19.5 18" />
                 </svg>

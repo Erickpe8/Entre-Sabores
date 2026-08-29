@@ -1,4 +1,4 @@
-@props(['align' => 'right', 'width' => '48', 'contentClasses' => 'py-1 bg-white'])
+@props(['align' => 'right', 'width' => '48', 'contentClasses' => 'py-1 app-dropdown-panel'])
 
 @php
 $alignmentClasses = match ($align) {
@@ -9,6 +9,7 @@ $alignmentClasses = match ($align) {
 
 $width = match ($width) {
     '48' => 'w-48',
+    '52' => 'w-52',
     default => $width,
 };
 @endphp
@@ -20,9 +21,10 @@ $width = match ($width) {
 
     <div
         data-dropdown-panel
-        class="absolute z-50 mt-2 hidden origin-top scale-95 opacity-0 transition duration-200 ease-out {{ $width }} rounded-md shadow-lg {{ $alignmentClasses }}"
+        class="absolute z-50 mt-2 hidden origin-top scale-95 opacity-0 transition duration-150 ease-out {{ $width }} {{ $alignmentClasses }}"
+        role="menu"
     >
-        <div class="rounded-md ring-1 ring-black ring-opacity-5 {{ $contentClasses }}">
+        <div class="{{ $contentClasses }}">
             {{ $content }}
         </div>
     </div>

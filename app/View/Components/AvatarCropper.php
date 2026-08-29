@@ -24,6 +24,8 @@ class AvatarCropper extends Component
         public ?string $formId = null,
         public ?string $stepOneId = null,
         public ?string $stepTwoId = null,
+        /** @var list<string>|null */
+        public ?array $stepIds = null,
     ) {}
 
     public function render(): View

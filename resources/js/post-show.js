@@ -1,6 +1,8 @@
 import { ensureEcho } from './echo.js';
 import { resetAppChromeState } from './ui/appChromeReset.js';
-import { renderCard, heartSvgHtml, flashLikeAnimation } from './social/postCard.js';
+import { renderCard } from './social/postCard.js';
+import { setupPostCardInteractions, syncSavedPostButtons } from './social/postCardInteractions.js';
+import { initPostCardMedia } from './social/postCardMedia.js';
 import { mountPostShowMaridajeFlip } from './social/maridajeFlip.js';
 import {
     renderCommentsTreeHtml,
@@ -64,7 +66,7 @@ export function initPostShow() {
         mount.innerHTML = '';
         postShowFlipCleanup?.();
         postShowFlipCleanup = null;
-        const article = renderCard(post, { omitInteractionBar: true });
+        const article = renderCard(post, { omitInteractionBar: true, variant: 'detail' });
         postShowFlipCleanup = mountPostShowMaridajeFlip(mount, post, article, {
             axios,
             postBaseUrl: config.postBaseUrl,
@@ -73,56 +75,27 @@ export function initPostShow() {
         });
     }
 
+    setupPostCardInteractions(root, {
+        axios,
+        postBaseUrl: config.postBaseUrl,
+        isAuthenticated: config.isAuthenticated === true,
+        loginUrl: config.loginUrl,
+        onOpenDetail: () => {
+            document.getElementById('post-show-comments')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        },
+        onNotify: (msg) => showToast(toastEl, msg),
+    });
+    syncSavedPostButtons(root);
+    initPostCardMedia(root);
+
     const commentsWrap = document.getElementById('post-show-comments');
     if (commentsWrap) {
         commentsWrap.className =
-            'mt-4 rounded-xl border border-slate-700/60 bg-slate-950/50 p-3 shadow-inner';
+            'mt-4 rounded-xl border border-warm-200/60 bg-warm-50/50 p-3 shadow-inner';
         commentsWrap.innerHTML = renderCommentsTreeHtml(post.comments || [], {
             showReplyButtons: config.isAuthenticated === true,
         });
     }
-
-    async function toggleLike(postId) {
-        if (!config.isAuthenticated) {
-            window.location.href = config.loginUrl;
-
-            return;
-        }
-        try {
-            const { data } = await axios.post(`${config.postBaseUrl}/${postId}/likes/toggle`);
-            const liked = data.liked === true;
-            const likesCount = data.likes_count ?? 0;
-            if (liked) {
-                flashLikeAnimation(postId);
-            }
-            root.querySelectorAll(`[data-like-post-id="${postId}"]`).forEach((btn) => {
-                btn.dataset.liked = liked ? '1' : '0';
-                btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
-                btn.classList.toggle('text-rose-500', liked);
-                btn.classList.toggle('text-slate-400', !liked);
-                const span = btn.querySelector('[data-like-count]');
-                if (span) {
-                    span.textContent = String(likesCount);
-                }
-                const wrap = btn.querySelector('.wall-like-svg-wrap');
-                if (wrap) {
-                    wrap.innerHTML = heartSvgHtml(liked);
-                }
-            });
-        } catch (e) {
-            console.error(e);
-            showToast(toastEl, 'No pudimos guardar tu «me gusta». Inténtalo de nuevo.');
-        }
-    }
-
-    root.addEventListener('click', (e) => {
-        const likeBtn = e.target.closest('.wall-like-btn');
-        if (!likeBtn?.dataset.likePostId) {
-            return;
-        }
-        e.preventDefault();
-        void toggleLike(Number(likeBtn.dataset.likePostId));
-    });
 
     setupCommentInteractions(root, {
         postId: Number(post.id),

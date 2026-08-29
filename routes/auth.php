@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\RegisterCountryHintController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,14 @@ Route::get('logout', function () {
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
+
+    Route::get('register/country-hint', [RegisterCountryHintController::class, 'hint'])
+        ->middleware('throttle:30,1')
+        ->name('register.country-hint');
+
+    Route::post('register/resolve-location', [RegisterCountryHintController::class, 'resolve'])
+        ->middleware('throttle:20,1')
+        ->name('register.resolve-location');
 
     Route::post('register', [RegisteredUserController::class, 'store'])
         ->middleware('throttle:register');

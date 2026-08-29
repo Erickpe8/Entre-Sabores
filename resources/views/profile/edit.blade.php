@@ -3,19 +3,19 @@
         <div class="max-w-7xl mx-auto px-6 py-10 grid lg:grid-cols-3 gap-8">
             {{-- Sidebar --}}
             <aside class="space-y-6 lg:self-start lg:sticky lg:top-24">
-                <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10 hover:scale-[1.01] transition">
+                <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-warm-200 hover:scale-[1.01] transition">
                     <div class="flex flex-col items-center text-center space-y-3">
                         <img
                             id="avatarPreview"
                             src="{{ $user->profile_photo_url }}"
                             alt=""
-                            class="w-28 h-28 rounded-full border-2 border-green-400 object-cover shrink-0"
+                            class="w-28 h-28 rounded-full border-2 border-fresh-500 object-cover shrink-0"
                         >
 
                         <button
                             type="button"
                             id="openAvatarModal"
-                            class="text-sm text-green-400 hover:underline focus:outline-none focus:ring-2 focus:ring-green-400/50 rounded"
+                            class="text-sm text-tomato-500 hover:underline focus:outline-none focus:ring-2 focus:ring-fresh-500/50 rounded"
                         >
                             Cambiar foto
                         </button>
@@ -23,7 +23,7 @@
                         <input type="file" id="avatarInput" accept="image/*" class="sr-only" tabindex="-1" autocomplete="off">
 
                         <div class="space-y-1">
-                            <h3 class="text-white font-semibold text-lg leading-tight">
+                            <h3 class="text-ink font-semibold text-lg leading-tight">
                                 {{ $user->first_name }} {{ $user->last_name }}
                             </h3>
 
@@ -35,28 +35,28 @@
                                 href="{{ route('profile.show', $user->username) }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="inline-flex items-center gap-1.5 text-xs text-green-400 hover:text-green-300 hover:underline"
+                                class="inline-flex items-center gap-1.5 text-xs text-tomato-500 hover:text-green-300 hover:underline"
                             >
                                 <x-ui.icon name="external-link" class="w-3.5 h-3.5 shrink-0" />
                                 Ver perfil público
                             </a>
 
                             <div class="flex items-center justify-center gap-2 text-gray-400 text-sm">
-                                <x-ui.icon name="map-pin" class="w-4 h-4 text-green-400 shrink-0" />
+                                <x-ui.icon name="map-pin" class="w-4 h-4 text-tomato-500 shrink-0" />
                                 <span>{{ $user->country ?? '—' }}</span>
                             </div>
                         </div>
 
-                        <div class="mt-3 w-full space-y-3 text-sm text-gray-400 border-t border-white/10 pt-4">
+                        <div class="mt-3 w-full space-y-3 text-sm text-gray-400 border-t border-warm-200 pt-4">
                             @if ($user->birthdate)
                                 <div class="flex items-center justify-center gap-2">
-                                    <x-ui.icon name="cake" class="w-4 h-4 text-green-400 shrink-0" />
+                                    <x-ui.icon name="cake" class="w-4 h-4 text-tomato-500 shrink-0" />
                                     <span class="text-gray-300">{{ $user->birthdate->age }} años</span>
                                 </div>
                             @endif
 
                             <div class="flex items-center justify-center gap-2 text-center">
-                                <x-ui.icon name="calendar" class="w-4 h-4 text-green-400 shrink-0" />
+                                <x-ui.icon name="calendar" class="w-4 h-4 text-tomato-500 shrink-0" />
                                 <span>
                                     Miembro desde
                                     <span class="text-gray-300 font-medium">
@@ -82,15 +82,15 @@
                         @if ($user->preferences && count($user->preferences))
                             <div class="mt-3 flex flex-wrap gap-2 justify-center w-full">
                                 @foreach ($user->preferences as $pref)
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs rounded-full bg-green-400/20 text-green-300 border border-green-400/30">
-                                        <x-ui.icon :name="$preferenceIcons[$pref] ?? 'star'" class="w-3.5 h-3.5 text-green-400 shrink-0" />
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs rounded-full bg-green-400/20 text-green-300 border border-fresh-500/30">
+                                        <x-ui.icon :name="$preferenceIcons[$pref] ?? 'star'" class="w-3.5 h-3.5 text-tomato-500 shrink-0" />
                                         <span>{{ $pref }}</span>
                                     </span>
                                 @endforeach
                             </div>
                         @endif
 
-                        <div class="mt-3 flex flex-wrap gap-4 justify-center items-center w-full border-t border-white/10 pt-4">
+                        <div class="mt-3 flex flex-wrap gap-4 justify-center items-center w-full border-t border-warm-200 pt-4">
                             @if ($user->instagram)
                                 <a
                                     href="https://www.instagram.com/{{ $user->instagram }}/"
@@ -141,8 +141,8 @@
                     <x-input-error class="mt-2" :messages="$errors->get('profile_photo_base64')" />
 
                     {{-- Información personal --}}
-                    <div class="bg-white/5 backdrop-blur rounded-2xl p-6 space-y-5 border border-white/10 hover:scale-[1.01] transition shadow-lg shadow-black/20">
-                        <h2 class="text-white text-lg font-semibold">
+                    <div class="bg-white/5 backdrop-blur rounded-2xl p-6 space-y-5 border border-warm-200 hover:scale-[1.01] transition shadow-lg shadow-ink/5">
+                        <h2 class="text-ink text-lg font-semibold">
                             Información personal
                         </h2>
 
@@ -173,7 +173,7 @@
                                 aria-live="polite"
                             ></p>
                             <p class="mt-0.5 text-xs text-gray-500">
-                                URL pública: <span class="text-gray-400">{{ url('/user/') }}</span><span id="username-url-preview" class="text-green-400/90">{{ old('username', $user->username) }}</span>
+                                URL pública: <span class="text-gray-400">{{ url('/user/') }}</span><span id="username-url-preview" class="text-tomato-500/90">{{ old('username', $user->username) }}</span>
                             </p>
                         </div>
 
@@ -237,8 +237,8 @@
                     </div>
 
                     {{-- Perfil --}}
-                    <div class="bg-white/5 backdrop-blur rounded-2xl p-6 space-y-5 border border-white/10 hover:scale-[1.01] transition shadow-lg shadow-black/20">
-                        <h2 class="text-white text-lg font-semibold">
+                    <div class="bg-white/5 backdrop-blur rounded-2xl p-6 space-y-5 border border-warm-200 hover:scale-[1.01] transition shadow-lg shadow-ink/5">
+                        <h2 class="text-ink text-lg font-semibold">
                             Perfil
                         </h2>
 
@@ -277,8 +277,8 @@
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
-                        <div class="border-t border-white/10 pt-5 space-y-4">
-                            <h3 class="text-white text-sm font-semibold">
+                        <div class="border-t border-warm-200 pt-5 space-y-4">
+                            <h3 class="text-ink text-sm font-semibold">
                                 Preferencias gastronómicas
                             </h3>
                             <p class="text-xs text-gray-500 -mt-2">
@@ -287,7 +287,7 @@
 
                             <div class="grid grid-cols-2 gap-3">
                                 @foreach (\App\Models\User::PREFERENCE_OPTIONS as $pref)
-                                    <label class="flex items-center gap-2.5 cursor-pointer bg-white/5 px-3 py-2 rounded-xl hover:bg-white/10 transition border border-white/10 text-left">
+                                    <label class="flex items-center gap-2.5 cursor-pointer bg-white/5 px-3 py-2 rounded-xl hover:bg-warm-100 transition border border-warm-200 text-left">
                                         <input
                                             type="checkbox"
                                             name="preferences[]"
@@ -295,8 +295,8 @@
                                             @checked(in_array($pref, old('preferences', $user->preferences ?? []), true))
                                             class="peer sr-only"
                                         >
-                                        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-white/35 bg-slate-900/90 transition peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-400/70 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-slate-950 peer-checked:border-emerald-400 peer-checked:bg-emerald-500 peer-checked:[&>svg]:opacity-100">
-                                            <svg class="h-3.5 w-3.5 text-white opacity-0 transition-opacity" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                                        <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-white/35 bg-warm-0/90 transition peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-fresh-500/40 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-slate-950 peer-checked:border-emerald-400 peer-checked:bg-emerald-500 peer-checked:[&>svg]:opacity-100">
+                                            <svg class="h-3.5 w-3.5 text-ink opacity-0 transition-opacity" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                                                 <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                             </svg>
                                         </span>
@@ -307,8 +307,8 @@
                             <x-input-error class="mt-2" :messages="$errors->get('preferences')" />
                         </div>
 
-                        <div class="border-t border-white/10 pt-5 space-y-4">
-                            <h3 class="text-white text-sm font-semibold">
+                        <div class="border-t border-warm-200 pt-5 space-y-4">
+                            <h3 class="text-ink text-sm font-semibold">
                                 Redes sociales
                             </h3>
                             <p class="text-xs text-gray-500 -mt-2">
@@ -355,7 +355,7 @@
 
                     <button
                         type="submit"
-                        class="w-full py-3 rounded-xl bg-gradient-to-r from-green-400 to-blue-500 text-white font-semibold shadow-lg shadow-green-900/30 hover:opacity-95 transition"
+                        class="w-full py-3 rounded-xl bg-gradient-to-r bg-tomato-500 text-ink font-semibold shadow-lg shadow-green-900/30 hover:opacity-95 transition"
                     >
                         Guardar cambios
                     </button>
@@ -363,17 +363,17 @@
                     @if (session('success') || session('status') === 'profile-updated')
                         <p
                             data-flash-auto-hide="2500"
-                            class="text-sm text-center text-green-400 transition-opacity duration-300"
+                            class="text-sm text-center text-tomato-500 transition-opacity duration-300"
                             role="status"
                         >{{ session('success') ?? __('Guardado.') }}</p>
                     @endif
                 </form>
 
-                <div class="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10 hover:scale-[1.01] transition shadow-lg shadow-black/20">
+                <div class="bg-white/5 backdrop-blur rounded-2xl p-6 border border-warm-200 hover:scale-[1.01] transition shadow-lg shadow-ink/5">
                     @include('profile.partials.update-password-form')
                 </div>
 
-                <div class="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10 hover:scale-[1.01] transition shadow-lg shadow-black/20">
+                <div class="bg-white/5 backdrop-blur rounded-2xl p-6 border border-warm-200 hover:scale-[1.01] transition shadow-lg shadow-ink/5">
                     @include('profile.partials.delete-user-form')
                 </div>
             </main>

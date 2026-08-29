@@ -44,6 +44,7 @@ class UserController extends Controller
             'profilePostsConfig' => [
                 'postsUrl' => route('users.posts.index', ['username' => $user->username], false),
                 'postPublicBase' => '/posts',
+                'postBaseUrl' => '/posts',
                 'loginUrl' => route('login', [], false),
                 'isAuthenticated' => auth()->check(),
             ],
@@ -51,6 +52,7 @@ class UserController extends Controller
                 ? [
                     'likesUrl' => route('profile.likes', [], false),
                     'postPublicBase' => '/posts',
+                    'postBaseUrl' => '/posts',
                     'loginUrl' => route('login', [], false),
                     'isAuthenticated' => true,
                 ]

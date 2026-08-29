@@ -1,16 +1,17 @@
-/** Gradientes tipo daily.dev para cabecera de card (determinísticos por id) */
-const HEADER_GRADIENTS = [
-    'from-violet-600 via-purple-600 to-fuchsia-700',
-    'from-emerald-600 via-teal-600 to-cyan-700',
-    'from-amber-600 via-orange-600 to-rose-700',
-    'from-sky-600 via-blue-600 to-indigo-800',
-    'from-rose-600 via-pink-600 to-violet-800',
-];
+import { buildPostImageHtml, enhancePostCardMedia } from './postCardMedia.js';
+import { buildPostMenuHtml } from './postCardMenu.js';
 
-function gradientClassForPostId(id) {
-    const n = Number(id) || 0;
+function userInitials(user) {
+    const fromName = String(user?.name || '').trim();
+    const fromUsername = String(user?.username || '').trim();
+    const source = fromName || fromUsername || '?';
+    const parts = source.split(/\s+/).filter(Boolean);
 
-    return HEADER_GRADIENTS[Math.abs(n) % HEADER_GRADIENTS.length];
+    if (parts.length >= 2) {
+        return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+    }
+
+    return source.slice(0, 2).toUpperCase();
 }
 
 export function relativeTimeEs(iso) {
@@ -53,7 +54,6 @@ export function esc(s) {
 }
 
 /**
- * Nombre de país + bandera: usa flag_url del API o, en su defecto, /flags/{iso}.svg.
  * @param {{ name?: string, flag_url?: string | null, iso_code?: string | null } | null | undefined} country
  */
 export function countryPreviewMetaHtml(country) {
@@ -66,10 +66,10 @@ export function countryPreviewMetaHtml(country) {
         }
     }
     if (url) {
-        return `<span class="inline-flex items-center gap-1.5 min-w-0 max-w-full"><img src="${esc(url)}" alt="" class="h-3.5 w-5 shrink-0 rounded-sm object-cover object-left ring-1 ring-slate-500/50" width="20" height="14" loading="lazy" decoding="async" /><span class="truncate text-slate-400">${name}</span></span>`;
+        return `<span class="inline-flex min-w-0 max-w-full items-center gap-1.5 text-muted text-xs"><img src="${esc(url)}" alt="" class="h-3.5 w-5 shrink-0 rounded-sm object-cover object-left" width="20" height="14" loading="lazy" decoding="async" /><span class="truncate">${name}</span></span>`;
     }
 
-    return `<span class="truncate text-slate-400">${name}</span>`;
+    return `<span class="truncate text-muted text-xs">${name}</span>`;
 }
 
 export function onEnterOrSpace(event, callback) {
@@ -83,8 +83,22 @@ export function formatStory(text) {
     return esc(String(text)).replace(/\n/g, '<br>');
 }
 
-export const ICON_COMMENT =
-    '<svg class="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>';
+const ICON_CLASS = 'h-5 w-5 shrink-0';
+
+const INTERACTION_BTN =
+    'post-card-interaction-btn inline-flex items-center justify-center gap-1.5 min-h-8 min-w-8 p-1.5 text-body text-sm hover:text-accent-warm focus:outline-none focus:ring-4 focus:ring-neutral-tertiary rounded-base transition-colors duration-150 disabled:cursor-wait disabled:opacity-65';
+
+const TAG_PILL =
+    'inline-flex items-center bg-accent-gold-soft text-accent-gold border border-accent-gold-soft rounded-full px-3 py-1 text-xs font-medium cursor-pointer hover:bg-accent-gold-medium transition-colors duration-150 focus:outline-none focus:ring-4 focus:ring-neutral-tertiary';
+
+const READ_MORE_LINK =
+    'post-card-read-more inline text-accent-warm font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-neutral-tertiary rounded-sm';
+
+export const ICON_COMMENT = `<svg class="${ICON_CLASS}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>`;
+
+const ICON_SHARE = `<svg class="${ICON_CLASS}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>`;
+
+const ICON_BOOKMARK = `<svg class="${ICON_CLASS}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>`;
 
 export function flashLikeAnimation(postId) {
     document.querySelectorAll(`button[data-like-post-id="${postId}"]`).forEach((btn) => {
@@ -97,62 +111,121 @@ export function flashLikeAnimation(postId) {
 
 export function heartSvgHtml(liked) {
     if (liked) {
-        return '<svg class="h-4 w-4 text-rose-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"/></svg>';
+        return `<svg class="${ICON_CLASS}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"/></svg>`;
     }
 
-    return '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>';
+    return `<svg class="${ICON_CLASS}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>`;
+}
+
+function buildAvatarHtml(user, ariaProfile) {
+    const profileUrl = esc(user.profile_url || '#');
+    const avatarUrl = user.avatar_thumb || user.avatar;
+    const initials = esc(userInitials(user));
+    const avatarShell =
+        'wall-post-user-avatar flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-default bg-neutral-secondary-medium transition-colors hover:border-accent-warm focus:outline-none focus:ring-4 focus:ring-neutral-tertiary';
+
+    if (avatarUrl) {
+        return `<a href="${profileUrl}" class="${avatarShell}" data-post-avatar-link aria-label="Ver perfil: ${ariaProfile}">
+            <img src="${esc(avatarUrl)}" alt="" class="h-full w-full object-cover" width="44" height="44" loading="lazy" decoding="async" onerror="this.classList.add('hidden');this.parentElement.querySelector('[data-avatar-fallback]')?.classList.remove('hidden')" />
+            <span class="hidden flex h-full w-full items-center justify-center text-xs font-semibold text-accent-gold" data-avatar-fallback aria-hidden="true">${initials}</span>
+        </a>`;
+    }
+
+    return `<a href="${profileUrl}" class="${avatarShell}" data-post-avatar-link aria-label="Ver perfil: ${ariaProfile}">
+        <span class="flex h-full w-full items-center justify-center text-xs font-semibold text-accent-gold">${initials}</span>
+    </a>`;
+}
+
+function buildExcerptHtml(post, detailHref, options = {}) {
+    const { omitInteractionBar = false, variant = 'feed' } = options;
+
+    if (variant === 'detail') {
+        const body = String(post.description || post.excerpt || '').trim();
+        if (!body) {
+            return '';
+        }
+
+        return `<div class="post-card-body text-body text-sm leading-relaxed whitespace-pre-wrap">${formatStory(body)}</div>`;
+    }
+
+    if (omitInteractionBar) {
+        return '';
+    }
+
+    const excerpt = String(post.excerpt || post.description || '').trim();
+    if (!excerpt) {
+        return `<p class="mb-3 text-body text-sm leading-relaxed">
+            <a href="${detailHref}" class="${READ_MORE_LINK} post-card-detail-link" data-post-detail-link>Ver más →</a>
+        </p>`;
+    }
+
+    return `<p class="post-card-excerpt mb-3 text-body text-sm leading-relaxed">
+        <span class="post-card-excerpt__text line-clamp-3">${esc(excerpt)}</span><a href="${detailHref}" class="${READ_MORE_LINK} post-card-detail-link ms-1" data-post-detail-link>Ver más →</a>
+    </p>`;
 }
 
 /**
- * Like + contador de comentarios (compacto) para barra de interacción.
- *
- * @param {object} post — payload PostResource
- * @param {{ commentsCountId?: string, comfortable?: boolean }} [opts]
+ * @param {object} post
+ * @param {{ commentsCountId?: string }} [opts]
  */
-export function buildInteractionStatsHtml(post, opts = {}) {
-    const comfortable = opts.comfortable === true;
+export function buildInteractionButtonsHtml(post, opts = {}) {
     const liked = post.liked === true;
     const likesCount = post.likes_count ?? 0;
     const commentsCount = post.comments_count ?? 0;
     const idAttr = opts.commentsCountId ? ` id="${esc(opts.commentsCountId)}"` : '';
-
-    const likeBtnClass = comfortable
-        ? `wall-like-btn inline-flex min-h-[40px] cursor-pointer items-center gap-1.5 rounded-full px-2 py-1.5 text-sm font-medium transition-all duration-200 ease-out hover:bg-slate-800/80 hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 active:scale-[0.98] ${
-              liked ? 'text-rose-500' : 'text-slate-400'
-          }`
-        : `wall-like-btn inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 rounded-full px-1.5 py-1 text-xs font-medium transition-all duration-200 ease-out hover:bg-slate-800/80 hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 active:scale-[0.98] ${
-              liked ? 'text-rose-500' : 'text-slate-400'
-          }`;
-
-    const statText = comfortable ? 'text-sm text-slate-400' : 'text-[11px] text-slate-400';
+    const likeActive = liked ? ' text-danger hover:text-danger' : '';
 
     return `
-        <button type="button" class="${likeBtnClass}" data-like-post-id="${post.id}" data-liked="${liked ? '1' : '0'}" aria-pressed="${liked ? 'true' : 'false'}" aria-label="Me gusta">
-            <span class="wall-like-svg-wrap shrink-0">${heartSvgHtml(liked)}</span>
+        <button type="button" class="${INTERACTION_BTN} wall-like-btn${likeActive}" data-like-post-id="${post.id}" data-liked="${liked ? '1' : '0'}" aria-pressed="${liked ? 'true' : 'false'}" aria-label="Me gusta">
+            <span class="wall-like-svg-wrap inline-flex">${heartSvgHtml(liked)}</span>
             <span data-like-count class="tabular-nums">${likesCount}</span>
         </button>
-        <span class="inline-flex cursor-default items-center gap-1.5 ${statText} transition-colors duration-200 hover:text-slate-200" title="Comentarios">
+        <button type="button" class="${INTERACTION_BTN} wall-comment-btn" data-post-id="${post.id}" aria-label="Comentar">
             ${ICON_COMMENT}
             <span${idAttr} data-comments-count class="tabular-nums">${commentsCount}</span>
-        </span>`;
+        </button>
+        <button type="button" class="${INTERACTION_BTN} wall-share-btn" data-post-id="${post.id}" aria-label="Compartir">
+            ${ICON_SHARE}
+        </button>`;
 }
 
 /**
- * @param {object} post — payload PostResource
- * @param {{ onOpenDetail?: (id: number) => void, omitInteractionBar?: boolean }} [options]
+ * @param {object} post
+ */
+export function buildSaveButtonHtml(post) {
+    return `<button type="button" class="${INTERACTION_BTN} wall-save-btn shrink-0" data-post-id="${post.id}" aria-label="Guardar" aria-pressed="false">
+        ${ICON_BOOKMARK}
+    </button>`;
+}
+
+/**
+ * @param {object} post
+ * @param {{ commentsCountId?: string }} [opts]
+ */
+export function buildInteractionStatsHtml(post, opts = {}) {
+    return `
+        <div class="flex items-center justify-between gap-3">
+            <div class="flex min-w-0 flex-wrap items-center gap-4 sm:gap-5">
+                ${buildInteractionButtonsHtml(post, opts)}
+            </div>
+            ${buildSaveButtonHtml(post)}
+        </div>`;
+}
+
+/**
+ * @param {object} post
+ * @param {{ onOpenDetail?: (id: number) => void, omitInteractionBar?: boolean, variant?: 'feed' | 'detail' }} [options]
  */
 export function renderCard(post, options = {}) {
-    const { onOpenDetail, omitInteractionBar } = options;
+    const { onOpenDetail, omitInteractionBar, variant = 'feed' } = options;
+    const isDetail = variant === 'detail';
 
     const el = document.createElement('article');
-    el.className =
-        'group relative flex flex-col overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/80 shadow-sm shadow-black/30 transition duration-200 ease-out hover:z-[1] hover:shadow-lg hover:shadow-black/40 hover:border-slate-600 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70';
+    el.className = isDetail
+        ? 'post-card post-card--detail flex w-full flex-col relative'
+        : 'post-card bg-neutral-primary-soft flex w-full flex-col p-6 border border-default rounded-base shadow-xs relative transition-colors duration-150';
     if (onOpenDetail) {
-        el.classList.add(
-            'cursor-pointer',
-            'hover:scale-[1.02]',
-            'active:scale-[0.99]',
-        );
+        el.classList.add('hover:bg-neutral-secondary-medium', 'cursor-pointer', 'focus-visible:outline-none', 'focus-visible:ring-4', 'focus-visible:ring-neutral-tertiary');
         el.setAttribute('role', 'button');
         el.setAttribute('tabindex', '0');
     }
@@ -161,95 +234,95 @@ export function renderCard(post, options = {}) {
 
     const when = relativeTimeEs(post.created_at);
     const countryHtml = countryPreviewMetaHtml(post.user?.country ?? post.country);
-    const timeHtml = when
-        ? `<span class="shrink-0 text-slate-500" data-post-relative-time>${esc(when)}</span>`
-        : '';
     const user = post.user || {};
-    const profileUrl = esc(user.profile_url || '#');
-    const avatarUrl = esc(user.avatar_thumb || user.avatar || '');
     const username = user.username ? esc(String(user.username)) : '';
-    const userTitle = username
-        ? `<span class="text-slate-100">@${username}</span>`
-        : `<span class="text-slate-100">${esc(user.name || '—')}</span>`;
+    const displayUser = username ? `@${username}` : esc(user.name || '—');
     const ariaProfile = esc(user.username ? `@${user.username}` : String(user.name || 'usuario'));
+    const profileUrl = esc(user.profile_url || '#');
+    const detailHref = `/posts/${post.id}`;
 
-    const grad = gradientClassForPostId(post.id);
     const highlightBadge =
         post.maridaje_highlighted === true
-            ? `<span class="pointer-events-none absolute right-2 top-2 z-10 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200 ring-1 ring-amber-400/40 shadow-sm shadow-black/40" title="Maridaje destacado">🔥 Destacado</span>`
+            ? `<span class="pointer-events-none absolute right-4 top-4 z-10 inline-flex items-center rounded-full border border-accent-gold-soft bg-accent-gold-soft px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-accent-gold" title="Maridaje destacado">Destacado</span>`
             : '';
 
-    const headerHtml = post.image_url
-        ? `<div class="relative h-[140px] shrink-0 overflow-hidden bg-slate-800">
-                ${highlightBadge}
-                <img src="${esc(post.image_url)}" alt="" class="h-full w-full object-cover" loading="lazy" />
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent pointer-events-none"></div>
-               </div>`
-        : `<div class="relative h-[140px] shrink-0 overflow-hidden bg-slate-800">
-                ${highlightBadge}
-                <div class="absolute inset-0 bg-gradient-to-br ${grad} opacity-95"></div>
-                <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.12),_transparent_55%)]"></div>
-            </div>`;
+    const timeLine = when
+        ? `<p class="text-muted text-xs"><span aria-hidden="true">· </span><span data-post-relative-time>${esc(when)}</span></p>`
+        : '';
 
     const tagPills = (post.tags || [])
         .slice(0, 5)
         .map(
             (t) =>
-                `<button type="button" class="wall-feed-tag-pill inline-flex rounded-full bg-slate-800/90 px-2 py-0.5 text-[10px] font-medium text-emerald-200/95 ring-1 ring-slate-600/80 transition hover:bg-emerald-600/25 hover:ring-emerald-500/50" data-tag-name="${esc(t.name)}" aria-label="Filtrar por ${esc(t.name)}">#${esc(t.name)}</button>`,
+                `<button type="button" class="${TAG_PILL} wall-feed-tag-pill" data-tag-name="${esc(t.name)}" aria-label="Filtrar por ${esc(t.name)}">#${esc(t.name)}</button>`,
         )
         .join('');
 
+    const imageBlock = buildPostImageHtml(post, esc);
+    const excerptBlock = buildExcerptHtml(post, detailHref, { omitInteractionBar, variant });
+    const titleHtml = isDetail
+        ? `<h2 class="post-card__title text-xl font-bold leading-snug text-heading">${esc(post.title)}</h2>`
+        : `<a href="${detailHref}" class="post-card-detail-link mb-3 block focus:outline-none focus:ring-4 focus:ring-neutral-tertiary rounded-base" data-post-detail-link tabindex="-1">
+            <h3 class="line-clamp-2 text-base font-semibold text-heading">${esc(post.title)}</h3>
+        </a>`;
+
     el.innerHTML = `
-            ${headerHtml}
-            <div class="flex flex-1 flex-col p-4 pt-3">
-                <div class="mb-3 flex gap-3">
-                    <a href="${profileUrl}" class="wall-post-user-avatar shrink-0 self-start rounded-full ring-1 ring-slate-600/70 transition hover:ring-emerald-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60" data-post-avatar-link aria-label="Ver perfil: ${ariaProfile}">
-                        <img src="${avatarUrl}" alt="" class="h-10 w-10 rounded-full object-cover bg-slate-800" width="40" height="40" loading="lazy" decoding="async" />
-                    </a>
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-semibold leading-tight">${userTitle}</p>
-                        <div class="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] leading-tight">
-                            ${countryHtml}
-                            ${when ? `<span class="text-slate-600" aria-hidden="true">·</span>` : ''}
-                            ${timeHtml}
-                        </div>
-                    </div>
-                </div>
-                <h3 class="text-[15px] font-semibold leading-snug text-slate-100 line-clamp-2">${esc(post.title)}</h3>
-                <p class="mt-3 text-sm leading-relaxed text-slate-400 line-clamp-3">${esc(post.excerpt)}</p>
-                <div class="mt-3 flex flex-wrap gap-1.5">${tagPills}</div>
-                ${
-                    omitInteractionBar === true
-                        ? ''
-                        : `
-                <div class="mt-4 border-t border-slate-700/80 pt-3">
-                    <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                        <div class="flex min-w-0 items-center gap-5">
-                            ${buildInteractionStatsHtml(post, { comfortable: false })}
-                        </div>
-                        <span class="max-w-full truncate text-end text-[11px] text-slate-500 sm:max-w-[45%]">${esc((post.tags || []).find((t) => t.type === 'experience')?.name || '')}</span>
-                    </div>
-                </div>`
-                }
+        ${highlightBadge}
+        <header class="post-card__header flex items-center gap-3 ${isDetail ? 'pb-4' : 'pb-3'}">
+            ${buildAvatarHtml(user, ariaProfile)}
+            <div class="min-w-0 flex-1">
+                <a href="${profileUrl}" class="text-heading font-semibold text-sm hover:text-accent-warm focus:outline-none focus:ring-4 focus:ring-neutral-tertiary rounded-base" data-post-avatar-link>${displayUser}</a>
+                ${timeLine}
+                ${countryHtml ? `<div class="mt-1">${countryHtml}</div>` : ''}
             </div>
-        `;
+            ${buildPostMenuHtml(post)}
+        </header>
+        ${imageBlock}
+        ${isDetail ? `<div class="post-card__content space-y-3">${titleHtml}${tagPills ? `<div class="flex flex-wrap gap-2">${tagPills}</div>` : ''}${excerptBlock}</div>` : `${titleHtml}${excerptBlock}${tagPills ? `<div class="mb-3 flex flex-wrap gap-2">${tagPills}</div>` : ''}`}
+        ${
+            omitInteractionBar === true
+                ? ''
+                : `
+        <hr class="post-card__divider border-default border-t my-3" />
+        ${buildInteractionStatsHtml(post)}`
+        }
+    `;
+
+    enhancePostCardMedia(el);
 
     if (onOpenDetail) {
         el.addEventListener('click', (e) => {
             if (
-                e.target.closest('a') ||
+                e.target.closest('a[data-post-avatar-link]') ||
                 e.target.closest('.wall-like-btn') ||
-                e.target.closest('.wall-feed-tag-pill')
+                e.target.closest('.wall-comment-btn') ||
+                e.target.closest('.wall-share-btn') ||
+                e.target.closest('.wall-save-btn') ||
+                e.target.closest('.wall-post-menu-btn') ||
+                e.target.closest('[data-post-menu]') ||
+                e.target.closest('.wall-post-menu-action') ||
+                e.target.closest('.wall-feed-tag-pill') ||
+                e.target.closest('.post-card-media-open')
             ) {
                 return;
+            }
+            if (e.target.closest('[data-post-detail-link]')) {
+                e.preventDefault();
             }
             onOpenDetail(post.id);
         });
         el.addEventListener('keydown', (e) => {
             if (
                 e.target.closest('.wall-like-btn') ||
+                e.target.closest('.wall-comment-btn') ||
+                e.target.closest('.wall-share-btn') ||
+                e.target.closest('.wall-save-btn') ||
+                e.target.closest('.wall-post-menu-btn') ||
+                e.target.closest('[data-post-menu]') ||
+                e.target.closest('.wall-post-menu-action') ||
                 e.target.closest('.wall-feed-tag-pill') ||
-                e.target.closest('.wall-post-user-avatar')
+                e.target.closest('[data-post-avatar-link]') ||
+                e.target.closest('.post-card-media-open')
             ) {
                 return;
             }
