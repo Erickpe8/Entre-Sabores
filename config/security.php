@@ -31,16 +31,16 @@ return [
 
     /*
     | Política base estricta: sin eval. JS solo desde Vite (public/build).
+    | Fuentes self-hosted vía Vite (@fontsource); no requiere CDNs externos.
     | style-src conserva 'unsafe-inline' por estilos de componentes y atributos ocasionales.
-    | Google Fonts (Plus Jakarta Sans en app.css): fonts.googleapis.com + fonts.gstatic.com.
     | Si Laravel Echo/Reverb usa otro host/puerto, amplía connect-src vía SECURITY_CSP_POLICY.
     */
 
     'csp_default_policy' => implode('; ', [
         "default-src 'self'",
         "script-src 'self'",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-        "font-src 'self' data: https://fonts.gstatic.com",
+        "style-src 'self' 'unsafe-inline'",
+        "font-src 'self' data:",
         "img-src 'self' data: blob: https:",
         "connect-src 'self'",
         "frame-ancestors 'none'",
