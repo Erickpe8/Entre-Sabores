@@ -1,10 +1,10 @@
 <section class="space-y-6">
     <header>
-        <h2 class="text-lg font-semibold text-white">
+        <h2 class="text-lg font-semibold text-ink">
             Eliminar cuenta
         </h2>
 
-        <p class="mt-1 text-sm text-slate-400">
+        <p class="mt-1 text-sm text-ink-muted">
             Una vez eliminada tu cuenta, todos tus datos se borrarán de forma permanente. Descarga cualquier información que quieras conservar antes de continuar.
         </p>
     </header>
@@ -22,7 +22,7 @@
                 ¿Seguro que quieres eliminar tu cuenta?
             </h2>
 
-            <p class="mt-1 text-sm text-gray-600">
+            <p class="mt-1 text-sm text-ink-secondary">
                 Esta acción no se puede deshacer. Escribe tu contraseña para confirmar que deseas eliminar tu cuenta de forma permanente.
             </p>
 
@@ -33,7 +33,7 @@
                     id="password"
                     name="password"
                     type="password"
-                    class="mt-1 block w-3/4 rounded-lg border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    class="mt-1 block w-3/4 rounded-lg border-warm-200 shadow-sm focus:border-green-500 focus:ring-green-500"
                     placeholder="Contraseña"
                 />
 

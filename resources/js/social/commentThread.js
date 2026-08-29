@@ -24,7 +24,7 @@ export function commentTimeDetail(iso) {
 export function renderCommentsTreeHtml(comments, opts) {
     const showReplyButtons = opts.showReplyButtons === true;
     if (!comments?.length) {
-        return '<p class="text-sm text-slate-500 px-1 py-3 text-center border border-dashed border-slate-700/80 rounded-lg">Sin comentarios aún.</p>';
+        return '<p class="text-sm text-ink-muted px-1 py-3 text-center border border-dashed border-warm-200 rounded-lg">Sin comentarios aún.</p>';
     }
 
     return `<div class="space-y-3">${comments.map((c) => renderCommentNodeHtml(c, showReplyButtons)).join('')}</div>`;
@@ -37,7 +37,7 @@ export function renderCommentsTreeHtml(comments, opts) {
 export function renderCommentNodeHtml(c, showReplyButtons) {
     const { relative, absolute } = commentTimeDetail(c.created_at);
     const replyBtn = showReplyButtons
-        ? `<button type="button" class="wall-comment-reply-btn text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:underline" data-comment-id="${c.id}" data-comment-username="${esc(c.user.username)}">Responder</button>`
+        ? `<button type="button" class="wall-comment-reply-btn text-xs font-medium text-fresh-600 hover:text-fresh-600 hover:underline" data-comment-id="${c.id}" data-comment-username="${esc(c.user.username)}">Responder</button>`
         : '';
 
     const repliesHtml =
@@ -46,18 +46,18 @@ export function renderCommentNodeHtml(c, showReplyButtons) {
             : '';
 
     return `
-<article class="wall-comment-node rounded-xl bg-slate-800/95 border border-slate-700/80 p-3 text-sm shadow-sm" data-comment-id="${c.id}">
+<article class="wall-comment-node rounded-xl bg-warm-100/95 border border-warm-200 p-3 text-sm shadow-sm" data-comment-id="${c.id}">
     <div class="flex items-start justify-between gap-2 mb-2">
         <div class="flex items-center gap-2 min-w-0">
             <img src="${esc(c.user.avatar)}" alt="" width="32" height="32" loading="lazy" class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600 shrink-0" />
             <div class="min-w-0">
-                <div class="font-medium text-slate-100 truncate">${esc(c.user.name)}</div>
-                <div class="text-xs text-slate-500 truncate">@${esc(c.user.username)}</div>
+                <div class="font-medium text-ink truncate">${esc(c.user.name)}</div>
+                <div class="text-xs text-ink-muted truncate">@${esc(c.user.username)}</div>
             </div>
         </div>
-        <time class="text-[11px] text-slate-400 shrink-0 tabular-nums text-right max-w-[min(100%,9rem)] leading-tight" datetime="${esc(c.created_at || '')}" title="${esc(absolute)}">${esc(relative)}</time>
+        <time class="text-[11px] text-ink-muted shrink-0 tabular-nums text-right max-w-[min(100%,9rem)] leading-tight" datetime="${esc(c.created_at || '')}" title="${esc(absolute)}">${esc(relative)}</time>
     </div>
-    <p class="text-slate-300 whitespace-pre-wrap break-words">${formatCommentBodyHtml(c.body)}</p>
+    <p class="text-ink-secondary whitespace-pre-wrap break-words">${formatCommentBodyHtml(c.body)}</p>
     <div class="mt-2 flex flex-wrap items-center gap-2">${replyBtn}</div>
     ${repliesHtml}
 </article>`;
@@ -79,7 +79,7 @@ function formatCommentBodyHtml(text) {
         const start = match.index;
         out += esc(source.slice(last, start));
         out += esc(prefix);
-        out += `<a href="/profile/${encodeURIComponent(username)}" class="font-medium text-emerald-300 transition hover:text-emerald-200 hover:underline">@${esc(username)}</a>`;
+        out += `<a href="/profile/${encodeURIComponent(username)}" class="font-medium text-fresh-600 transition hover:text-emerald-200 hover:underline">@${esc(username)}</a>`;
         last = start + full.length;
     }
     out += esc(source.slice(last));
@@ -137,8 +137,8 @@ export function setupCommentInteractions(rootEl, ctx, options = {}) {
             replyState.className =
                 'hidden items-center justify-between gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200';
             replyState.innerHTML = `
-                <p class="min-w-0 truncate"><span class="text-emerald-300">Respondiendo a</span> <span data-reply-username></span></p>
-                <button type="button" class="wall-reply-cancel rounded-full border border-emerald-300/30 px-2.5 py-1 text-[11px] font-medium text-emerald-100 transition hover:bg-emerald-500/20">Cancelar</button>
+                <p class="min-w-0 truncate"><span class="text-fresh-600">Respondiendo a</span> <span data-reply-username></span></p>
+                <button type="button" class="wall-reply-cancel rounded-full border border-emerald-300/30 px-2.5 py-1 text-[11px] font-medium text-emerald-100 transition hover:bg-fresh-600/20">Cancelar</button>
             `;
             const label = mainCommentForm.querySelector('label');
             if (label && label.parentNode) {

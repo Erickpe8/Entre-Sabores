@@ -7,7 +7,7 @@
 
 @section('settings-sidebar-actions')
     <div class="flex flex-col items-center gap-3 text-center">
-        <button type="button" id="openAvatarModal" class="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white">
+        <button type="button" id="openAvatarModal" class="inline-flex items-center gap-1.5 rounded-full border border-warm-200 px-4 py-2 text-sm font-medium text-ink transition hover:bg-warm-100 hover:text-ink">
             <x-ui.icon name="image-plus" class="h-4 w-4 shrink-0" />
             Cambiar foto
         </button>
@@ -24,8 +24,8 @@
         <input type="hidden" name="profile_photo_base64" id="profile_photo_base64" value="">
         <x-input-error class="mt-2" :messages="$errors->get('profile_photo_base64')" />
 
-        <div class="bg-white/5 backdrop-blur rounded-2xl p-6 space-y-5 border border-white/10 shadow-lg shadow-black/20">
-            <h2 class="text-white text-lg font-semibold">Información personal</h2>
+        <div class="bg-white/5 backdrop-blur rounded-2xl p-6 space-y-5 border border-warm-200 shadow-lg shadow-ink/5">
+            <h2 class="text-ink text-lg font-semibold">Información personal</h2>
 
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-300 mb-1">Nombre de usuario</label>
@@ -33,7 +33,7 @@
                 <x-input-error class="mt-2" :messages="$errors->get('username')" />
                 <p id="username-availability" class="mt-1 text-xs min-h-[1.25rem]" role="status" aria-live="polite"></p>
                 <p class="mt-0.5 text-xs text-gray-500">
-                    URL pública: <span class="text-gray-400">{{ url('/profile/') }}</span><span id="username-url-preview" class="text-green-400/90">{{ old('username', $user->username) }}</span>
+                    URL pública: <span class="text-gray-400">{{ url('/profile/') }}</span><span id="username-url-preview" class="text-tomato-500/90">{{ old('username', $user->username) }}</span>
                 </p>
             </div>
 
@@ -65,8 +65,8 @@
             </div>
         </div>
 
-        <div class="bg-white/5 backdrop-blur rounded-2xl p-6 space-y-5 border border-white/10 shadow-lg shadow-black/20">
-            <h2 class="text-white text-lg font-semibold">Perfil</h2>
+        <div class="bg-white/5 backdrop-blur rounded-2xl p-6 space-y-5 border border-warm-200 shadow-lg shadow-ink/5">
+            <h2 class="text-ink text-lg font-semibold">Perfil</h2>
 
             <div>
                 <label for="country" class="block text-sm font-medium text-gray-300 mb-1">País</label>
@@ -92,13 +92,13 @@
                 <x-input-error class="mt-2" :messages="$errors->get('description')" />
             </div>
 
-            <div class="border-t border-white/10 pt-5 space-y-4">
-                <h3 class="text-white text-sm font-semibold">Preferencias gastronómicas</h3>
+            <div class="border-t border-warm-200 pt-5 space-y-4">
+                <h3 class="text-ink text-sm font-semibold">Preferencias gastronómicas</h3>
                 <p class="text-xs text-gray-500 -mt-2">Elige todas las que te representen (aparecen como etiquetas en tu perfil).</p>
 
                 <div class="grid grid-cols-2 gap-3">
                     @foreach (\App\Models\User::PREFERENCE_OPTIONS as $pref)
-                        <label class="flex items-center gap-2.5 cursor-pointer bg-white/5 px-3 py-2 rounded-xl hover:bg-white/10 transition border border-white/10 text-left">
+                        <label class="flex items-center gap-2.5 cursor-pointer bg-white/5 px-3 py-2 rounded-xl hover:bg-warm-100 transition border border-warm-200 text-left">
                             <input
                                 type="checkbox"
                                 name="preferences[]"
@@ -106,8 +106,8 @@
                                 @checked(in_array($pref, old('preferences', $user->preferences ?? []), true))
                                 class="peer sr-only"
                             >
-                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-white/35 bg-slate-900/90 transition peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-400/70 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-slate-950 peer-checked:border-emerald-400 peer-checked:bg-emerald-500 peer-checked:[&>svg]:opacity-100">
-                                <svg class="h-3.5 w-3.5 text-white opacity-0 transition-opacity" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-white/35 bg-warm-0/90 transition peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-fresh-500/40 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-slate-950 peer-checked:border-emerald-400 peer-checked:bg-emerald-500 peer-checked:[&>svg]:opacity-100">
+                                <svg class="h-3.5 w-3.5 text-ink opacity-0 transition-opacity" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                                     <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </span>
@@ -118,8 +118,8 @@
                 <x-input-error class="mt-2" :messages="$errors->get('preferences')" />
             </div>
 
-            <div class="border-t border-white/10 pt-5 space-y-4">
-                <h3 class="text-white text-sm font-semibold">Redes sociales</h3>
+            <div class="border-t border-warm-200 pt-5 space-y-4">
+                <h3 class="text-ink text-sm font-semibold">Redes sociales</h3>
                 <p class="text-xs text-gray-500 -mt-2">Solo el usuario (sin @); en LinkedIn puedes pegar la URL del perfil o el slug.</p>
 
                 <div class="grid md:grid-cols-2 gap-4">
@@ -141,7 +141,7 @@
             </div>
         </div>
 
-        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-green-400 to-blue-500 text-white font-semibold shadow-lg shadow-green-900/30 hover:opacity-95 transition">
+        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r bg-tomato-500 text-ink font-semibold shadow-lg shadow-green-900/30 hover:opacity-95 transition">
             Guardar cambios
         </button>
     </form>

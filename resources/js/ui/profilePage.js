@@ -21,12 +21,12 @@ function initProfileTabs() {
         });
         buttons.forEach((b) => {
             const on = b.getAttribute('data-profile-tab') === id;
-            b.classList.toggle('bg-emerald-500/25', on);
+            b.classList.toggle('bg-fresh-100', on);
             b.classList.toggle('text-emerald-100', on);
             b.classList.toggle('ring-1', on);
             b.classList.toggle('ring-emerald-400/40', on);
-            b.classList.toggle('text-slate-400', !on);
-            b.classList.toggle('hover:text-white', !on);
+            b.classList.toggle('text-ink-muted', !on);
+            b.classList.toggle('hover:text-ink', !on);
             b.classList.toggle('hover:bg-white/5', !on);
         });
     };

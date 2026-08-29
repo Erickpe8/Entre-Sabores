@@ -1,14 +1,16 @@
 import { ensureEcho } from './echo.js';
 import {
     renderCard,
-    heartSvgHtml,
     esc,
     formatStory,
-    flashLikeAnimation,
-    buildInteractionStatsHtml,
     countryPreviewMetaHtml,
     relativeTimeEs,
 } from './social/postCard.js';
+import {
+    setupPostCardInteractions,
+    syncSavedPostButtons,
+} from './social/postCardInteractions.js';
+import { initPostCardMedia } from './social/postCardMedia.js';
 import { renderCommentsTreeHtml, setupCommentInteractions } from './social/commentThread.js';
 import {
     bindMaridajeFlip,
@@ -16,12 +18,11 @@ import {
     buildWallModalFlipHtml,
 } from './social/maridajeFlip.js';
 
-const CLS = {
-    secondary:
-        'wall-chip wall-chip-sort shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition sm:px-3.5 sm:py-2 sm:text-sm bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/35 hover:bg-emerald-500/25',
-    inactiveSort:
-        'wall-chip wall-chip-sort shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition sm:px-3.5 sm:py-2 sm:text-sm bg-slate-800/90 text-slate-300 ring-1 ring-slate-700/80 hover:bg-slate-700 hover:text-white',
-};
+const FILTER_PILL_ACTIVE = 'wall-filter-pill wall-filter-pill--active';
+const FILTER_PILL_INACTIVE = 'wall-filter-pill wall-filter-pill--inactive';
+
+const TAB_ACTIVE = 'navbar-feed-tab navbar-feed-tab--active';
+const TAB_IDLE = 'navbar-feed-tab';
 
 /** Etiquetas visibles y ayuda contextual (state.sort sigue siendo recent | popular | trending). */
 const SORT_UX = {
@@ -59,7 +60,7 @@ function showToast(message, variant = 'info') {
             ? 'bg-emerald-950/95 text-emerald-50 border-emerald-500/40'
             : variant === 'error'
               ? 'bg-red-950/95 text-red-50 border-red-500/40'
-              : 'bg-slate-900/95 text-slate-100 border-slate-600/80';
+              : 'bg-warm-0/95 text-ink border-warm-200/80';
     el.className = `${base} ${styles}`;
     el.setAttribute('role', 'status');
     el.textContent = message;
@@ -79,6 +80,7 @@ export function initWall() {
     }
 
     ensureEcho();
+    initPostCardMedia(document);
 
     const cfgEl = document.getElementById('wall-config');
     if (!cfgEl?.textContent) {
@@ -123,7 +125,15 @@ export function initWall() {
     const tagPanelDismiss = document.getElementById('create-post-tag-panel-dismiss');
     const tagPanelCloseBtn = document.getElementById('create-post-tag-panel-close');
     const openTagsBtn = document.getElementById('create-post-open-tags');
-    const searchInput = document.getElementById('wall-search-q');
+    const searchInputs = [...document.querySelectorAll('[data-wall-search]')];
+
+    function syncSearchInputs(value, source = null) {
+        searchInputs.forEach((input) => {
+            if (input !== source) {
+                input.value = value;
+            }
+        });
+    }
 
     const state = {
         following: config.initialFollowing === true,
@@ -140,8 +150,8 @@ export function initWall() {
     if (urlSort === 'popular' || urlSort === 'trending' || urlSort === 'recent') {
         state.sort = urlSort;
     }
-    if (searchInput && urlSearch) {
-        searchInput.value = urlSearch;
+    if (urlSearch) {
+        syncSearchInputs(urlSearch);
     }
     let searchDebounceTimer = null;
     let fetchDebounceTimer = null;
@@ -257,7 +267,7 @@ export function initWall() {
                 return;
             }
             const span = document.createElement('span');
-            span.className = 'font-medium text-emerald-400/95';
+            span.className = 'font-medium text-fresh-600/95';
             span.textContent = `#${meta.name}`;
             tagPillsEl.appendChild(span);
         });
@@ -283,7 +293,7 @@ export function initWall() {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className =
-                'rounded-full p-0.5 text-emerald-300/90 transition hover:bg-white/10 hover:text-white';
+                'rounded-full p-0.5 text-fresh-600/90 transition hover:bg-white/10 hover:text-ink';
             btn.setAttribute('aria-label', `Quitar etiqueta ${meta.name}`);
             btn.innerHTML =
                 '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>';
@@ -401,7 +411,7 @@ export function initWall() {
             const b = document.createElement('button');
             b.type = 'button';
             b.className =
-                'rounded-full border border-emerald-500/30 bg-zinc-800/90 px-3 py-1.5 text-[11px] font-medium text-emerald-200 transition hover:bg-emerald-600/35';
+                'rounded-full border border-emerald-500/30 bg-zinc-800/90 px-3 py-1.5 text-[11px] font-medium text-emerald-200 transition hover:bg-fresh-500/35';
             b.textContent = `+ #${t.name}`;
             b.addEventListener('click', () => {
                 addSelectedTag(t);
@@ -472,7 +482,7 @@ export function initWall() {
             tagDropdown.innerHTML = '';
             if (items.length === 0) {
                 const li = document.createElement('li');
-                li.className = 'px-4 py-3 text-sm text-slate-500';
+                li.className = 'px-4 py-3 text-sm text-ink-muted';
                 li.textContent = 'Sin coincidencias';
                 tagDropdown.appendChild(li);
                 tagDropdown.classList.remove('hidden');
@@ -484,7 +494,7 @@ export function initWall() {
                 const li = document.createElement('li');
                 li.setAttribute('role', 'option');
                 li.className =
-                    'cursor-pointer px-4 py-2.5 text-sm text-slate-100 transition hover:bg-emerald-600/25 active:bg-emerald-600/35';
+                    'cursor-pointer px-4 py-2.5 text-sm text-ink transition hover:bg-fresh-500/25 active:bg-fresh-500/35';
                 li.textContent = t.name;
                 li.addEventListener('mousedown', (e) => {
                     e.preventDefault();
@@ -613,32 +623,6 @@ export function initWall() {
 
     bindCreateComposerEditables();
 
-    function applyLikeState(postId, liked, likesCount) {
-        document.querySelectorAll(`[data-like-post-id="${postId}"]`).forEach((btn) => {
-            btn.dataset.liked = liked ? '1' : '0';
-            btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
-            btn.classList.toggle('text-rose-500', liked);
-            btn.classList.toggle('text-slate-400', !liked);
-            const span = btn.querySelector('[data-like-count]');
-            if (span) {
-                span.textContent = String(likesCount);
-            }
-            const wrap = btn.querySelector('.wall-like-svg-wrap');
-            if (wrap) {
-                wrap.innerHTML = heartSvgHtml(liked);
-            }
-        });
-    }
-
-    function setLikeButtonsBusy(postId, busy) {
-        document.querySelectorAll(`[data-like-post-id="${postId}"]`).forEach((btn) => {
-            btn.dataset.busy = busy ? '1' : '0';
-            btn.toggleAttribute('disabled', busy);
-            btn.classList.toggle('opacity-70', busy);
-            btn.classList.toggle('cursor-wait', busy);
-        });
-    }
-
     function applyCommentsCount(postId, count) {
         document.querySelectorAll(`article[data-post-id="${postId}"] [data-comments-count]`).forEach((el) => {
             el.textContent = String(count);
@@ -649,78 +633,85 @@ export function initWall() {
         }
     }
 
-    async function toggleLike(postId) {
-        if (!config.isAuthenticated) {
-            window.location.href = config.loginUrl;
-
-            return;
-        }
-
-        const probeBtn = document.querySelector(`[data-like-post-id="${postId}"]`);
-        if (!probeBtn || probeBtn.dataset.busy === '1') {
-            return;
-        }
-
-        const previousLiked = probeBtn.dataset.liked === '1';
-        const previousCount = Number(
-            probeBtn.querySelector('[data-like-count]')?.textContent || 0,
-        );
-        const optimisticLiked = !previousLiked;
-        const optimisticCount = Math.max(0, previousCount + (optimisticLiked ? 1 : -1));
-
-        setLikeButtonsBusy(postId, true);
-        applyLikeState(postId, optimisticLiked, optimisticCount);
-
-        try {
-            const { data } = await axios.post(`${config.postBaseUrl}/${postId}/likes/toggle`);
-            applyLikeState(postId, data.liked === true, data.likes_count);
-            if (data.liked === true) {
-                flashLikeAnimation(postId);
-            }
-        } catch (e) {
-            applyLikeState(postId, previousLiked, previousCount);
-            console.error(e);
-            showToast('No pudimos guardar tu «me gusta». Inténtalo de nuevo.', 'error');
-        } finally {
-            setLikeButtonsBusy(postId, false);
-        }
-    }
-
     function setFeedStatus(message) {
         if (feedStatus) {
             feedStatus.textContent = message;
         }
     }
 
-    const sortFeedbackEl = document.getElementById('wall-sort-feedback');
-    const sortActiveKindEl = document.getElementById('wall-sort-active-kind');
-    const sortScopeBadgeEl = document.getElementById('wall-sort-scope-badge');
-    const sortHintEl = document.getElementById('wall-sort-hint');
+    let sortTooltipTimer = null;
+    let sortTooltipDismissBound = false;
 
-    function updateSortContextUi({ flash = false } = {}) {
+    function getSortHintText() {
         const ux = SORT_UX[state.sort] ?? SORT_UX.recent;
-        if (sortActiveKindEl) {
-            sortActiveKindEl.textContent = ux.title;
+
+        return state.following
+            ? (SORT_UX_FOLLOWING_HINT[state.sort] ?? SORT_UX_FOLLOWING_HINT.recent)
+            : ux.hint;
+    }
+
+    function hideSortTooltip() {
+        const tooltip = document.getElementById('wall-sort-tooltip');
+        if (tooltip) {
+            tooltip.classList.add('hidden');
         }
-        if (sortScopeBadgeEl) {
-            if (state.following) {
-                sortScopeBadgeEl.textContent = 'Siguiendo';
-                sortScopeBadgeEl.classList.remove('hidden');
-            } else {
-                sortScopeBadgeEl.textContent = '';
-                sortScopeBadgeEl.classList.add('hidden');
-            }
+        if (sortTooltipTimer) {
+            window.clearTimeout(sortTooltipTimer);
+            sortTooltipTimer = null;
         }
-        if (sortHintEl) {
-            sortHintEl.textContent = state.following
-                ? (SORT_UX_FOLLOWING_HINT[state.sort] ?? SORT_UX_FOLLOWING_HINT.recent)
-                : ux.hint;
+    }
+
+    function showSortTooltip(anchorEl) {
+        if (!(anchorEl instanceof HTMLElement)) {
+            return;
         }
-        if (flash && sortFeedbackEl) {
-            sortFeedbackEl.classList.remove('wall-sort-context-flash');
-            void sortFeedbackEl.offsetWidth;
-            sortFeedbackEl.classList.add('wall-sort-context-flash');
-            window.setTimeout(() => sortFeedbackEl.classList.remove('wall-sort-context-flash'), 480);
+
+        let tooltip = document.getElementById('wall-sort-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'wall-sort-tooltip';
+            tooltip.className = 'wall-sort-tooltip hidden';
+            tooltip.setAttribute('role', 'tooltip');
+            document.body.appendChild(tooltip);
+        }
+
+        tooltip.textContent = getSortHintText();
+        tooltip.classList.remove('hidden');
+
+        const rect = anchorEl.getBoundingClientRect();
+        const maxWidth = 280;
+        let left = rect.left + rect.width / 2;
+        const margin = 12;
+        left = Math.max(margin + maxWidth / 2, Math.min(left, window.innerWidth - margin - maxWidth / 2));
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${rect.bottom + 8}px`;
+        tooltip.style.transform = 'translateX(-50%)';
+        tooltip.style.maxWidth = `${maxWidth}px`;
+
+        if (sortTooltipTimer) {
+            window.clearTimeout(sortTooltipTimer);
+        }
+        sortTooltipTimer = window.setTimeout(() => hideSortTooltip(), 3000);
+
+        if (!sortTooltipDismissBound) {
+            sortTooltipDismissBound = true;
+            document.addEventListener(
+                'click',
+                (e) => {
+                    if (e.target.closest('[data-sort]') || e.target.closest('#wall-sort-tooltip')) {
+                        return;
+                    }
+                    hideSortTooltip();
+                },
+                true,
+            );
+        }
+    }
+
+    function updateSortContextUi({ flash = false, anchorEl = null } = {}) {
+        if (flash && anchorEl) {
+            showSortTooltip(anchorEl);
         }
     }
 
@@ -747,17 +738,22 @@ export function initWall() {
     }
 
     function updateNavbarFeedUi() {
-        const slider = document.getElementById('navbar-feed-slider');
-        if (slider) {
-            slider.style.transform = state.following ? 'translateX(100%)' : 'translateX(0%)';
-        }
-
         document.querySelectorAll('[data-navbar-feed]').forEach((el) => {
             const tab = el.dataset.navbarFeed || '';
             const on =
                 (tab === 'fyp' && !state.following) || (tab === 'following' && state.following);
-            el.classList.toggle('active', on);
+            el.className = on ? TAB_ACTIVE : TAB_IDLE;
+            if (on) {
+                el.classList.add('navbar-feed-tab--active');
+            } else {
+                el.classList.remove('navbar-feed-tab--active');
+            }
             el.setAttribute('aria-pressed', on ? 'true' : 'false');
+            if (on) {
+                el.setAttribute('aria-current', 'page');
+            } else {
+                el.removeAttribute('aria-current');
+            }
         });
     }
 
@@ -782,8 +778,8 @@ export function initWall() {
     function applyFeedTagSearch(term) {
         const t = String(term || '').trim();
         state.q = t;
-        if (searchInput) {
-            searchInput.value = t;
+        if (searchInputs.length) {
+            syncSearchInputs(t);
         }
         state.following = false;
         pagination.page = 1;
@@ -866,8 +862,8 @@ export function initWall() {
 
         if (meta?.guest_following) {
             feedEl.innerHTML = `
-                <p class="col-span-full text-center text-slate-400 py-16 text-sm max-w-md mx-auto leading-relaxed">
-                    <a href="${esc(config.loginUrl)}" class="font-medium text-emerald-400 hover:text-emerald-300 underline underline-offset-2">Inicia sesión</a> para ver publicaciones de quienes sigues.
+                <p class="col-span-full text-center text-ink-muted py-16 text-sm max-w-md mx-auto leading-relaxed">
+                    <a href="${esc(config.loginUrl)}" class="font-medium text-fresh-600 hover:text-fresh-600 underline underline-offset-2">Inicia sesión</a> para ver publicaciones de quienes sigues.
                 </p>
             `;
             pagination.hasMore = false;
@@ -878,7 +874,7 @@ export function initWall() {
 
         if (!posts.length && !append) {
             feedEl.innerHTML =
-                '<p class="col-span-full text-center text-slate-500 py-16 text-sm">No hay publicaciones con estos filtros.</p>';
+                '<p class="col-span-full text-center text-ink-muted py-16 text-sm">No hay publicaciones con estos filtros.</p>';
             pagination.hasMore = false;
             setFeedStatus('No hay publicaciones con los filtros actuales.');
 
@@ -901,6 +897,8 @@ export function initWall() {
             );
         });
 
+        syncSavedPostButtons(feedEl);
+
         pagination.page = Number(meta?.current_page || pagination.page || 1);
         pagination.hasMore = Boolean(meta?.has_more);
         setFeedStatus(
@@ -910,44 +908,42 @@ export function initWall() {
         );
     }
 
-    feedEl?.addEventListener('click', (e) => {
-        const pill = e.target.closest('.wall-feed-tag-pill');
-        if (pill) {
-            e.preventDefault();
-            e.stopPropagation();
-            const name = pill.getAttribute('data-tag-name') || '';
-            applyFeedTagSearch(name);
+    const postCardInteractionOpts = {
+        axios,
+        postBaseUrl: config.postBaseUrl,
+        isAuthenticated: config.isAuthenticated,
+        loginUrl: config.loginUrl,
+        onNotify: showToast,
+    };
 
-            return;
-        }
-        const likeBtn = e.target.closest('.wall-like-btn');
-        if (!likeBtn || !likeBtn.dataset.likePostId) {
-            return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        toggleLike(Number(likeBtn.dataset.likePostId));
-    });
+    if (feedEl) {
+        setupPostCardInteractions(feedEl, {
+            ...postCardInteractionOpts,
+            onOpenDetail: (id) => {
+                void openModal(id);
+            },
+            onEditPost: (id) => {
+                void loadPostForEdit(id);
+            },
+            onTagFilter: applyFeedTagSearch,
+        });
+    }
 
-    modalBody?.addEventListener('click', (e) => {
-        const pill = e.target.closest('.wall-feed-tag-pill');
-        if (pill) {
-            e.preventDefault();
-            e.stopPropagation();
-            const name = pill.getAttribute('data-tag-name') || '';
-            closeModal();
-            applyFeedTagSearch(name);
-
-            return;
-        }
-        const likeBtn = e.target.closest('.wall-like-btn');
-        if (!likeBtn || !likeBtn.dataset.likePostId) {
-            return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        toggleLike(Number(likeBtn.dataset.likePostId));
-    });
+    if (modalBody) {
+        setupPostCardInteractions(modalBody, {
+            ...postCardInteractionOpts,
+            onOpenDetail: () => {
+                document.getElementById('wall-comment-form')?.querySelector('textarea')?.focus();
+            },
+            onEditPost: (id) => {
+                void loadPostForEdit(id);
+            },
+            onTagFilter: (name) => {
+                closeModal();
+                applyFeedTagSearch(name);
+            },
+        });
+    }
 
     function setupInfiniteScroll() {
         if (!scrollAnchor || !('IntersectionObserver' in window)) {
@@ -980,7 +976,7 @@ export function initWall() {
         modalFlipCleanup = null;
 
         modalBody.innerHTML =
-            '<div class="flex justify-center py-12 text-slate-400">Cargando…</div>';
+            '<div class="flex justify-center py-12 text-ink-muted">Cargando…</div>';
         modal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
 
@@ -994,38 +990,38 @@ export function initWall() {
                 metaPieces.push(countryPreviewMetaHtml(userCountry));
             }
             if (whenModal) {
-                metaPieces.push(`<span class="shrink-0 text-slate-500">${esc(whenModal)}</span>`);
+                metaPieces.push(`<span class="shrink-0 text-ink-muted">${esc(whenModal)}</span>`);
             }
             const metaJoinedModal = metaPieces.join(
                 '<span class="text-slate-600" aria-hidden="true">·</span>',
             );
             const canEditPost = p.can_edit === true;
             const userHeaderModal = `
-                <div class="flex items-start justify-between gap-3">
+                <header class="post-card__header flex items-start justify-between gap-3">
                     <div class="flex min-w-0 flex-1 gap-3">
-                        <a href="${esc(p.user.profile_url)}" class="wall-post-user-avatar shrink-0 rounded-full ring-1 ring-slate-600/70 outline-none transition hover:ring-emerald-500/50 focus-visible:ring-2 focus-visible:ring-emerald-400/60" aria-label="Ver perfil: @${esc(p.user.username)}">
-                            <img src="${esc(p.user.avatar_medium || p.user.avatar_thumb || p.user.avatar)}" alt="" class="h-12 w-12 rounded-full object-cover bg-slate-800" width="48" height="48" loading="lazy" decoding="async" />
+                        <a href="${esc(p.user.profile_url)}" class="wall-post-user-avatar shrink-0 rounded-full border border-default outline-none transition hover:border-accent-warm focus-visible:ring-4 focus-visible:ring-neutral-tertiary" aria-label="Ver perfil: @${esc(p.user.username)}">
+                            <img src="${esc(p.user.avatar_medium || p.user.avatar_thumb || p.user.avatar)}" alt="" class="h-11 w-11 rounded-full object-cover bg-neutral-secondary-medium" width="44" height="44" loading="lazy" decoding="async" />
                         </a>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate font-semibold text-slate-100">@${esc(p.user.username)}</p>
+                            <p class="truncate font-semibold text-sm text-heading">@${esc(p.user.username)}</p>
                             ${
                                 metaJoinedModal !== ''
-                                    ? `<div class="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] leading-tight">${metaJoinedModal}</div>`
+                                    ? `<div class="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted">${metaJoinedModal}</div>`
                                     : ''
                             }
                         </div>
                     </div>
                     ${
                         canEditPost
-                            ? `<button type="button" id="wall-post-edit-trigger" class="inline-flex shrink-0 items-center rounded-full border border-cyan-500/40 px-3 py-1.5 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-500/10">Editar post</button>`
+                            ? `<button type="button" id="wall-post-edit-trigger" class="inline-flex shrink-0 items-center rounded-full border border-default px-3 py-1.5 text-xs font-semibold text-accent-warm transition hover:bg-neutral-secondary-medium">Editar post</button>`
                             : ''
                     }
-                </div>`;
+                </header>`;
 
             const tagsLine = (p.tags || [])
                 .map(
                     (t) =>
-                        `<button type="button" class="wall-feed-tag-pill inline-flex rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-emerald-200 ring-1 ring-slate-600 transition hover:bg-emerald-600/25 hover:ring-emerald-500/50" data-tag-name="${esc(t.name)}" aria-label="Filtrar por ${esc(t.name)}">#${esc(t.name)}</button>`,
+                        `<button type="button" class="inline-flex items-center bg-accent-gold-soft text-accent-gold border border-accent-gold-soft rounded-full px-3 py-1 text-xs font-medium cursor-pointer hover:bg-accent-gold-medium wall-feed-tag-pill" data-tag-name="${esc(t.name)}" aria-label="Filtrar por ${esc(t.name)}">#${esc(t.name)}</button>`,
                 )
                 .join(' ');
 
@@ -1035,17 +1031,17 @@ export function initWall() {
 
             const commentForm = config.isAuthenticated
                 ? `
-                <form id="wall-comment-form" class="mt-4 space-y-2 border-t border-slate-700/80 pt-4">
-                    <label class="block text-sm font-medium text-slate-300">Tu comentario</label>
-                    <textarea name="body" rows="3" class="w-full rounded-xl border-slate-600 bg-slate-800/80 text-slate-100 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500 placeholder-slate-500" required maxlength="2000" placeholder="Escribe algo…"></textarea>
-                    <button type="submit" class="inline-flex items-center px-4 py-2 rounded-full bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500">Publicar</button>
+                <form id="wall-comment-form" class="mt-4 space-y-2 border-t border-warm-200 pt-4">
+                    <label class="block text-sm font-medium text-ink-secondary">Tu comentario</label>
+                    <textarea name="body" rows="3" class="w-full rounded-xl border-warm-200 bg-warm-100/80 text-ink text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500 placeholder-slate-500" required maxlength="2000" placeholder="Escribe algo…"></textarea>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 rounded-full bg-fresh-500 text-white text-sm font-medium hover:bg-fresh-600">Publicar</button>
                 </form>
             `
-                : `<p class="mt-4 text-sm text-slate-400"><a href="${config.loginUrl}" class="text-emerald-400 hover:text-emerald-300 underline">Inicia sesión</a> para comentar.</p>`;
+                : `<p class="mt-4 text-sm text-ink-muted"><a href="${config.loginUrl}" class="text-fresh-600 hover:text-fresh-600 underline">Inicia sesión</a> para comentar.</p>`;
 
             const heroImg =
                 p.image_url != null
-                    ? `<div class="mb-4 overflow-hidden rounded-xl border border-slate-700"><img src="${esc(p.image_url)}" alt="" class="w-full max-h-72 object-cover" loading="lazy" /></div>`
+                    ? `<div class="post-maridaje-front__media overflow-hidden border-b border-default/40"><img src="${esc(p.image_url)}" alt="" class="w-full max-h-72 object-cover" loading="lazy" /></div>`
                     : '';
 
             const modalLiked = p.liked === true;
@@ -1056,19 +1052,17 @@ export function initWall() {
                 Number(config.authUserId) === Number(p.user?.id);
 
             const interactionBarHtml = buildMaridajeFrontInteractionBar(
-                buildInteractionStatsHtml(
-                    {
-                        ...p,
-                        liked: modalLiked,
-                        likes_count: modalLikesCount,
-                        comments_count: p.comments_count ?? 0,
-                    },
-                    { commentsCountId: 'wall-modal-comments-count', comfortable: true },
-                ),
+                {
+                    ...p,
+                    liked: modalLiked,
+                    likes_count: modalLikesCount,
+                    comments_count: p.comments_count ?? 0,
+                },
+                { commentsCountId: 'wall-modal-comments-count' },
             );
 
             modalBody.innerHTML = `
-                <div class="space-y-4" data-modal-post-id="${p.id}">
+                <div class="space-y-6" data-modal-post-id="${p.id}">
                     ${buildWallModalFlipHtml({
                         postId: Number(p.id),
                         heroImg,
@@ -1080,11 +1074,11 @@ export function initWall() {
                         aiAnalysis: p.ai_analysis ?? null,
                         canReanalyze: canReanalyzeMaridaje,
                     })}
-                    <div>
-                        <h3 class="font-semibold text-slate-200 mb-2">Comentarios</h3>
-                        <div id="wall-modal-comments" class="rounded-xl border border-slate-700/60 bg-slate-950/50 p-3 shadow-inner">${commentsHtml}</div>
+                    <section class="post-modal-comments border-t border-default/50 pt-6" aria-labelledby="wall-modal-comments-heading">
+                        <h3 id="wall-modal-comments-heading" class="mb-3 text-base font-semibold text-heading">Comentarios</h3>
+                        <div id="wall-modal-comments" class="rounded-base border border-default/60 bg-neutral-secondary-medium/40 p-4">${commentsHtml}</div>
                         ${commentForm}
-                    </div>
+                    </section>
                 </div>
             `;
 
@@ -1126,6 +1120,8 @@ export function initWall() {
                 },
                 { signal: modalCommentAbort.signal },
             );
+
+            syncSavedPostButtons(modalBody);
         } catch (e) {
             modalBody.innerHTML =
                 '<p class="text-red-400 text-center py-8">No se pudo cargar la publicación.</p>';
@@ -1264,6 +1260,20 @@ export function initWall() {
         window.requestAnimationFrame(() => {
             titleEditable?.focus();
         });
+    }
+
+    async function loadPostForEdit(postId) {
+        try {
+            const { data } = await axios.get(`${config.postBaseUrl}/${postId}`);
+            if (data.post?.can_edit === true) {
+                openComposerForEdit(data.post);
+
+                return;
+            }
+            showToast('No puedes editar esta publicación.', 'error');
+        } catch {
+            showToast('No se pudo abrir el editor.', 'error');
+        }
     }
 
     function applyImageFile(file) {
@@ -1501,36 +1511,48 @@ export function initWall() {
             const next = btn.dataset.sort || 'recent';
             const sortChanged = next !== state.sort;
             state.sort = next;
-            updateFilterUi({ flashSortContext: sortChanged });
+            updateFilterUi({ flashSortContext: sortChanged, sortAnchor: sortChanged ? btn : null });
             scheduleFetch();
         });
     });
 
-    searchInput?.addEventListener('input', () => {
-        if (searchDebounceTimer) {
-            window.clearTimeout(searchDebounceTimer);
-        }
-        searchDebounceTimer = window.setTimeout(() => {
-            state.q = searchInput.value;
-            pagination.page = 1;
-            pagination.hasMore = true;
-            scheduleFetch();
-        }, 320);
+    searchInputs.forEach((input) => {
+        input.addEventListener('input', () => {
+            syncSearchInputs(input.value, input);
+            if (searchDebounceTimer) {
+                window.clearTimeout(searchDebounceTimer);
+            }
+            searchDebounceTimer = window.setTimeout(() => {
+                state.q = input.value;
+                pagination.page = 1;
+                pagination.hasMore = true;
+                scheduleFetch();
+            }, 320);
+        });
     });
 
-    function updateFilterUi({ flashSortContext = false } = {}) {
+    function updateFilterUi({ flashSortContext = false, sortAnchor = null } = {}) {
         updateNavbarFeedUi();
 
         document.querySelectorAll('[data-sort]').forEach((el) => {
             const on = state.sort === el.dataset.sort;
-            el.className = on ? CLS.secondary : CLS.inactiveSort;
+            el.className = on ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE;
             el.setAttribute('aria-selected', on ? 'true' : 'false');
         });
 
-        updateSortContextUi({ flash: flashSortContext });
+        updateSortContextUi({ flash: flashSortContext, anchorEl: sortAnchor });
     }
 
     updateFilterUi();
     setupInfiniteScroll();
     scheduleFetch(0);
+
+    const pendingEditRaw = sessionStorage.getItem('es:pending-edit-post');
+    if (pendingEditRaw) {
+        sessionStorage.removeItem('es:pending-edit-post');
+        const pendingId = Number(pendingEditRaw);
+        if (Number.isFinite(pendingId)) {
+            void loadPostForEdit(pendingId);
+        }
+    }
 }

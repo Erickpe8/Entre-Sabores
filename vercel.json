@@ -4,7 +4,6 @@
 	"buildCommand": null,
 	"installCommand": null,
 	"outputDirectory": null,
-	"ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" != \"main\" ]; then exit 0; else exit 1; fi",
 	"git": {
 		"deploymentEnabled": {
 			"main": true,
@@ -15,7 +14,8 @@
 		"web": {
 			"root": ".",
 			"entrypoint": "Dockerfile.vercel",
-			"runtime": "container"
+			"runtime": "container",
+			"ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" != \"main\" ]; then exit 0; else exit 1; fi"
 		}
 	},
 	"rewrites": [

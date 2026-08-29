@@ -6,37 +6,48 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ $title ?? config('app.name', 'Entre Sabores') }}</title>
-        <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-slate-100 antialiased">
-        <main class="min-h-[100dvh] px-4 py-6 sm:px-6 sm:py-8 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 overflow-y-auto">
-            <div class="grid lg:grid-cols-2 gap-8 lg:gap-10 w-full max-w-6xl mx-auto items-start lg:items-center min-h-[100dvh] lg:min-h-0">
-                <section class="flex items-start lg:items-center justify-center w-full">
-                    <div class="w-full max-w-lg">
-                        <a href="/" class="mb-6 sm:mb-8 inline-flex items-center gap-3">
-                            <img
-                                src="{{ asset('favicon.png') }}"
-                                alt="Logo Entre Sabores"
-                                class="h-10 w-10 object-contain"
-                            >
-                            <h1 class="text-xl font-bold text-white tracking-wide">
-                                Entre <span class="text-green-400">Sabores</span>
-                            </h1>
-                        </a>
+    <body class="auth-page font-sans antialiased">
+        <x-ui.alert-stack class="top-20" />
+
+        <header class="auth-page__header">
+            <a href="{{ route('welcome') }}" class="auth-logo" aria-label="Entre Sabores, inicio">
+                <x-ui.app-logo class="h-10 w-10 shrink-0" />
+                <span class="auth-logo__title">Entre <span class="auth-logo__accent">Sabores</span></span>
+            </a>
+        </header>
+
+        <main class="auth-page__main">
+            <div class="auth-illustration auth-illustration--mobile" aria-hidden="true">
+                <div class="auth-illustration__glow">
+                    <div class="auth-illustration__glow-inner scale-75"></div>
+                </div>
+                <img
+                    src="{{ asset('images/hero-gallery.png') }}"
+                    alt=""
+                    class="auth-illustration__img--compact"
+                >
+            </div>
+
+            <div class="auth-page__grid">
+                <section class="auth-page__form-col">
+                    <div class="auth-card">
                         {{ $slot }}
                     </div>
                 </section>
 
-                <aside class="hidden lg:flex items-center justify-center relative min-h-[560px]">
-                    <div class="relative z-10 flex items-center justify-center w-full">
-                        <img
-                            src="{{ asset('images/hero-gallery.png') }}"
-                            alt="Entre Sabores"
-                            class="w-[520px] xl:w-[650px] 2xl:w-[750px] object-contain scale-110 drop-shadow-2xl"
-                        >
+                <aside class="auth-illustration auth-illustration--desktop" aria-hidden="true">
+                    <div class="auth-illustration__glow">
+                        <div class="auth-illustration__glow-inner"></div>
                     </div>
+                    <img
+                        src="{{ asset('images/hero-gallery.png') }}"
+                        alt=""
+                        class="auth-illustration__img scale-110"
+                    >
                 </aside>
             </div>
         </main>

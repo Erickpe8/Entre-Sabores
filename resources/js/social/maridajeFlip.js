@@ -1,5 +1,5 @@
 import { ensureEcho } from '../echo.js';
-import { esc, buildInteractionStatsHtml } from './postCard.js';
+import { esc, buildInteractionButtonsHtml, buildSaveButtonHtml } from './postCard.js';
 
 /**
  * @typedef {{ historia?: string, afinidad?: string, equilibrio?: string, recomendacion?: string, score?: number }} AiAnalysis
@@ -11,9 +11,7 @@ const SVG_SPARKLE_CHART = `<svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/200
 
 const SVG_STAR_SCORE = `<svg class="inline-block h-4 w-4 align-text-bottom text-amber-300/95" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 00.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>`;
 
-const SVG_ANALYSIS_HEADING = `<svg class="h-5 w-5 shrink-0 text-emerald-300/95" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>`;
-
-const MARIDAJE_NAV_HINT_HTML = `Puedes alternar entre la publicación y el análisis con los botones <span class="font-medium text-slate-400">Ver análisis</span> y <span class="font-medium text-slate-400">Volver</span>.`;
+const SVG_ANALYSIS_HEADING = `<svg class="h-5 w-5 shrink-0 text-fresh-600/95" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>`;
 
 /**
  * Altura natural de una cara del flip (caras apiladas con position:absolute).
@@ -49,16 +47,21 @@ export function syncMaridajeFlipHeight(sceneRoot) {
 }
 
 /**
- * Barra inferior del post (muro / detalle): stats a la izquierda, «Ver análisis» a la derecha.
+ * Barra inferior del post (muro / detalle): interacciones + guardar + «Ver análisis».
  *
- * @param {string} statsLeftHtml — HTML de like + comentarios ({@link buildInteractionStatsHtml})
+ * @param {object} post
+ * @param {{ commentsCountId?: string }} [opts]
  */
-export function buildMaridajeFrontInteractionBar(statsLeftHtml) {
+export function buildMaridajeFrontInteractionBar(post, opts = {}) {
     return `
-        <div class="post-maridaje-actions-bar mt-1 flex flex-col gap-2.5 border-t border-slate-700/60 pt-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-            <div class="flex min-w-0 flex-wrap items-center gap-5 sm:flex-1">${statsLeftHtml}</div>
-            <div class="flex shrink-0 items-center justify-start sm:justify-end">
-                <button type="button" class="maridaje-btn-show-analysis inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-emerald-600/90 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-900/25 transition-all duration-200 ease-out hover:bg-emerald-500 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70">
+        <hr class="post-card__divider border-default/60 my-4" />
+        <div class="post-maridaje-actions-bar flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5">
+            <div class="flex min-w-0 flex-wrap items-center gap-1 sm:gap-2">
+                ${buildInteractionButtonsHtml(post, opts)}
+            </div>
+            <div class="flex shrink-0 items-center gap-2 ms-auto">
+                ${buildSaveButtonHtml(post)}
+                <button type="button" class="maridaje-btn-show-analysis inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-fresh-500/90 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-900/25 transition-all duration-200 ease-out hover:bg-fresh-600 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fresh-500/40">
                     ${SVG_SPARKLE_CHART}
                     <span>Ver análisis</span>
                 </button>
@@ -71,8 +74,8 @@ export function buildMaridajeFrontInteractionBar(statsLeftHtml) {
  */
 function buildBackToolbarHtml(canReanalyze) {
     return `
-        <div class="maridaje-analysis-toolbar flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-slate-700/70 px-5 pb-3 pt-4">
-            <button type="button" class="maridaje-btn-back-analysis inline-flex items-center gap-1.5 rounded-full border border-slate-600/80 bg-slate-800/80 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60">
+        <div class="maridaje-analysis-toolbar flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-warm-200/70 px-5 pb-3 pt-4">
+            <button type="button" class="maridaje-btn-back-analysis inline-flex items-center gap-1.5 rounded-full border border-warm-200/80 bg-warm-100/80 px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-warm-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fresh-500/40">
                 ${SVG_CHEVRON_LEFT}
                 <span>Volver</span>
             </button>
@@ -94,8 +97,7 @@ export function renderAiAnalysisSectionsHtml(analysis) {
         return `
             <div class="flex w-full flex-col items-center justify-center gap-4 py-10 px-2">
                 <div class="h-11 w-11 rounded-full border-2 border-emerald-500/25 border-t-emerald-400 animate-spin" aria-hidden="true"></div>
-                <p class="text-center text-sm font-medium text-slate-300 animate-pulse">Generando el análisis de maridaje…</p>
-                <p class="text-center text-xs text-slate-500 max-w-xs">Cuando esté listo, verás el resultado aquí sin necesidad de recargar la página.</p>
+                <p class="text-center text-sm font-medium text-ink-secondary animate-pulse">Generando el análisis de maridaje…</p>
             </div>`;
     }
 
@@ -115,56 +117,56 @@ export function renderAiAnalysisSectionsHtml(analysis) {
         equilibrioRaw === null || equilibrioRaw === undefined ? '' : String(equilibrioRaw),
     );
     const recomendacion = esc(String(analysis.recomendacion ?? ''));
-    const emptyDash = '<span class="text-slate-500">—</span>';
+    const emptyDash = '<span class="text-ink-muted">—</span>';
 
     const fallbackBanner = isFallbackScore
         ? `<div role="status" class="rounded-lg border border-amber-500/35 bg-amber-950/35 px-3 py-2 text-xs leading-snug text-amber-100">
-                No pudimos obtener el análisis automático en este momento; mostramos un texto de respaldo. Si publicaste tú la entrada, puedes pulsar «Analizar de nuevo» para intentarlo otra vez.
+                No pudimos obtener el análisis automático en este momento.
             </div>`
         : '';
 
     const scoreBlock = isFallbackScore
-        ? `<div class="border-t border-slate-700/80 pt-5">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Puntuación</p>
-                <p class="mt-2 text-sm text-amber-200/95">
+        ? `<div class="border-t border-warm-200 pt-5">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted">Puntuación</p>
+                <p class="mt-2 text-sm text-mango-600/95">
                     <span class="inline-flex items-center gap-1.5">${SVG_STAR_SCORE}<span>0 de 10</span></span>
-                    <span class="text-slate-400"> (resultado de respaldo)</span>
+                    <span class="text-ink-muted"> (resultado de respaldo)</span>
                 </p>
             </div>`
-        : `<div class="border-t border-slate-700/80 pt-5">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Puntuación</p>
+        : `<div class="border-t border-warm-200 pt-5">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted">Puntuación</p>
                 <p class="mt-2 text-base font-semibold text-amber-300">
                     <span class="inline-flex items-center gap-1.5">${SVG_STAR_SCORE}<span>${scoreDisplay} de 10</span></span>
                 </p>
             </div>`;
 
     const labelCls =
-        'text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400';
+        'text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted';
     const blockCls =
-        'space-y-2 rounded-xl border border-slate-700/50 bg-slate-900/40 px-4 py-3.5 sm:px-5';
+        'space-y-2 rounded-xl border border-warm-200/50 bg-warm-0/40 px-4 py-3.5 sm:px-5';
 
     return `
-        <div class="post-maridaje-ai-body maridaje-ai-enter w-full space-y-6 text-[15px] leading-relaxed text-slate-200 transition-all duration-300 ease-out">
-            <header class="flex items-center gap-2.5 border-b border-slate-700/60 pb-4 text-base font-semibold text-emerald-300">
+        <div class="post-maridaje-ai-body maridaje-ai-enter w-full space-y-6 text-[15px] leading-relaxed text-ink transition-all duration-300 ease-out">
+            <header class="flex items-center gap-2.5 border-b border-warm-200/60 pb-4 text-base font-semibold text-fresh-600">
                 ${SVG_ANALYSIS_HEADING}
                 <span>Análisis del maridaje</span>
             </header>
             ${fallbackBanner}
             <section class="${blockCls}">
                 <h5 class="${labelCls}">Historia</h5>
-                <p class="text-slate-200/95">${historia}</p>
+                <p class="text-ink/95">${historia}</p>
             </section>
             <section class="${blockCls}">
                 <h5 class="${labelCls}">Afinidad</h5>
-                <p class="text-slate-200/95">${afinidad === '' ? emptyDash : afinidad}</p>
+                <p class="text-ink/95">${afinidad === '' ? emptyDash : afinidad}</p>
             </section>
             <section class="${blockCls}">
                 <h5 class="${labelCls}">Equilibrio</h5>
-                <p class="text-slate-200/95">${equilibrio === '' ? emptyDash : equilibrio}</p>
+                <p class="text-ink/95">${equilibrio === '' ? emptyDash : equilibrio}</p>
             </section>
             <section class="${blockCls}">
                 <h5 class="${labelCls}">Recomendación</h5>
-                <p class="text-slate-200/95">${recomendacion}</p>
+                <p class="text-ink/95">${recomendacion}</p>
             </section>
             ${scoreBlock}
         </div>`;
@@ -187,25 +189,22 @@ export function buildWallModalFlipHtml(p) {
     const slotInner = renderAiAnalysisSectionsHtml(p.aiAnalysis);
 
     return `
-        <div data-maridaje-flip-root data-maridaje-post-id="${p.postId}" class="mb-1">
-            <p class="mb-3 text-center text-[11px] leading-relaxed text-slate-500">
-                ${MARIDAJE_NAV_HINT_HTML}
-            </p>
-            <div class="post-maridaje-flip-scene rounded-xl ring-1 ring-slate-700/45">
+        <div data-maridaje-flip-root data-maridaje-post-id="${p.postId}" class="post-maridaje-flip-root">
+            <div class="post-maridaje-flip-scene overflow-hidden rounded-xl border border-default/50 bg-neutral-primary-soft shadow-xs">
                 <div class="post-maridaje-flip-inner rounded-xl">
-                    <div class="post-maridaje-front rounded-xl border border-slate-700/80 bg-slate-900/60 shadow-inner shadow-black/30 overflow-hidden">
+                    <div class="post-maridaje-front overflow-hidden rounded-xl">
                         ${p.heroImg}
-                        <div class="space-y-3 px-4 py-3">
+                        <div class="post-maridaje-front__body space-y-4 px-5 py-4 sm:px-6 sm:py-5">
                             ${p.userHeaderModal}
-                            <div>
-                                <h2 class="text-xl font-bold text-slate-50">${p.titleHtml}</h2>
-                                <div class="mt-2 flex flex-wrap gap-2">${p.tagsLine}</div>
+                            <div class="space-y-3">
+                                <h2 class="text-xl font-bold leading-snug text-heading">${p.titleHtml}</h2>
+                                ${p.tagsLine ? `<div class="flex flex-wrap gap-2">${p.tagsLine}</div>` : ''}
                             </div>
-                            <div class="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">${p.descriptionStoryHtml}</div>
+                            <div class="post-card-body text-sm leading-relaxed text-body whitespace-pre-wrap">${p.descriptionStoryHtml}</div>
                             ${p.interactionBarHtml}
                         </div>
                     </div>
-                    <div class="post-maridaje-back flex w-full flex-col rounded-xl border border-emerald-900/40 bg-slate-950/95 shadow-inner shadow-black/40">
+                    <div class="post-maridaje-back flex w-full flex-col rounded-xl border border-emerald-900/40 bg-warm-50/95 shadow-inner shadow-ink/10">
                         ${buildBackToolbarHtml(p.canReanalyze)}
                         <div class="w-full overflow-visible px-5 pb-5 pt-1" data-maridaje-ai-slot>
                             ${slotInner}
@@ -236,35 +235,28 @@ export function mountPostShowMaridajeFlip(mountEl, post, articleEl, io) {
     const root = document.createElement('div');
     root.dataset.maridajeFlipRoot = '';
     root.dataset.maridajePostId = String(post.id);
-    root.className = 'mb-6';
-
-    const hint = document.createElement('p');
-    hint.className = 'mb-3 text-center text-[11px] leading-relaxed text-slate-500';
-    hint.innerHTML = MARIDAJE_NAV_HINT_HTML;
+    root.className = 'post-maridaje-flip-root mb-6';
 
     const scene = document.createElement('div');
-    scene.className = 'post-maridaje-flip-scene rounded-xl ring-1 ring-slate-700/45';
+    scene.className =
+        'post-maridaje-flip-scene overflow-hidden rounded-xl border border-default/50 bg-neutral-primary-soft shadow-xs';
 
     const inner = document.createElement('div');
     inner.className = 'post-maridaje-flip-inner rounded-xl';
 
     const front = document.createElement('div');
-    front.className =
-        'post-maridaje-front rounded-xl border border-slate-700/80 bg-slate-900/60 shadow-inner shadow-black/30 overflow-hidden';
+    front.className = 'post-maridaje-front overflow-hidden rounded-xl';
 
     articleEl.classList.add('w-full');
-    front.appendChild(articleEl);
-
-    const toolbarHost = document.createElement('div');
-    toolbarHost.className = 'bg-slate-900/55 px-4 pb-4 pt-2';
-    toolbarHost.innerHTML = buildMaridajeFrontInteractionBar(
-        buildInteractionStatsHtml(post, { comfortable: true }),
+    articleEl.insertAdjacentHTML(
+        'beforeend',
+        buildMaridajeFrontInteractionBar(post),
     );
-    front.appendChild(toolbarHost);
+    front.appendChild(articleEl);
 
     const back = document.createElement('div');
     back.className =
-        'post-maridaje-back flex w-full flex-col rounded-xl border border-emerald-900/40 bg-slate-950/95 shadow-inner shadow-black/40';
+        'post-maridaje-back flex w-full flex-col rounded-xl border border-emerald-900/40 bg-warm-50/95 shadow-inner shadow-ink/10';
     back.innerHTML =
         buildBackToolbarHtml(canReanalyze) +
         `<div class="w-full overflow-visible px-5 pb-5 pt-1" data-maridaje-ai-slot>${renderAiAnalysisSectionsHtml(post.ai_analysis ?? null)}</div>`;
@@ -272,7 +264,6 @@ export function mountPostShowMaridajeFlip(mountEl, post, articleEl, io) {
     inner.appendChild(front);
     inner.appendChild(back);
     scene.appendChild(inner);
-    root.appendChild(hint);
     root.appendChild(scene);
     mountEl.appendChild(root);
 

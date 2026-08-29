@@ -17,7 +17,8 @@ export function initDropdowns() {
         (ariaEl ?? trigger).setAttribute('aria-expanded', 'false');
 
         function render() {
-            (ariaEl ?? trigger).setAttribute('aria-expanded', open ? 'true' : 'false');
+            const ariaTarget = trigger.matches('button') ? trigger : trigger.querySelector('button');
+            (ariaTarget ?? trigger).setAttribute('aria-expanded', open ? 'true' : 'false');
             if (open) {
                 panel.classList.remove('hidden');
                 requestAnimationFrame(() => {

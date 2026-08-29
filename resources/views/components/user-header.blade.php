@@ -31,7 +31,7 @@
             @if (auth()->id() === $user->id)
                 <a
                     href="{{ route('settings.profile') }}"
-                    class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-slate-200 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-ink transition hover:bg-warm-100 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fresh-500/40"
                     aria-label="Editar perfil"
                 >
                     <x-ui.icon name="pencil" class="h-4 w-4" />
@@ -42,7 +42,7 @@
         <button
             type="button"
             id="profile-share-open"
-            class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-slate-200 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
+            class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-ink transition hover:bg-warm-100 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fresh-500/40"
             aria-label="Compartir perfil"
         >
             <x-ui.icon name="send" class="h-4 w-4" />
@@ -73,7 +73,7 @@
                     data-following="{{ $viewerFollows ? '1' : '0' }}"
                     data-follow-store-url="{{ route('users.follow.store', $user->username) }}"
                     data-follow-destroy-url="{{ route('users.follow.destroy', $user->username) }}"
-                    class="mt-4 w-full rounded-full px-4 py-2.5 text-sm font-semibold transition border {{ $viewerFollows ? 'border-white/30 bg-white/10 text-white hover:bg-white/15' : 'border-green-400 bg-green-500 text-white hover:bg-green-400' }}"
+                    class="mt-4 w-full rounded-full px-4 py-2.5 text-sm font-semibold transition border {{ $viewerFollows ? 'border-white/30 bg-warm-100 text-ink hover:bg-white/15' : 'border-fresh-500 bg-green-500 text-ink hover:bg-green-400' }}"
                 >
                     {{ $viewerFollows ? 'Dejar de seguir' : 'Seguir' }}
                 </button>
@@ -81,28 +81,28 @@
         @else
             <a
                 href="{{ route('login', [], false) }}"
-                class="mt-4 inline-flex w-full justify-center rounded-full border border-green-400 bg-green-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-400 transition"
+                class="mt-4 inline-flex w-full justify-center rounded-full border border-fresh-500 bg-green-500 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-green-400 transition"
             >
                 Inicia sesión para seguir
             </a>
         @endauth
 
-        <div class="flex items-center justify-center gap-2 text-gray-400 text-sm mt-4 pt-4 border-t border-white/10">
-            <x-ui.icon name="map-pin" class="w-4 h-4 text-green-400 shrink-0" />
+        <div class="flex items-center justify-center gap-2 text-gray-400 text-sm mt-4 pt-4 border-t border-warm-200">
+            <x-ui.icon name="map-pin" class="w-4 h-4 text-tomato-500 shrink-0" />
             <span>{{ $user->country ?? '—' }}</span>
         </div>
     </div>
 
-    <div class="mt-3 w-full space-y-3 text-sm text-gray-400 border-t border-white/10 pt-4">
+    <div class="mt-3 w-full space-y-3 text-sm text-gray-400 border-t border-warm-200 pt-4">
         @if ($user->birthdate)
             <div class="flex items-center justify-center gap-2">
-                <x-ui.icon name="cake" class="w-4 h-4 text-green-400 shrink-0" />
+                <x-ui.icon name="cake" class="w-4 h-4 text-tomato-500 shrink-0" />
                 <span class="text-gray-300">{{ $user->birthdate->age }} años</span>
             </div>
         @endif
 
         <div class="flex items-center justify-center gap-2 text-center">
-            <x-ui.icon name="calendar" class="w-4 h-4 text-green-400 shrink-0" />
+            <x-ui.icon name="calendar" class="w-4 h-4 text-tomato-500 shrink-0" />
             <span>
                 Miembro desde
                 <span class="text-gray-300 font-medium">
@@ -115,15 +115,15 @@
     @if ($user->preferences && count($user->preferences))
         <div class="mt-3 flex flex-wrap gap-2 justify-center w-full">
             @foreach ($user->preferences as $pref)
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs rounded-full bg-green-400/20 text-green-300 border border-green-400/30">
-                    <x-ui.icon :name="$preferenceIcons[$pref] ?? 'star'" class="w-3.5 h-3.5 text-green-400 shrink-0" />
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs rounded-full bg-green-400/20 text-green-300 border border-fresh-500/30">
+                    <x-ui.icon :name="$preferenceIcons[$pref] ?? 'star'" class="w-3.5 h-3.5 text-tomato-500 shrink-0" />
                     <span>{{ $pref }}</span>
                 </span>
             @endforeach
         </div>
     @endif
 
-    <div class="mt-3 flex flex-wrap gap-4 justify-center items-center w-full border-t border-white/10 pt-4">
+    <div class="mt-3 flex flex-wrap gap-4 justify-center items-center w-full border-t border-warm-200 pt-4">
         @if ($user->instagram)
             <a
                 href="https://www.instagram.com/{{ $user->instagram }}/"
@@ -153,17 +153,17 @@
 <div id="profile-share-modal" class="profile-share-modal fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="profile-share-title">
     <button type="button" id="profile-share-backdrop" class="absolute inset-0 bg-black/75 backdrop-blur-md transition-opacity duration-300" aria-label="Cerrar compartir"></button>
 
-    <div id="profile-share-panel" class="profile-share-panel relative w-full max-w-md overflow-hidden rounded-3xl border border-white/15 bg-slate-950/85 p-5 text-slate-100 shadow-[0_30px_70px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/10 sm:p-6">
+    <div id="profile-share-panel" class="profile-share-panel relative w-full max-w-md overflow-hidden rounded-3xl border border-white/15 bg-warm-50/85 p-5 text-ink shadow-[0_30px_70px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/10 sm:p-6">
         <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_55%)]"></div>
 
         <div class="relative">
             <div class="mb-5 flex items-start justify-between gap-3">
                 <div class="min-w-0">
-                    <h3 id="profile-share-title" class="text-lg font-semibold tracking-tight text-white">Compartir perfil</h3>
-                    <p class="mt-1 truncate text-sm text-slate-300">{{ '@'.$user->username }}</p>
+                    <h3 id="profile-share-title" class="text-lg font-semibold tracking-tight text-ink">Compartir perfil</h3>
+                    <p class="mt-1 truncate text-sm text-ink-secondary">{{ '@'.$user->username }}</p>
                 </div>
 
-                <button type="button" id="profile-share-close" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-slate-300 transition hover:-translate-y-0.5 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60" aria-label="Cerrar">
+                <button type="button" id="profile-share-close" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-ink-secondary transition hover:-translate-y-0.5 hover:bg-warm-100 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fresh-500/40" aria-label="Cerrar">
                     <x-ui.icon name="x" class="h-4 w-4" />
                 </button>
             </div>
@@ -174,23 +174,23 @@
                 </div>
             </div>
 
-            <div class="mb-4 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
-                <p class="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-400">Enlace del perfil</p>
-                <p class="truncate text-xs text-slate-200" id="profile-share-url">{{ $profileUrl }}</p>
+            <div class="mb-4 rounded-2xl border border-warm-200 bg-white/[0.03] px-3 py-2.5">
+                <p class="mb-1 text-[11px] font-medium uppercase tracking-wide text-ink-muted">Enlace del perfil</p>
+                <p class="truncate text-xs text-ink" id="profile-share-url">{{ $profileUrl }}</p>
             </div>
 
             <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-                <button type="button" id="profile-share-native" class="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70">
+                <button type="button" id="profile-share-native" class="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-ink transition duration-200 hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70">
                     <x-ui.icon name="send" class="h-4 w-4 shrink-0" />
                     <span data-profile-share-native-label>Compartir</span>
                 </button>
 
-                <button type="button" id="profile-share-copy" class="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-medium text-slate-100 transition duration-200 hover:-translate-y-0.5 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60">
+                <button type="button" id="profile-share-copy" class="inline-flex items-center justify-center gap-2 rounded-full border border-warm-200 bg-warm-100 px-4 py-2.5 text-sm font-medium text-ink transition duration-200 hover:-translate-y-0.5 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60">
                     <x-ui.icon name="copy" class="h-4 w-4 shrink-0" />
                     <span data-profile-share-copy-label>Copiar enlace</span>
                 </button>
 
-                <a id="profile-share-download" href="{{ $qrUrl }}" download="perfil-{{ $user->username }}-qr.png" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-400/45 bg-emerald-500/15 px-4 py-2.5 text-sm font-medium text-emerald-200 transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60">
+                <a id="profile-share-download" href="{{ $qrUrl }}" download="perfil-{{ $user->username }}-qr.png" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-400/45 bg-fresh-100 px-4 py-2.5 text-sm font-medium text-emerald-200 transition duration-200 hover:-translate-y-0.5 hover:bg-fresh-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60">
                     <x-ui.icon name="download" class="h-4 w-4 shrink-0" />
                     Descargar
                 </a>

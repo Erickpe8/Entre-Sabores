@@ -190,6 +190,23 @@ class User extends Authenticatable
         });
     }
 
+    /** Iniciales para avatares fallback (marketing, navbar, etc.). */
+    protected function initials(): Attribute
+    {
+        return Attribute::get(function (): string {
+            $initials = strtoupper(
+                mb_substr((string) ($this->first_name ?? ''), 0, 1)
+                .mb_substr((string) ($this->last_name ?? ''), 0, 1)
+            );
+
+            if (trim($initials) === '') {
+                return strtoupper(mb_substr((string) ($this->username ?? 'U'), 0, 2));
+            }
+
+            return $initials;
+        });
+    }
+
     /**
      * Variante pequeña (p. ej. listados); si no existe, coincide con la foto principal.
      */
