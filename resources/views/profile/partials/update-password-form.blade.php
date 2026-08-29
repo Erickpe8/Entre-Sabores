@@ -1,10 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-semibold text-white">
+        <h2 class="text-lg font-semibold text-ink">
             Actualizar contraseña
         </h2>
 
-        <p class="mt-1 text-sm text-slate-400">
+        <p class="mt-1 text-sm text-ink-muted">
             Usa una contraseña larga y aleatoria para mantener tu cuenta segura.
         </p>
     </header>
@@ -34,7 +34,7 @@
         <div class="flex items-center gap-4">
             <button
                 type="submit"
-                class="inline-flex items-center rounded-xl px-5 py-2.5 bg-gradient-to-r from-green-400 to-blue-500 text-white text-sm font-semibold shadow-lg shadow-green-900/30 hover:opacity-95 transition"
+                class="inline-flex items-center rounded-xl px-5 py-2.5 bg-gradient-to-r bg-tomato-500 text-ink text-sm font-semibold shadow-lg shadow-green-900/30 hover:opacity-95 transition"
             >
                 Guardar contraseña
             </button>
@@ -42,7 +42,7 @@
             @if (session('status') === 'password-updated')
                 <p
                     data-flash-auto-hide="2000"
-                    class="text-sm text-green-400 transition-opacity duration-300"
+                    class="text-sm text-tomato-500 transition-opacity duration-300"
                     role="status"
                 >{{ __('Guardado.') }}</p>
             @endif

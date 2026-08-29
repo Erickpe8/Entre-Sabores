@@ -2,6 +2,7 @@
 
 return [
     'required' => 'El campo :attribute es obligatorio.',
+    'lowercase' => 'El campo :attribute debe estar en minúsculas.',
     'email' => 'El campo :attribute debe ser un correo electrónico válido.',
     'min' => [
         'string' => 'El campo :attribute debe tener al menos :min caracteres.',

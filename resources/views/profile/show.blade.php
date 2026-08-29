@@ -2,7 +2,7 @@
     <div class="min-h-[100dvh] bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#022c22] pb-16">
         <div class="max-w-7xl mx-auto px-6 py-10 grid lg:grid-cols-3 gap-8">
             <aside class="space-y-6 lg:self-start lg:sticky lg:top-24">
-                <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white/10">
+                <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-warm-200">
                     <x-user-header
                         :user="$user"
                         :viewer-follows="$viewerFollows"
@@ -16,18 +16,18 @@
 
             <main class="lg:col-span-2 space-y-6">
                 @if ($isProfileOwner)
-                    <nav class="flex flex-wrap gap-2 border-b border-white/10 pb-3 transition-colors duration-200" aria-label="Secciones del perfil">
+                    <nav class="flex flex-wrap gap-2 border-b border-warm-200 pb-3 transition-colors duration-200" aria-label="Secciones del perfil">
                         <button
                             type="button"
                             data-profile-tab="posts"
-                            class="profile-tab-btn rounded-full px-4 py-2 text-sm font-medium bg-emerald-500/25 text-emerald-100 ring-1 ring-emerald-400/40"
+                            class="profile-tab-btn rounded-full px-4 py-2 text-sm font-medium bg-fresh-100 text-emerald-100 ring-1 ring-emerald-400/40"
                         >
                             Publicaciones
                         </button>
                         <button
                             type="button"
                             data-profile-tab="likes"
-                            class="profile-tab-btn rounded-full px-4 py-2 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5"
+                            class="profile-tab-btn rounded-full px-4 py-2 text-sm font-medium text-ink-muted hover:text-ink hover:bg-white/5"
                         >
                             Me gusta
                         </button>
@@ -37,8 +37,8 @@
                 <div id="profile-panel-posts" data-profile-panel="posts" class="space-y-6">
                     <textarea id="profile-posts-config" class="sr-only" readonly tabindex="-1" aria-hidden="true">@json($profilePostsConfig)</textarea>
 
-                    <div class="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10 shadow-lg shadow-black/20">
-                        <h2 class="text-white text-lg font-semibold mb-3">
+                    <div class="bg-white/5 backdrop-blur rounded-2xl p-6 border border-warm-200 shadow-lg shadow-ink/5">
+                        <h2 class="text-ink text-lg font-semibold mb-3">
                             Sobre {{ $user->first_name }}
                         </h2>
                         @if ($user->description)
@@ -48,14 +48,14 @@
                         @endif
                     </div>
 
-                    <div class="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10 shadow-lg shadow-black/20">
-                        <h2 class="text-white text-lg font-semibold mb-4">
+                    <div class="bg-white/5 backdrop-blur rounded-2xl p-6 border border-warm-200 shadow-lg shadow-ink/5">
+                        <h2 class="text-ink text-lg font-semibold mb-4">
                             Publicaciones
                         </h2>
                         <p id="profile-posts-status" class="text-xs text-gray-500 mb-4" aria-live="polite"></p>
                         <div
                             id="profile-posts-grid"
-                            class="grid gap-4 sm:grid-cols-2"
+                            class="grid gap-4 grid-cols-1"
                         ></div>
                         <div id="profile-posts-sentinel" class="h-4 w-full" aria-hidden="true"></div>
                     </div>
@@ -65,14 +65,14 @@
                     <div id="profile-panel-likes" data-profile-panel="likes" class="hidden space-y-6">
                         <textarea id="profile-likes-config" class="sr-only" readonly tabindex="-1" aria-hidden="true">@json($profileLikesConfig)</textarea>
 
-                        <div class="bg-white/5 backdrop-blur rounded-2xl p-6 border border-white/10 shadow-lg shadow-black/20">
-                            <h2 class="text-white text-lg font-semibold mb-4">
+                        <div class="bg-white/5 backdrop-blur rounded-2xl p-6 border border-warm-200 shadow-lg shadow-ink/5">
+                            <h2 class="text-ink text-lg font-semibold mb-4">
                                 Me gusta
                             </h2>
                             <p id="profile-likes-status" class="text-xs text-gray-500 mb-4 min-h-[1rem]" aria-live="polite"></p>
                             <div
                                 id="profile-likes-grid"
-                                class="grid gap-4 sm:grid-cols-2 min-h-0"
+                                class="grid gap-4 grid-cols-1 min-h-0"
                             ></div>
                             <div id="profile-likes-sentinel" class="h-4 w-full" aria-hidden="true"></div>
                         </div>

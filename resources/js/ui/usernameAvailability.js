@@ -27,7 +27,7 @@ export function initUsernameAvailability() {
 
     const showDefaultState = () => setStatus('', 'text-gray-500');
     const showLoading = () => setStatus('Comprobando...', 'text-gray-500');
-    const showAvailable = () => setStatus('Disponible', 'text-green-400');
+    const showAvailable = () => setStatus('Disponible', 'text-tomato-500');
     const showTaken = () => setStatus('No disponible', 'text-red-400');
     const showError = () => setStatus('No se pudo comprobar. Reintenta.', 'text-amber-400/90');
 

@@ -23,7 +23,7 @@ function showRealtimeToast(message, themeDark) {
     const el = document.createElement('div');
     el.setAttribute('role', 'status');
     el.className = themeDark
-        ? 'fixed bottom-6 left-1/2 z-[70] max-w-[min(calc(100vw-2rem),22rem)] -translate-x-1/2 rounded-xl border border-emerald-500/40 bg-slate-900/95 px-4 py-3 text-sm text-emerald-50 shadow-lg backdrop-blur-sm'
+        ? 'fixed bottom-6 left-1/2 z-[70] max-w-[min(calc(100vw-2rem),22rem)] -translate-x-1/2 rounded-xl border border-emerald-500/40 bg-warm-0/95 px-4 py-3 text-sm text-emerald-50 shadow-lg backdrop-blur-sm'
         : 'fixed bottom-6 left-1/2 z-[70] max-w-[min(calc(100vw-2rem),22rem)] -translate-x-1/2 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm text-stone-900 shadow-lg';
     el.textContent = message;
     document.body.appendChild(el);
@@ -96,14 +96,14 @@ export function initNotificationsNav() {
 
     const styles = themeDark
         ? {
-              rowBorder: 'border-slate-800/80',
-              rowUnread: 'bg-emerald-500/10 hover:bg-emerald-500/15',
-              rowRead: 'opacity-75 hover:bg-white/5',
-              title: 'text-slate-100',
-              body: 'text-slate-400',
-              time: 'text-slate-500',
-              ring: 'ring-slate-600',
-              imgBg: 'bg-slate-800',
+              rowBorder: 'border-default',
+              rowUnread: 'bg-neutral-secondary-medium/80 hover:bg-neutral-tertiary-medium',
+              rowRead: 'opacity-75 hover:bg-neutral-secondary-medium/50',
+              title: 'text-heading',
+              body: 'text-muted',
+              time: 'text-muted',
+              ring: 'ring-default',
+              imgBg: 'bg-neutral-secondary-medium',
           }
         : {
               rowBorder: 'border-stone-100',

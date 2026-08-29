@@ -2,29 +2,42 @@ import './bootstrap';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 
+import { initFlowbite } from 'flowbite';
+
 import { initAppChromePageshow, resetAppChromeState } from './ui/appChromeReset.js';
-import { initMobileNav } from './ui/mobileNav.js';
 import { initDropdowns } from './ui/dropdowns.js';
 import { initModals } from './ui/modals.js';
 import { initFlashAutoHide } from './ui/flashMessages.js';
+import { initAlerts } from './ui/alerts.js';
 import { initProfileShareModal } from './ui/profileShareModal.js';
 import { initProfilePage } from './ui/profilePage.js';
 import { initUsernameAvailability } from './ui/usernameAvailability.js';
+import { initNavbarChrome } from './ui/navbarChrome.js';
 import { initAvatarCroppers } from './ui/avatarCropper.js';
+import { initAuthForms } from './ui/authForms.js';
+import { initRegisterWizard } from './ui/registerWizard.js';
+import { initRegisterCountryLocation } from './ui/registerCountryLocation.js';
 
 window.Cropper = Cropper;
 
 resetAppChromeState();
 initAppChromePageshow();
+initFlowbite();
 
-initMobileNav();
+document.addEventListener('DOMContentLoaded', () => initFlowbite());
+window.addEventListener('pageshow', () => initFlowbite());
 initDropdowns();
 initModals();
 initFlashAutoHide();
+initAlerts();
 initProfileShareModal();
 initProfilePage();
 initUsernameAvailability();
+initAuthForms();
+initRegisterCountryLocation();
+initRegisterWizard();
 initAvatarCroppers();
+initNavbarChrome();
 
 if (document.getElementById('posts-container')) {
     import('./wall.js').then((m) => m.initWall());

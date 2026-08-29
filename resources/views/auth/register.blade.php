@@ -1,61 +1,99 @@
 <x-guest-layout title="Registrar usuario | Entre Sabores">
-    <div class="mb-5">
-        <h1 class="text-4xl font-extrabold text-white leading-tight">
-            Crea tu cuenta
-        </h1>
-        <p class="mt-2 text-sm text-slate-400">Únete a la comunidad gastronómica.</p>
-    </div>
-
     @php
-        $stepTwoHasErrors = $errors->has('profile_photo') || $errors->has('description');
+        $registerStep = 1;
+
+        if ($errors->any()) {
+            if ($errors->has('profile_photo')) {
+                $registerStep = 4;
+            } elseif ($errors->hasAny(['description', 'country'])) {
+                $registerStep = 2;
+            } elseif ($errors->hasAny(['password', 'password_confirmation'])) {
+                $registerStep = 3;
+            } elseif ($errors->hasAny(['first_name', 'last_name', 'email'])) {
+                $registerStep = 1;
+            }
+        }
     @endphp
 
-    <form id="register-form" method="POST" action="{{ route('register') }}" enctype="multipart/form-data" class="space-y-4" novalidate>
+    <x-auth.card-header
+        title="Crea tu cuenta"
+        subtitle="Únete a la comunidad gastronómica."
+    />
+
+    <form
+        id="register-form"
+        method="POST"
+        action="{{ route('register') }}"
+        enctype="multipart/form-data"
+        class="auth-form"
+        novalidate
+        data-auth-wizard
+        data-register-initial-step="{{ $registerStep - 1 }}"
+    >
         @csrf
 
-        <div id="step-1" class="space-y-4 {{ $stepTwoHasErrors ? 'hidden' : '' }}">
+        <div class="auth-register-progress" id="register-progress" aria-hidden="true">
+            @for ($i = 1; $i <= 4; $i++)
+                <span
+                    data-step-dot
+                    class="auth-register-progress__dot {{ $i <= $registerStep ? 'is-active' : '' }} {{ $i < $registerStep ? 'is-complete' : '' }}"
+                ></span>
+            @endfor
+        </div>
+
+        <p class="auth-register-step-label text-caption text-secondary">
+            Paso <span id="register-step-current">{{ $registerStep }}</span> de 4
+        </p>
+
+        {{-- Paso 1: nombre y correo --}}
+        <div
+            id="step-1"
+            class="register-step space-y-4"
+            data-step-fields="first_name,last_name,email"
+            @if($registerStep !== 1) hidden @endif
+        >
             <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label for="first_name" class="mb-2 block text-sm font-semibold text-slate-100">Nombre</label>
-                    <input id="first_name" class="w-full px-3 py-2.5 text-sm rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-green-400" type="text" name="first_name" value="{{ old('first_name') }}" required autofocus autocomplete="given-name" />
-                    <p id="first_name_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
-                    <x-input-error :messages="$errors->get('first_name')" class="mt-2 text-sm" />
+                <div class="auth-field !mt-0">
+                    <x-input-label for="first_name" value="Nombre" />
+                    <input id="first_name" class="input" type="text" name="first_name" value="{{ old('first_name') }}" required autocomplete="given-name" />
                 </div>
-
-                <div>
-                    <label for="last_name" class="mb-2 block text-sm font-semibold text-slate-100">Apellido</label>
-                    <input id="last_name" class="w-full px-3 py-2.5 text-sm rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-green-400" type="text" name="last_name" value="{{ old('last_name') }}" required autocomplete="family-name" />
-                    <p id="last_name_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
-                    <x-input-error :messages="$errors->get('last_name')" class="mt-2 text-sm" />
+                <div class="auth-field !mt-0">
+                    <x-input-label for="last_name" value="Apellido" />
+                    <input id="last_name" class="input" type="text" name="last_name" value="{{ old('last_name') }}" required autocomplete="family-name" />
                 </div>
             </div>
 
-            <div>
-                <label for="email" class="mb-2 block text-sm font-semibold text-slate-100">Correo electrónico</label>
-                <input id="email" class="w-full px-3 py-2.5 text-sm rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-green-400" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" />
-                <p id="email_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
-                <x-input-error :messages="$errors->get('email')" class="mt-2 text-sm" />
+            <div class="auth-field !mt-0">
+                <x-input-label for="email" value="Correo electrónico" />
+                <input id="email" class="input" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" />
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label for="password" class="mb-2 block text-sm font-semibold text-slate-100">Contraseña</label>
-                    <input id="password" class="w-full px-3 py-2.5 text-sm rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-green-400" type="password" name="password" required autocomplete="new-password" />
-                    <p id="password_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
-                    <x-input-error :messages="$errors->get('password')" class="mt-2 text-sm" />
-                </div>
+            <div class="auth-actions">
+                <button type="button" data-register-next class="btn btn-primary w-full">Continuar</button>
+            </div>
+        </div>
 
-                <div>
-                    <label for="password_confirmation" class="mb-2 block text-sm font-semibold text-slate-100">Confirmar contraseña</label>
-                    <input id="password_confirmation" class="w-full px-3 py-2.5 text-sm rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-green-400" type="password" name="password_confirmation" required autocomplete="new-password" />
-                    <p id="password_confirmation_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
-                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-sm" />
-                </div>
+        {{-- Paso 2: descripción y país --}}
+        <div
+            id="step-2"
+            class="register-step space-y-4"
+            data-step-fields="description,country"
+            data-country-hint-url="{{ route('register.country-hint') }}"
+            @if($registerStep !== 2) hidden @endif
+        >
+            <div class="auth-field !mt-0">
+                <x-input-label for="description" value="Descripción (opcional)" />
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Cuéntanos sobre ti..."
+                    class="input h-16 resize-none"
+                >{{ old('description') }}</textarea>
             </div>
 
-            <div>
-                <label for="country" class="mb-2 block text-sm font-semibold text-slate-100">País</label>
-                <select id="country" name="country" class="w-full rounded-lg bg-gray-800 border border-gray-600 px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-green-400" required>
+            <div class="auth-field !mt-0">
+                <x-input-label for="country" value="País" />
+                <select id="country" name="country" class="input" required>
                     <option value="">Selecciona tu país</option>
                     <option value="Colombia" @selected(old('country') === 'Colombia')>Colombia</option>
                     <option value="México" @selected(old('country') === 'México')>México</option>
@@ -68,56 +106,72 @@
                     <option value="Paraguay" @selected(old('country') === 'Paraguay')>Paraguay</option>
                     <option value="Uruguay" @selected(old('country') === 'Uruguay')>Uruguay</option>
                 </select>
-                <p id="country_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
-                <x-input-error :messages="$errors->get('country')" class="mt-2 text-sm" />
             </div>
 
-            <button id="go-step-2" type="button" class="w-full py-2.5 mt-2 rounded-lg text-sm bg-gradient-to-r from-green-400 to-blue-500 text-white font-semibold hover:opacity-90 transition">
-                Continuar
-            </button>
+            <div class="auth-actions flex gap-3">
+                <button type="button" data-register-back class="btn btn-secondary w-1/2">Atrás</button>
+                <button type="button" data-register-next class="btn btn-primary w-1/2">Continuar</button>
+            </div>
         </div>
 
-        <div id="step-2" class="{{ $stepTwoHasErrors ? '' : 'hidden' }} space-y-5 max-w-md">
-            <button type="button" id="openEditor"
-                class="w-full py-3 rounded-xl bg-gradient-to-r from-green-400 to-blue-500 text-white font-semibold hover:opacity-90 transition">
-                Seleccionar y editar foto
-            </button>
+        {{-- Paso 3: contraseña --}}
+        <div
+            id="step-3"
+            class="register-step space-y-4"
+            data-step-fields="password,password_confirmation"
+            @if($registerStep !== 3) hidden @endif
+        >
+            <div class="grid grid-cols-2 gap-3">
+                <div class="auth-field !mt-0">
+                    <x-input-label for="password" value="Contraseña" />
+                    <input id="password" class="input" type="password" name="password" required autocomplete="new-password" />
+                </div>
+                <div class="auth-field !mt-0">
+                    <x-input-label for="password_confirmation" value="Confirmar" />
+                    <input id="password_confirmation" class="input" type="password" name="password_confirmation" required autocomplete="new-password" />
+                </div>
+            </div>
 
-            <div class="flex justify-center">
-                <img id="preview"
-                    alt="Vista previa"
-                    class="w-24 h-24 rounded-full object-cover hidden border-2 border-white">
+            <div class="auth-actions flex gap-3">
+                <button type="button" data-register-back class="btn btn-secondary w-1/2">Atrás</button>
+                <button type="button" data-register-next class="btn btn-primary w-1/2">Continuar</button>
+            </div>
+        </div>
+
+        {{-- Paso 4: foto --}}
+        <div
+            id="step-4"
+            class="register-step space-y-3"
+            data-step-fields="profile_photo"
+            @if($registerStep !== 4) hidden @endif
+        >
+            <div class="auth-photo-picker auth-photo-picker--compact">
+                <img id="preview" alt="Vista previa de tu foto" class="auth-photo-picker__preview hidden">
+
+                <button type="button" id="openEditor" class="auth-photo-picker__trigger">
+                    <span class="auth-photo-picker__icon" aria-hidden="true">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/>
+                        </svg>
+                    </span>
+                    <span class="auth-photo-picker__label">Seleccionar y editar foto</span>
+                    <span class="auth-photo-picker__hint">JPG, PNG o WebP · máx. 2 MB</span>
+                </button>
             </div>
 
             <input type="hidden" id="profile_photo_base64" name="profile_photo_base64">
             <input id="profile_photo" type="file" name="profile_photo" class="hidden" required>
-            <p id="profile_photo_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
-            <x-input-error :messages="$errors->get('profile_photo')" class="mt-2 text-sm" />
 
-            <div>
-                <label for="description" class="mb-2 block text-sm font-semibold text-slate-100">Descripción</label>
-                <textarea
-                    id="description"
-                    name="description"
-                    placeholder="Cuéntanos sobre ti..."
-                    class="w-full rounded-xl bg-gray-800 border border-gray-600 px-4 py-3 text-white resize-none h-24 custom-scroll focus:outline-none focus:ring-2 focus:ring-green-400">{{ old('description') }}</textarea>
-                <p id="description_client_error" class="mt-2 hidden rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
-                <x-input-error :messages="$errors->get('description')" class="mt-2 text-sm" />
-            </div>
-
-            <div class="flex items-center gap-3">
-                <button id="back-step-1" type="button" class="w-1/2 py-3 rounded-xl border border-white/30 bg-transparent text-white font-medium hover:bg-white/10 transition">
-                    Atrás
-                </button>
-                <button type="submit" class="w-1/2 py-3 rounded-xl bg-gradient-to-r from-green-400 to-blue-500 text-white font-semibold hover:opacity-90 transition">
-                    Registrarse
-                </button>
+            <div class="auth-actions flex gap-3">
+                <button type="button" data-register-back class="btn btn-secondary w-1/2">Atrás</button>
+                <button type="submit" class="btn btn-primary w-1/2">Registrarse</button>
             </div>
         </div>
 
-        <p class="text-center text-sm text-slate-300">
+        <p class="auth-form-footer">
             ¿Ya tienes cuenta?
-            <a class="font-semibold text-cyan-300 hover:text-cyan-200" href="{{ route('login') }}">Inicia sesión</a>
+            <a class="text-link" href="{{ route('login') }}">Inicia sesión</a>
         </p>
     </form>
 
@@ -131,7 +185,6 @@
         modal-id="modalCrop"
         data-transfer-input-id="profile_photo"
         form-id="register-form"
-        step-one-id="step-1"
-        step-two-id="step-2"
+        :step-ids="['step-1', 'step-2', 'step-3', 'step-4']"
     />
 </x-guest-layout>

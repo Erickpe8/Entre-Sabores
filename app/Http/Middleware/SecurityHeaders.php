@@ -16,12 +16,14 @@ class SecurityHeaders
             return $response;
         }
 
+        $geolocationPolicy = $request->routeIs('register') ? 'geolocation=(self)' : 'geolocation=()';
+
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set(
             'Permissions-Policy',
-            'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()'
+            "accelerometer=(), camera=(), {$geolocationPolicy}, gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
         );
 
         if ($this->shouldSendCsp()) {
