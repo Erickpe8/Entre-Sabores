@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\FilterPostsRequest;
 use App\Models\Tag;
 use App\Services\WallFeedService;
+use App\Support\Illustrations;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 
@@ -42,6 +43,19 @@ class WallController extends Controller
                 'authUserId' => auth()->id(),
                 'initialFollowing' => request()->boolean('following'),
                 'tagsByType' => $tagsByType,
+                'showOnboarding' => request()->boolean('onboarding'),
+                'authUserPostsCount' => auth()->check()
+                    ? (int) auth()->user()->posts()->count()
+                    : 0,
+                'illustrations' => Illustrations::bundleForJs([
+                    'empty-no-posts',
+                    'empty-no-search-results',
+                    'empty-no-comments',
+                    'onboarding-discover-flavors',
+                    'onboarding-share-pairing',
+                    'onboarding-explore-cultures',
+                    'community-celebration-milestone',
+                ]),
             ],
         ]);
     }

@@ -52,12 +52,16 @@
             id="nav-notifications-list"
             class="max-h-[min(55vh,22rem)] overflow-y-auto overscroll-contain scrollbar-transparent"
         ></div>
-        <p
+        <div
             id="nav-notifications-empty"
-            class="hidden px-4 py-8 text-center text-sm text-muted"
+            class="hidden px-4 py-4"
         >
-            No hay notificaciones recientes.
-        </p>
+            <x-ui.empty-state
+                illustration="empty-no-notifications"
+                title="Sin notificaciones"
+                message="No hay notificaciones recientes."
+            />
+        </div>
     </div>
 </div>
 
@@ -66,4 +70,5 @@
     'readAllUrl' => route('notifications.read_all', absolute: false),
     'initialUnread' => $navUnreadCount,
     'authUserId' => auth()->id(),
+    'defaultAvatarUrl' => \App\Support\Illustrations::defaultAvatarPath(),
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</textarea>

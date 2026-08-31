@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\Illustrations;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -183,7 +184,7 @@ class User extends Authenticatable
         return Attribute::get(function (): string {
             $normalized = self::normalizePublicDiskPath($this->profile_photo);
             if ($normalized === null) {
-                return '/images/default.png';
+                return Illustrations::defaultAvatarPath();
             }
 
             return '/storage/'.ltrim($normalized, '/');

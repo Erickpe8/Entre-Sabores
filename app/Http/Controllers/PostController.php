@@ -10,6 +10,7 @@ use App\Models\Post;
 use App\Services\ContentGuard;
 use App\Support\OperationalLogger;
 use App\Support\OperationalMetrics;
+use App\Support\Illustrations;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -110,6 +111,7 @@ class PostController extends Controller
                 'loginUrl' => route('login', [], false),
                 'isAuthenticated' => auth()->check(),
                 'authUserId' => auth()->id(),
+                'illustrations' => Illustrations::bundleForJs(['empty-no-comments']),
             ],
         ]);
     }

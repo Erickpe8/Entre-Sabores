@@ -54,10 +54,11 @@
                 <div class="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
                     <div class="h-[min(100%,520px)] w-[min(100%,520px)] bg-hero-glow"></div>
                 </div>
-                <img
-                    src="{{ asset('images/image-hero.png') }}"
-                    alt="Hero Entre Sabores"
-                    class="relative z-10 w-[660px] animate-float object-contain drop-shadow-[0_30px_80px_rgba(0,0,0,0.6)] md:w-[730px] xl:w-[880px] 2xl:w-[980px]"
+                <x-ui.illustration
+                    name="hero-landing"
+                    :lazy="false"
+                    class="relative z-10"
+                    img-class="w-[660px] animate-float object-contain drop-shadow-[0_30px_80px_rgba(0,0,0,0.6)] md:w-[730px] xl:w-[880px] 2xl:w-[980px]"
                 />
             </div>
         </main>

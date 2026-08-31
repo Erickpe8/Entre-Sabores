@@ -563,6 +563,8 @@ final class Catalog
                 [
                     'app/View/Components/AppLayout.php',
                     'app/View/Components/GuestLayout.php',
+                    'app/Support/Illustrations.php',
+                    'config/illustrations.php',
                     'resources/views/layouts/app.blade.php',
                     'resources/views/layouts/guest.blade.php',
                     'resources/views/layouts/navigation.blade.php',
@@ -574,6 +576,9 @@ final class Catalog
                     'resources/js/bootstrap.js',
                     'resources/js/ui/appChromeReset.js',
                     'resources/js/ui/dropdowns.js',
+                    'resources/js/ui/emptyState.js',
+                    'resources/js/ui/onboardingModal.js',
+                    'resources/js/ui/celebrationModal.js',
                     'resources/js/ui/flashMessages.js',
                     'resources/js/ui/mobileNav.js',
                     'resources/js/ui/modals.js',

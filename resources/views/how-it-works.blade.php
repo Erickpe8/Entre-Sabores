@@ -8,6 +8,13 @@
     <article class="mx-auto max-w-3xl space-y-10">
         <header class="space-y-4 text-center sm:text-left">
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-accent-cool">Cómo funciona</p>
+            <div class="mx-auto max-w-lg sm:mx-0">
+                <x-ui.illustration
+                    name="community-food-lovers"
+                    class="mx-auto mb-6 sm:mx-0"
+                    img-class="h-auto w-full rounded-2xl object-contain drop-shadow-lg"
+                />
+            </div>
             <h1 class="text-3xl font-extrabold tracking-tight text-heading sm:text-4xl md:text-5xl">
                 Maridajes con contexto y análisis en la misma tarjeta
             </h1>

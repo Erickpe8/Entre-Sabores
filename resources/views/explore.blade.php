@@ -8,6 +8,13 @@
     <article class="mx-auto max-w-3xl space-y-10">
         <header class="space-y-4 text-center sm:text-left">
             <p class="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200/80">Explorar</p>
+            <div class="mx-auto max-w-md sm:mx-0">
+                <x-ui.illustration
+                    name="discovery-world-cuisine"
+                    class="mx-auto mb-6 max-w-xs sm:mx-0"
+                    img-class="h-auto w-full object-contain drop-shadow-lg"
+                />
+            </div>
             <h1 class="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl md:text-5xl">
                 Tu ventana a maridajes y culturas
             </h1>
@@ -32,6 +39,22 @@
                     <span><strong class="text-ink">Orden y búsqueda</strong> — combina «Recientes», «Populares» o «Tendencia» con texto y etiquetas para acotar lo que ves.</span>
                 </li>
             </ul>
+        </div>
+
+        <div class="rounded-2xl border border-warm-200 bg-white/[0.04] p-6 sm:p-8 backdrop-blur-sm">
+            <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
+                <x-ui.illustration
+                    name="discovery-culinary-journey"
+                    class="mx-auto w-full max-w-xs shrink-0 sm:mx-0 sm:max-w-[14rem]"
+                    img-class="h-auto w-full object-contain"
+                />
+                <div class="min-w-0 text-center sm:text-left">
+                    <h2 class="text-lg font-bold text-ink">Un viaje en cada maridaje</h2>
+                    <p class="mt-2 text-ink-secondary leading-relaxed">
+                        Cada publicación es una parada: sabores, contexto y cultura contados en primera persona por la comunidad.
+                    </p>
+                </div>
+            </div>
         </div>
 
         <div class="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">

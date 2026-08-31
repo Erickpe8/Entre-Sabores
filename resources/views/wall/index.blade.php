@@ -275,4 +275,7 @@
             <div id="wall-modal-body" class="px-4 sm:px-6 pb-8 pt-2"></div>
         </div>
     </div>
+
+    <x-ui.onboarding-modal />
+    <x-ui.celebration-modal />
 </x-app-layout>

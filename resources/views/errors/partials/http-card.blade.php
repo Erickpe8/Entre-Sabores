@@ -1,22 +1,15 @@
 @php
     $comfortLine = $comfort_line ?? 'Si no carga en este momento, inténtalo de nuevo en unos segundos.';
-
-    $errorImage = is_file(public_path('entre_sabores_error.png'))
-        ? asset('entre_sabores_error.png')
-        : asset('images/entre_sabores_error.png');
 @endphp
 
 {{-- Vista estilo panel de aplicación --}}
 <section class="mx-auto w-full max-w-xl text-center">
     <div class="mb-5 flex justify-center">
-        <img
-            src="{{ $errorImage }}"
-            alt="Ilustración de error"
-            class="error-page-illustration"
-            loading="eager"
-            decoding="async"
-            draggable="false"
-        >
+        <x-ui.illustration
+            name="error-page-not-found"
+            :lazy="false"
+            img-class="error-page-illustration"
+        />
     </div>
 
     <div class="space-y-3">

@@ -19,7 +19,10 @@ class CommunitySocialProof extends Component
     {
         $stats = CommunityStats::forMarketing();
         $this->totalUsers = $stats['totalUsers'];
-        $this->recentMembers = $stats['recentMembers'];
+        $recentMembers = $stats['recentMembers'];
+        $this->recentMembers = $recentMembers instanceof Collection
+            ? $recentMembers
+            : collect();
     }
 
     public function render(): View|Closure|string

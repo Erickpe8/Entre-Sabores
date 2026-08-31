@@ -1,4 +1,5 @@
 import { esc, relativeTimeEs } from './postCard.js';
+import { renderEmptyStateHtml } from '../ui/emptyState.js';
 
 /**
  * @param {string|undefined} iso
@@ -24,6 +25,15 @@ export function commentTimeDetail(iso) {
 export function renderCommentsTreeHtml(comments, opts) {
     const showReplyButtons = opts.showReplyButtons === true;
     if (!comments?.length) {
+        if (opts.emptyIllustration) {
+            return renderEmptyStateHtml({
+                ...opts.emptyIllustration,
+                title: opts.emptyTitle ?? 'Sin comentarios aún',
+                message: opts.emptyMessage ?? 'Sé el primero en compartir tu opinión.',
+                className: 'py-6 px-4 border border-dashed border-warm-200 rounded-lg',
+            });
+        }
+
         return '<p class="text-sm text-ink-muted px-1 py-3 text-center border border-dashed border-warm-200 rounded-lg">Sin comentarios aún.</p>';
     }
 
@@ -101,6 +111,7 @@ function formatCommentBodyHtml(text) {
  *   afterCommentPosted?: () => void,
  *   updateHeadingCount?: (count: number) => void,
  *   modalCommentsCountSelector?: string,
+ *   emptyIllustration?: { url?: string|null, webp?: string|null, png?: string|null, alt?: string }|null,
  * }} ctx
  * @param {{ signal?: AbortSignal }} [options]
  */
@@ -209,6 +220,7 @@ export function setupCommentInteractions(rootEl, ctx, options = {}) {
             const p = data.post;
             wrap.innerHTML = renderCommentsTreeHtml(p.comments || [], {
                 showReplyButtons: ctx.isAuthenticated,
+                emptyIllustration: ctx.emptyIllustration ?? null,
             });
             if (p.comments_count != null) {
                 if (ctx.applyCommentsCount) {

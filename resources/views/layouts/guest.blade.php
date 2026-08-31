@@ -1,5 +1,14 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    @php
+        $authIllustration = match (true) {
+            request()->routeIs('register') => 'auth-register-join-community',
+            request()->routeIs('login') => 'auth-login-welcome-back',
+            default => 'auth-welcome-food-world',
+        };
+        $isRegisterAuth = request()->routeIs('register');
+        $isLoginAuth = request()->routeIs('login');
+    @endphp
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,7 +19,11 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="auth-page font-sans antialiased">
+    <body @class([
+        'auth-page font-sans antialiased',
+        'auth-page--register' => $isRegisterAuth,
+        'auth-page--login' => $isLoginAuth,
+    ])>
         <x-ui.alert-stack class="top-20" />
 
         <header class="auth-page__header">
@@ -21,16 +34,18 @@
         </header>
 
         <main class="auth-page__main">
+            @unless ($isLoginAuth)
             <div class="auth-illustration auth-illustration--mobile" aria-hidden="true">
                 <div class="auth-illustration__glow">
                     <div class="auth-illustration__glow-inner scale-75"></div>
                 </div>
-                <img
-                    src="{{ asset('images/hero-gallery.png') }}"
-                    alt=""
-                    class="auth-illustration__img--compact"
-                >
+                <x-ui.illustration
+                    :name="$authIllustration"
+                    :lazy="false"
+                    :img-class="$isRegisterAuth ? 'auth-illustration__img--compact auth-illustration__img--prominent-compact' : 'auth-illustration__img--compact'"
+                />
             </div>
+            @endunless
 
             <div class="auth-page__grid">
                 <section class="auth-page__form-col">
@@ -43,11 +58,15 @@
                     <div class="auth-illustration__glow">
                         <div class="auth-illustration__glow-inner"></div>
                     </div>
-                    <img
-                        src="{{ asset('images/hero-gallery.png') }}"
-                        alt=""
-                        class="auth-illustration__img scale-110"
-                    >
+                <x-ui.illustration
+                    :name="$authIllustration"
+                    :lazy="false"
+                    :img-class="match (true) {
+                        $isLoginAuth => 'auth-illustration__img auth-illustration__img--login',
+                        $isRegisterAuth => 'auth-illustration__img auth-illustration__img--prominent',
+                        default => 'auth-illustration__img scale-105',
+                    }"
+                />
                 </aside>
             </div>
         </main>

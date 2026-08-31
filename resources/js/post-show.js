@@ -9,6 +9,7 @@ import {
     setupCommentInteractions,
     renderCommentNodeHtml,
 } from './social/commentThread.js';
+import { illustrationFromBundle } from './ui/emptyState.js';
 
 let postShowPageInitialized = false;
 
@@ -94,6 +95,7 @@ export function initPostShow() {
             'mt-4 rounded-xl border border-warm-200/60 bg-warm-50/50 p-3 shadow-inner';
         commentsWrap.innerHTML = renderCommentsTreeHtml(post.comments || [], {
             showReplyButtons: config.isAuthenticated === true,
+            emptyIllustration: illustrationFromBundle(config.illustrations, 'empty-no-comments'),
         });
     }
 
@@ -112,6 +114,7 @@ export function initPostShow() {
                 n.textContent = `(${count})`;
             }
         },
+        emptyIllustration: illustrationFromBundle(config.illustrations, 'empty-no-comments'),
     });
 
     const Echo = ensureEcho();
@@ -129,6 +132,7 @@ export function initPostShow() {
             const p = data.post;
             wrap.innerHTML = renderCommentsTreeHtml(p.comments || [], {
                 showReplyButtons: config.isAuthenticated === true,
+                emptyIllustration: illustrationFromBundle(config.illustrations, 'empty-no-comments'),
             });
             syncCommentsCount(root, p.id, p.comments_count ?? 0);
             const heading = document.getElementById('post-show-heading-count');

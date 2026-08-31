@@ -1,6 +1,7 @@
 import { renderCard } from './social/postCard.js';
 import { setupPostCardInteractions, syncSavedPostButtons } from './social/postCardInteractions.js';
 import { initPostCardMedia } from './social/postCardMedia.js';
+import { renderEmptyStateHtml, illustrationFromBundle } from './ui/emptyState.js';
 
 export function initProfilePosts() {
     const grid = document.getElementById('profile-posts-grid');
@@ -80,8 +81,12 @@ export function initProfilePosts() {
             }
 
             if (grid.children.length === 0) {
-                grid.innerHTML =
-                    '<p class="col-span-full text-center text-ink-muted text-sm py-10">Aún no hay publicaciones.</p>';
+                grid.innerHTML = renderEmptyStateHtml({
+                    ...illustrationFromBundle(config.illustrations, 'empty-no-posts'),
+                    title: 'Aún no hay publicaciones',
+                    message: 'Cuando publique algo, aparecerá aquí.',
+                    className: 'col-span-full py-10',
+                });
             }
             setStatus(
                 state.hasMore

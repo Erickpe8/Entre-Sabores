@@ -11,6 +11,9 @@ import {
     syncSavedPostButtons,
 } from './social/postCardInteractions.js';
 import { initPostCardMedia } from './social/postCardMedia.js';
+import { renderEmptyStateHtml, illustrationFromBundle } from './ui/emptyState.js';
+import { initOnboardingModal } from './ui/onboardingModal.js';
+import { showFirstPostCelebration } from './ui/celebrationModal.js';
 import { renderCommentsTreeHtml, setupCommentInteractions } from './social/commentThread.js';
 import {
     bindMaridajeFlip,
@@ -873,8 +876,13 @@ export function initWall() {
         }
 
         if (!posts.length && !append) {
-            feedEl.innerHTML =
-                '<p class="col-span-full text-center text-ink-muted py-16 text-sm">No hay publicaciones con estos filtros.</p>';
+            const emptyIll = illustrationFromBundle(config.illustrations, 'empty-no-search-results');
+            feedEl.innerHTML = renderEmptyStateHtml({
+                ...emptyIll,
+                title: 'Sin resultados',
+                message: 'No hay publicaciones con estos filtros.',
+                className: 'col-span-full py-16',
+            });
             pagination.hasMore = false;
             setFeedStatus('No hay publicaciones con los filtros actuales.');
 
@@ -1027,6 +1035,7 @@ export function initWall() {
 
             const commentsHtml = renderCommentsTreeHtml(p.comments || [], {
                 showReplyButtons: config.isAuthenticated === true,
+                emptyIllustration: illustrationFromBundle(config.illustrations, 'empty-no-comments'),
             });
 
             const commentForm = config.isAuthenticated
@@ -1117,6 +1126,7 @@ export function initWall() {
                     showToast,
                     applyCommentsCount,
                     modalCommentsCountSelector: '#wall-modal-comments-count',
+                    emptyIllustration: illustrationFromBundle(config.illustrations, 'empty-no-comments'),
                 },
                 { signal: modalCommentAbort.signal },
             );
@@ -1444,6 +1454,13 @@ export function initWall() {
                     ? 'Publicación actualizada y enviada a reanálisis.'
                     : 'Nueva publicación añadida al feed.',
             );
+            if (!isEdit && post) {
+                const wasFirstPost = (config.authUserPostsCount ?? 0) === 0;
+                config.authUserPostsCount = (config.authUserPostsCount ?? 0) + 1;
+                if (wasFirstPost) {
+                    showFirstPostCelebration(config);
+                }
+            }
         } catch (err) {
             const res = err.response;
             if (res?.status === 422 && res.data?.errors) {
@@ -1555,4 +1572,6 @@ export function initWall() {
             void loadPostForEdit(pendingId);
         }
     }
+
+    initOnboardingModal(config);
 }

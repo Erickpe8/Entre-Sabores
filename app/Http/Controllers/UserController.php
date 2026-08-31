@@ -7,6 +7,7 @@ use App\Http\Resources\PostResource;
 use App\Models\Like;
 use App\Models\Post;
 use App\Models\User;
+use App\Support\Illustrations;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 
@@ -47,6 +48,7 @@ class UserController extends Controller
                 'postBaseUrl' => '/posts',
                 'loginUrl' => route('login', [], false),
                 'isAuthenticated' => auth()->check(),
+                'illustrations' => Illustrations::bundleForJs(['empty-no-posts']),
             ],
             'profileLikesConfig' => $isProfileOwner
                 ? [

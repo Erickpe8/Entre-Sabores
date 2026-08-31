@@ -32,10 +32,11 @@ function showRealtimeToast(message, themeDark) {
     }, 5200);
 }
 
-function resolveAvatarUrl(raw) {
+function resolveAvatarUrl(raw, fallback) {
     const value = String(raw || '').trim();
+    const fb = fallback || '/images/avatars/avatar-default-foodie.png';
     if (!value) {
-        return '/images/default.png';
+        return fb;
     }
 
     const isAbsoluteHttp = /^https?:\/\//i.test(value);
@@ -44,7 +45,7 @@ function resolveAvatarUrl(raw) {
         return value;
     }
 
-    return '/images/default.png';
+    return fb;
 }
 
 /** Evita doble init si el bundle se cargara dos veces (defensa). */
@@ -151,7 +152,7 @@ export function initNotificationsNav() {
                     const url = esc(d.url || '#');
                     const title = esc(d.title || 'Actividad');
                     const body = esc(d.body || '');
-                    const avatarUrl = esc(resolveAvatarUrl(d.actor_avatar));
+                    const avatarUrl = esc(resolveAvatarUrl(d.actor_avatar, config.defaultAvatarUrl));
                     const read = n.read === true;
                     const when = esc(formatNotifTime(n.created_at));
                     const rowVisual = read ? styles.rowRead : styles.rowUnread;
