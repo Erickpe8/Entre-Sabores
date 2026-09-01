@@ -8,8 +8,8 @@ Documento orientado a desarrolladores y evaluación académica. Describe el esta
 
 | Archivo | Enfoque |
 |---------|---------|
+| **README.md** | **Punto de entrada** (Quick Start, índice, arquitectura, runbook, GitFlow, despliegue) — estilo hub del proyecto |
 | **DOCUMENTACION.md** (este) | Visión integral: arquitectura, flujo IA → BD → frontend, colas, modelo `posts.ai_analysis`, broadcasting. |
-| [README.md](README.md) | Stack, puesta en marcha, índice de docs, feed (tabla resumen). |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | WallFeedService, FYP/Siguiendo, `sort`, mixto 70/30, rutas, IA en una sección, tiempo real. |
 | [BACKEND.md](BACKEND.md) | Controladores, requests, `MaridajeAiAnalysisService`, jobs, policies, broadcasting detallado. |
 | [FRONTEND.md](FRONTEND.md) | Vite, módulos `resources/js/ui`, Echo, `wall.js`, maridaje flip, CSP. |
@@ -26,7 +26,7 @@ Documento orientado a desarrolladores y evaluación académica. Describe el esta
 
 ### Propósito
 
-**Entre Sabores** es una plataforma tipo red social donde los usuarios publican **maridajes**: combinaciones de comida y bebida descritas en texto (y opcionalmente imagen), enmarcadas en **experiencias culturales** y personales. El proyecto surge en el contexto COIL entre México y Colombia, priorizando intercambio cultural además de contenido gastronómico.
+**Entre Sabores** es una plataforma tipo red social donde los usuarios publican **maridajes**: combinaciones de comida y bebida descritas en texto (y opcionalmente imagen), enmarcadas en **experiencias culturales** y personales. El proyecto prioriza el intercambio cultural además del contenido gastronómico.
 
 ### Problema que resuelve
 
@@ -45,24 +45,21 @@ Centraliza la creación, descubrimiento e interacción (likes, comentarios, feed
 
 El sistema sigue el patrón **MVC** de Laravel: controladores delgados, **Form Requests** de validación, **Policies** de autorización, **Eloquent** para acceso a datos. La generación de análisis **no** se ejecuta en la petición HTTP de creación del post: se **encola** un `Job` que invoca un **servicio HTTP** (`MaridajeAiAnalysisService`) contra una API estilo **OpenAI** (`POST …/chat/completions`). El resultado se guarda en **`posts.ai_analysis`** (JSON). Opcionalmente se **broadcast** un evento para actualizar la UI sin polling.
 
-### Diagrama lógico (texto)
+### Diagrama lógico
 
-```
-[Cliente web]
-    │  HTTPS: crear post (JSON multipart), ver post, comentar, like
-    ▼
-[Laravel HTTP] — PostController, políticas, StorePostRequest
-    │  Transacción: insert post, sync tags(pivot), dispatch Job tras commit
-    ▼
-[Queue worker] — GeneratePostAnalysisJob
-    │  Lee Post → llama MaridajeAiAnalysisService → HTTP al proveedor IA
-    │  Valida payload → persiste ai_analysis → broadcast (si broadcasting ≠ null)
-    ▼
-[MySQL] — posts.ai_analysis JSON
-    │
-[Echo/Reverb] — canal post.{id}, evento post.analysis.generated
-    ▼
-[Cliente] — maridajeFlip.js escucha y repinta el panel de análisis
+```mermaid
+flowchart TB
+    CLIENT[Cliente web\nBlade + Axios + Echo]
+    CLIENT -->|HTTPS| HTTP[Laravel HTTP\nPostController, Policies]
+    HTTP -->|transacción + dispatch| Q[Queue Worker]
+    Q --> MOD[AnalyzePostJob]
+    Q --> MAR[GeneratePostAnalysisJob]
+    MOD --> AI[Proveedor IA]
+    MAR --> AI
+    MOD --> DB[(MySQL\nposts.status)]
+    MAR --> DB2[(MySQL\nposts.ai_analysis)]
+    MAR --> WS[Reverb\npost.analysis.generated]
+    WS --> CLIENT
 ```
 
 ### Relación entre componentes

@@ -4,6 +4,20 @@
 
 Stack: **PHP 8.4 (FPM)**, **Nginx**, **MySQL 8**, **phpMyAdmin** y **Redis** (caché/colas o futuros workers). La imagen incluye **Node.js y npm** para poder ejecutar `npm ci` + `npm run build` **dentro del contenedor** cuando haga falta (p. ej. volumen que oculta `public/build`).
 
+```mermaid
+flowchart TB
+    subgraph COMPOSE[docker compose]
+        APP[app :8080\nNginx + PHP-FPM\nSupervisor]
+        MYSQL[(mysql :3307)]
+        PMA[phpmyadmin :8081]
+        REDIS[(redis :6380)]
+    end
+    APP --> MYSQL
+    APP --> REDIS
+    PMA --> MYSQL
+    APP --> SUP[Supervisor\nphp-fpm | nginx | reverb | queue:work]
+```
+
 **Última revisión:** 2026-05-05.
 
 ## Rendimiento en desarrollo (Docker)

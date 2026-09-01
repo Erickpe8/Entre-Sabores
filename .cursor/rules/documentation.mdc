@@ -1,0 +1,46 @@
+---
+description: Convenciones de documentación del repositorio (estilo SystemPOA, audiencia humana)
+globs: "**/*.md"
+alwaysApply: false
+---
+
+# Documentación — Entre Sabores
+
+Los `.md` del repositorio están orientados a **personas**: desarrolladores del equipo, revisores, evaluadores académicos y operadores. No incluir en documentación pública:
+
+- Referencias a agentes, Cursor o `.cursor/rules/`
+- Comandos `project:query`, índice `.project/` ni flujos de trabajo con IA asistida
+- Instrucciones del tipo «el agente debe…»
+
+Ese material vive solo en reglas internas de Cursor (`.cursor/rules/`), no en README ni docs enlazados.
+
+## Hub principal
+
+**README.md**: Quick Start, índice, diagramas, runbook, GitFlow, despliegue. Los `.md` especializados profundizan sin duplicar todo.
+
+## Diagramas (obligatorio en docs técnicos)
+
+Al crear o actualizar documentación, **incluir diagramas Mermaid** cuando describas:
+
+| Tipo de contenido | Diagrama recomendado |
+|-------------------|----------------------|
+| Arquitectura / servicios | `flowchart` |
+| Flujos HTTP, colas, Git | `sequenceDiagram` |
+| Modelo de datos | `erDiagram` |
+| Ramas Git | `gitGraph` o `sequenceDiagram` |
+| Decisiones condicionales (feed, auth) | `flowchart TD` |
+
+Preferir **Mermaid** sobre ASCII para flujos no triviales.
+
+## Estilo (referencia SystemPOA)
+
+- Badges de stack en README.
+- Callouts GitHub: `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`, `> [!IMPORTANT]`.
+- Quick Start Docker en ≤ 6 comandos.
+- Tabla «Documentación del proyecto» con enlaces a todos los `.md` públicos.
+- Índice navegable en README.
+- Sin referencias a COIL en documentación pública.
+
+## Mantenimiento interno (solo agentes, no escribir en docs humanas)
+
+Si se editó `app/Support/ProjectIndex/Catalog.php`: `php artisan project:index --full`.

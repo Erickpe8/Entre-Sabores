@@ -26,8 +26,7 @@
                 "bootstrap/app.php"
             ],
             "aliases": [
-                "entre sabores",
-                "coil"
+                "entre sabores"
             ]
         },
         "domain.social": {
