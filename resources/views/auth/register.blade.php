@@ -1,4 +1,7 @@
-<x-guest-layout title="Registrar usuario | Entre Sabores">
+<x-guest-layout
+    title="Registrar usuario | Entre Sabores"
+    :meta-description="config('seo.auth_descriptions.register')"
+>
     @php
         $registerStep = 1;
 

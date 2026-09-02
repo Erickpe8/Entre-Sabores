@@ -4,6 +4,8 @@
 
 @section('meta_description', 'Descubre maridajes y experiencias en el muro de Entre Sabores: exploración global, cuentas que sigues y filtros de orden.')
 
+@section('canonical', route('explore'))
+
 @section('content')
     <article class="mx-auto max-w-3xl space-y-10">
         <header class="space-y-4 text-center sm:text-left">
