@@ -34,6 +34,12 @@ class SecurityHeaders
             $response->headers->set('Content-Security-Policy', $policy);
         }
 
+        $response->headers->remove('X-Powered-By');
+
+        if (app()->environment('production') && $request->isSecure()) {
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        }
+
         return $response;
     }
 

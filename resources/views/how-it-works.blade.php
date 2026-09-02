@@ -4,6 +4,8 @@
 
 @section('meta_description', 'Cómo publicar un maridaje, cómo funciona el análisis asistido y cómo ver el resultado en tu publicación.')
 
+@section('canonical', route('how-it-works'))
+
 @section('content')
     <article class="mx-auto max-w-3xl space-y-10">
         <header class="space-y-4 text-center sm:text-left">

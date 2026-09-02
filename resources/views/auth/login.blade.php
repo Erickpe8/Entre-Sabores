@@ -1,4 +1,7 @@
-<x-guest-layout title="Ingresar | Entre Sabores">
+<x-guest-layout
+    title="Ingresar | Entre Sabores"
+    :meta-description="config('seo.auth_descriptions.login')"
+>
     <x-auth.card-header
         title="¡Bienvenido de nuevo!"
         subtitle="Ingresa para continuar."

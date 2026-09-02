@@ -5,17 +5,25 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ $title ?? config('app.name', 'Entre Sabores') }}</title>
+        @php
+            $seoTitle = $title ?? config('app.name');
+            $seoDescription = $metaDescription ?? config('seo.default_description');
+        @endphp
+        <x-seo-head
+            :title="$seoTitle"
+            :description="$seoDescription"
+            :include-website-json-ld="false"
+        />
         <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/js/auth.js'])
     </head>
     <body class="auth-page font-sans antialiased">
         <x-ui.alert-stack class="top-20" />
 
         <header class="auth-page__header">
             <a href="{{ route('welcome') }}" class="auth-logo" aria-label="Entre Sabores, inicio">
-                <x-ui.app-logo class="h-10 w-10 shrink-0" />
+                <x-ui.app-logo class="h-10 w-10 shrink-0" alt="" />
                 <span class="auth-logo__title">Entre <span class="auth-logo__accent">Sabores</span></span>
             </a>
         </header>
@@ -28,6 +36,7 @@
                 <img
                     src="{{ asset('images/hero-gallery.png') }}"
                     alt=""
+                    role="presentation"
                     class="auth-illustration__img--compact"
                 >
             </div>
@@ -46,6 +55,7 @@
                     <img
                         src="{{ asset('images/hero-gallery.png') }}"
                         alt=""
+                        role="presentation"
                         class="auth-illustration__img scale-110"
                     >
                 </aside>

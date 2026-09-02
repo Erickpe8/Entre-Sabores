@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SeoController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\InternalMetricsController;
@@ -24,6 +25,9 @@ Route::get('/', function () {
 Route::get('/welcome', function () {
     return view('welcome');
 })->name('welcome');
+
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
 
 Route::view('/explorar', 'explore')->name('explore');
 
