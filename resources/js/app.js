@@ -1,6 +1,8 @@
 import './bootstrap';
-import Cropper from 'cropperjs';
-import 'cropperjs/dist/cropper.css';
+import '@fontsource/plus-jakarta-sans/400.css';
+import '@fontsource/plus-jakarta-sans/500.css';
+import '@fontsource/plus-jakarta-sans/600.css';
+import '@fontsource/plus-jakarta-sans/700.css';
 
 import { initFlowbite } from 'flowbite';
 
@@ -11,14 +13,7 @@ import { initFlashAutoHide } from './ui/flashMessages.js';
 import { initAlerts } from './ui/alerts.js';
 import { initProfileShareModal } from './ui/profileShareModal.js';
 import { initProfilePage } from './ui/profilePage.js';
-import { initUsernameAvailability } from './ui/usernameAvailability.js';
 import { initNavbarChrome } from './ui/navbarChrome.js';
-import { initAvatarCroppers } from './ui/avatarCropper.js';
-import { initAuthForms } from './ui/authForms.js';
-import { initRegisterWizard } from './ui/registerWizard.js';
-import { initRegisterCountryLocation } from './ui/registerCountryLocation.js';
-
-window.Cropper = Cropper;
 
 resetAppChromeState();
 initAppChromePageshow();
@@ -32,11 +27,6 @@ initFlashAutoHide();
 initAlerts();
 initProfileShareModal();
 initProfilePage();
-initUsernameAvailability();
-initAuthForms();
-initRegisterCountryLocation();
-initRegisterWizard();
-initAvatarCroppers();
 initNavbarChrome();
 
 if (document.getElementById('posts-container')) {

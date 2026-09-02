@@ -11,6 +11,20 @@
 
 ## Esquema principal (orden lógico)
 
+```mermaid
+erDiagram
+    users ||--o{ posts : publishes
+    users ||--o{ comments : writes
+    users ||--o{ likes : gives
+    users ||--o{ follows : follower
+    users ||--o{ follows : following
+    posts ||--o{ comments : has
+    posts ||--o{ likes : receives
+    posts }o--o{ tags : post_tag
+    comments ||--o{ comments : parent_id
+    users ||--o{ notifications : receives
+```
+
 1. **`users`** — Identidad, `username` único, perfil, preferencias JSON, país, redes.
 2. **`posts`** — Evolución desde legacy; migración grande **refactor_posts_for_tags_and_comment_threads** añade descripción, imagen, hilos; parte del cambio es **irreversible** (`down()` excepción). Campos de análisis/moderación:
    - `status` (`pending`, `active`, `rejected`)

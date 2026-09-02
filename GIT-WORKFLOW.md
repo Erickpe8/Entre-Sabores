@@ -1,6 +1,6 @@
 # Flujo Git — Entre Sabores
 
-Reglas del juego para el equipo y para agentes. **`main`** es la rama estable; **`develop`** integra features antes de promover a producción.
+Reglas de trabajo en equipo. **`main`** es la rama estable; **`develop`** integra features antes de promover a producción.
 
 ## Ramas
 
@@ -11,6 +11,18 @@ Reglas del juego para el equipo y para agentes. **`main`** es la rama estable; *
 | `feature/*` | Una rama por tarea; **siempre creada desde `main`** |
 
 ## Ciclo por tarea
+
+```mermaid
+gitGraph
+    commit id: "main estable"
+    branch feature/mi-tarea
+    checkout feature/mi-tarea
+    commit id: "desarrollo"
+    checkout develop
+    merge feature/mi-tarea id: "PR → develop"
+    checkout main
+    merge develop id: "PR → main (Vercel)"
+```
 
 ```text
 main ──(checkout -b)──► feature/mi-tarea ──(PR)──► develop ──(PR)──► main
@@ -71,9 +83,9 @@ Merge a `main` (dispara despliegue en Vercel — **solo esta rama**; ver [VERCEL
 
 Corrección urgente en producción: rama `hotfix/*` **desde `main`**, PR a `main` y **backport/merge a `develop`** para no diverger.
 
-## Tarjeta de tarea
+## Plantilla de tarjeta de tarea
 
-Al pedir la tarjeta de una tarea, el agente entrega un markdown para copiar y pegar:
+Al planificar una tarea en el tablero del equipo, puedes usar este formato:
 
 | Sección | Contenido |
 |---------|-----------|
@@ -82,8 +94,4 @@ Al pedir la tarjeta de una tarea, el agente entrega un markdown para copiar y pe
 | Descripción | Alcance y contexto |
 | Objetivo | Problema que resuelve o valor que aporta |
 
-El agente **también crea la rama** `feature/...` al entregar la tarjeta (conservando cambios locales si los hay).
-
-## Agentes (Cursor)
-
-Regla always-on: [`.cursor/rules/git-workflow.mdc`](.cursor/rules/git-workflow.mdc)
+Documento versionado enlazado desde [README.md](README.md#gitflow-del-proyecto).

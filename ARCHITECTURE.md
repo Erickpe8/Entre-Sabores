@@ -6,7 +6,7 @@ Decisiones técnicas y estructura lógica. **Última revisión documental:** 202
 
 ## Visión
 
-Aplicación web tipo red social gastronómica (COIL México–Colombia): muro con feed, publicaciones con etiquetas, interacciones (likes, comentarios anidados, seguimiento) y perfiles públicos. Autenticación y ajustes de cuenta vía **Laravel Breeze**.
+Aplicación web tipo red social gastronómica: muro con feed, publicaciones con etiquetas, interacciones (likes, comentarios anidados, seguimiento) y perfiles públicos. Autenticación y ajustes de cuenta vía **Laravel Breeze**.
 
 ## Stack
 
@@ -20,15 +20,15 @@ Aplicación web tipo red social gastronómica (COIL México–Colombia): muro co
 
 ## Capas y flujo general
 
-```
-HTTP → routes/web.php (+ auth.php)
-     → Middleware (web, auth, throttle)
-     → Controllers (delgados)
-     → Form Requests (validación de entrada)
-     → Servicios (WallFeedService para el feed del muro)
-     → Models / Eloquent
-     → API Resources (PostResource, …)
-     → JSON / Blade
+```mermaid
+flowchart LR
+    HTTP[routes/web.php\n+ auth.php] --> MW[Middleware\nweb, auth, throttle]
+    MW --> CTRL[Controllers]
+    CTRL --> REQ[Form Requests]
+    REQ --> SVC[Services\nWallFeedService, IA…]
+    SVC --> MODEL[Models / Eloquent]
+    MODEL --> RES[API Resources]
+    RES --> OUT[JSON / Blade]
 ```
 
 **Separación de responsabilidades**
@@ -58,6 +58,18 @@ Validación: `FilterPostsRequest` (`sort` nullable, valores permitidos los tres 
 ### Ramas principales del servicio
 
 Orden lógico en `respond()`:
+
+```mermaid
+flowchart TD
+    R[respond] --> F{following=1?}
+    F -->|Sí| FF[followingFeed]
+    F -->|No| M{sort=recent\ny auth?}
+    M -->|Sí| MX[mixedOrGlobalRecent\n70/30 si hay seguidos]
+    M -->|No| GE[globalExploreFeed]
+    FF --> AS[applySort]
+    MX --> AS
+    GE --> AS
+```
 
 1. Si **`following=1`** → `followingFeed()`: solo posts de usuarios seguidos; se aplica `applySort($sort)` sobre esa base. Invitado sin sesión: respuesta vacía con meta indicativa.
 2. Si **no** siguiendo y **`sort === recent`** y hay **usuario autenticado** → `mixedOrGlobalRecent()` (feed inteligente; véase abajo).
@@ -126,6 +138,24 @@ Las rutas suelen servir Blade con config JS (`wallConfig`, …) usando **rutas r
 ## Tiempo real (broadcasting)
 
 Solo donde aporta UX clara: **notificaciones** (badge + toast), **likes**, **comentarios** y **análisis de maridaje listo** en la **vista de detalle de un post**. El feed del muro completo **no** se actualiza por WebSockets (sigue siendo HTTP paginado).
+
+```mermaid
+flowchart LR
+    subgraph BACKEND[Laravel]
+        EVT[Domain Events\nLike, Comment, Notification]
+        BC[Broadcasting Events]
+        REV[Reverb / Pusher]
+    end
+    subgraph CLIENT[Cliente Echo]
+        POST[Canal post.id\npúblico]
+        USER[Canal user.id\nprivado]
+    end
+    EVT --> BC --> REV
+    REV --> POST
+    REV --> USER
+    POST --> UI1[Detalle post\nlikes, comentarios, análisis]
+    USER --> UI2[Nav notificaciones\nbadge + toast]
+```
 
 | Canal | Tipo | Uso |
 |-------|------|-----|

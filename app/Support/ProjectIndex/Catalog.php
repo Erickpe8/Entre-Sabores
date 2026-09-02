@@ -26,7 +26,7 @@ final class Catalog
             'project' => [
                 'id' => 'entre-sabores',
                 'name' => 'Entre Sabores',
-                'summary' => 'Red social gastronómica (COIL México–Colombia): muro, publicaciones con etiquetas, likes, comentarios, perfiles y análisis de maridaje por IA.',
+                'summary' => 'Red social gastronómica: muro, publicaciones con etiquetas, likes, comentarios, perfiles y análisis de maridaje por IA.',
             ],
             'scan_roots' => [
                 'app',
@@ -101,7 +101,7 @@ final class Catalog
                 'Raíz conceptual del monolito Laravel 13 de la red social gastronómica.',
                 [],
                 ['README.md', 'ARCHITECTURE.md', 'bootstrap/app.php'],
-                ['entre sabores', 'coil'],
+                ['entre sabores'],
             ),
 
             self::n('domain.social', 'domain', 'Red social', 'entre-sabores', 'Muro, publicaciones, likes, comentarios, seguimiento y etiquetas.', ['routes/web.php'], ['app/Http/Controllers/WallController.php'], ['feed', 'social']),
@@ -503,6 +503,12 @@ final class Catalog
                     'resources/views/welcome.blade.php',
                     'resources/views/how-it-works.blade.php',
                     'resources/views/explore.blade.php',
+                    'resources/views/components/seo-head.blade.php',
+                    'resources/views/seo/sitemap.blade.php',
+                    'app/Http/Controllers/SeoController.php',
+                    'config/seo.php',
+                    'resources/js/marketing.js',
+                    'tests/Feature/SeoTest.php',
                 ],
                 ['welcome', 'explorar', 'como funciona', 'landing'],
                 [],

@@ -17,7 +17,7 @@
                 @if ($member->profile_photo)
                     <img
                         src="{{ $member->profile_photo_thumb_url }}"
-                        alt=""
+                        alt="Foto de perfil de {{ '@'.$member->username }}"
                         class="h-full w-full object-cover"
                         width="32"
                         height="32"

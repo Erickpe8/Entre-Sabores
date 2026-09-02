@@ -5,22 +5,18 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ $title ?? config('app.name', 'Entre Sabores') }}</title>
-        @if (filled($metaDescription))
-            <meta name="description" content="{{ $metaDescription }}">
-        @endif
-        @if (filled($metaDescription) || filled($ogImage) || filled($ogUrl))
-            <meta property="og:title" content="{{ $title ?? config('app.name') }}">
-            <meta property="og:type" content="article">
-            @if (filled($metaDescription))
-                <meta property="og:description" content="{{ $metaDescription }}">
-            @endif
-            @if (filled($ogImage))
-                <meta property="og:image" content="{{ $ogImage }}">
-            @endif
-            <meta property="og:url" content="{{ $ogUrl ?? url()->current() }}">
-            <meta name="twitter:card" content="summary_large_image">
-        @endif
+        @php
+            $seoTitle = $title ?? config('app.name');
+            $seoDescription = $metaDescription ?? config('seo.default_description');
+        @endphp
+        <x-seo-head
+            :title="$seoTitle"
+            :description="$seoDescription"
+            :canonical="url()->current()"
+            :og-image="filled($ogImage ?? null) ? $ogImage : null"
+            og-type="website"
+            :include-website-json-ld="false"
+        />
         <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])

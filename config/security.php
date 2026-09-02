@@ -30,7 +30,8 @@ return [
     ],
 
     /*
-    | Política base estricta: sin CDNs, sin eval. JS solo desde Vite (public/build).
+    | Política base estricta: sin eval. JS solo desde Vite (public/build).
+    | Fuentes self-hosted vía Vite (@fontsource); no requiere CDNs externos.
     | style-src conserva 'unsafe-inline' por estilos de componentes y atributos ocasionales.
     | Si Laravel Echo/Reverb usa otro host/puerto, amplía connect-src vía SECURITY_CSP_POLICY.
     */

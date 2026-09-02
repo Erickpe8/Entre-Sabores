@@ -9,28 +9,19 @@ Entre Sabores se despliega en **Vercel** como **contenedor OCI** (`Dockerfile.ve
 
 ## Arquitectura
 
-```text
-Git push / vercel deploy
-        │
-        ▼
-┌───────────────────────────────┐
-│  Vercel build                 │
-│  Dockerfile.vercel            │
-│  · npm run build (Vite)       │
-│  · composer install --no-dev  │
-│  · FrankenPHP + Caddy         │
-└───────────────┬───────────────┘
-                │
-                ▼
-┌───────────────────────────────┐
-│  Contenedor HTTP ($PORT)      │
-│  Laravel / public             │
-└───────────────┬───────────────┘
-                │
-    ┌───────────┼───────────┐
-    ▼           ▼           ▼
- MySQL      Redis       S3/Blob
- (externo)  (Upstash)   (medios)
+```mermaid
+flowchart TB
+    GIT[git push / vercel deploy] --> BUILD[Vercel build\nDockerfile.vercel]
+    BUILD --> NPM[npm run build\nVite assets]
+    BUILD --> COMP[composer install --no-dev]
+    NPM --> IMG[Imagen FrankenPHP + Caddy]
+    COMP --> IMG
+    IMG --> HTTP[Contenedor HTTP\n$PORT]
+    HTTP --> MYSQL[(MySQL externo)]
+    HTTP --> REDIS[(Redis / Upstash)]
+    HTTP --> S3[(S3 / Blob)]
+    CRON[Vercel Cron] --> HTTP
+    HTTP --> PUSHER[Pusher / WS externo]
 ```
 
 ### Qué va dentro del contenedor
