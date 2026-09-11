@@ -75,7 +75,8 @@ COPY docker/vercel/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 RUN mkdir -p storage/app/public storage/logs storage/framework/sessions storage/framework/views storage/framework/cache/data bootstrap/cache \
-	&& chmod -R ug+rwX storage bootstrap/cache
+	&& chmod -R ug+rwX storage bootstrap/cache \
+	&& ln -sfn /app/storage/app/public /app/public/storage
 
 ENV PORT=80 \
 	APP_ENV=production \

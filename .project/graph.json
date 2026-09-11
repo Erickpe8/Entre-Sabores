@@ -668,6 +668,15 @@
         },
         {
             "from": "tests.suite",
+            "to": "platform.marketing",
+            "type": "tests",
+            "confidence": 0.9,
+            "source": "path-map",
+            "inferred": true,
+            "weight": 1
+        },
+        {
+            "from": "tests.suite",
             "to": "platform.observability",
             "type": "tests",
             "confidence": 0.9,

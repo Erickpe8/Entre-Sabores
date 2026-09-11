@@ -113,6 +113,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# --- Prototipo visual (capturas locales, no versionar) ---
+/docs/prototipo-visual/*.jpg
+/docs/prototipo-visual/*.jpeg
+/docs/prototipo-visual/*.png
+/docs/prototipo-visual/*.webp
+/docs/prototipo-visual/*.gif
+
 # --- Miscelánea ---
 *.orig
 *.rej

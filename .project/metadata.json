@@ -1,16 +1,23 @@
 {
     "schema_version": 1,
-    "generated_at": "2026-08-28T13:55:55+00:00",
-    "commit": "d7a376310be7785550d17a45b8bd016c1f598647",
+    "generated_at": "2026-09-10T23:11:26+00:00",
+    "commit": "0dff7d0bfca77dc4b287ed99cefdf0bf86e0184c",
     "dirty": true,
-    "files_hash": "8552ec9fe53d4964b4012a5b5f728464165f324c",
-    "catalog_hash": "df2d44c5911873f2110716893b785c31f4bad9de",
+    "files_hash": "954296975b49ed2ecb5a6eff5edc21d4d9a6e84e",
+    "catalog_hash": "0b56596efb77b99c668fea284490332644e1b472",
     "mode": "full",
     "node_count": 36,
-    "edge_count": 75,
+    "edge_count": 76,
     "truth_rule": "El índice decide QUÉ LEER, no QUÉ ES VERDAD. El código es la fuente de verdad.",
     "warnings": [
-        "working-tree-dirty"
+        "working-tree-dirty",
+        "commit-changed",
+        "unmapped-app-php:4"
     ],
-    "unmapped_app_php": []
+    "unmapped_app_php": [
+        "app/Support/CommunityStats.php",
+        "app/Support/RegisterCountryCatalog.php",
+        "app/Support/RegisterCountryDetector.php",
+        "app/View/Components/Ui/CommunitySocialProof.php"
+    ]
 }

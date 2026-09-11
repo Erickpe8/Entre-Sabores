@@ -3,8 +3,8 @@ set -e
 
 cd /app
 
-echo "[vercel] Preparando Laravel..."
-
+# Vercel enruta la petición en cuanto el proceso arranca. Cualquier `php artisan`
+# aquí retrasa el bind de $PORT y la primera visita tras scale-to-zero acaba en 504.
 mkdir -p \
 	storage/app/public \
 	storage/framework/sessions \
@@ -15,14 +15,5 @@ mkdir -p \
 
 chmod -R ug+rwX storage bootstrap/cache 2>/dev/null || true
 
-php artisan storage:link --force >/dev/null 2>&1 || true
-
-if [ -n "${APP_KEY:-}" ]; then
-	echo "[vercel] Registrando service providers..."
-	php artisan package:discover --ansi
-else
-	echo "[vercel] APP_KEY no definida; omitiendo package:discover."
-fi
-
-echo "[vercel] Iniciando FrankenPHP..."
+echo "[vercel] Iniciando FrankenPHP en :${PORT:-80}..."
 exec "$@"

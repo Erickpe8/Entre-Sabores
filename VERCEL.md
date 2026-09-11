@@ -5,7 +5,7 @@
 
 Entre Sabores se despliega en **Vercel** como **contenedor OCI** (`Dockerfile.vercel` + FrankenPHP). Vercel construye la imagen, la almacena en su Container Registry y la sirve con **Fluid compute** (escala a cero cuando no hay tráfico).
 
-**Última revisión:** 2026-08-28.
+**Última revisión:** 2026-09-11.
 
 ## Arquitectura
 
@@ -43,7 +43,7 @@ flowchart TB
 |---------|-----|
 | `Dockerfile.vercel` | Imagen de producción para Vercel |
 | `docker/vercel/Caddyfile` | Servidor HTTP en `$PORT` |
-| `docker/vercel/entrypoint.sh` | Caches Laravel y migraciones opcionales |
+| `docker/vercel/entrypoint.sh` | Bind inmediato de `$PORT` (sin artisan en el arranque) |
 | `vercel.json` | Servicio container + rewrites + crons |
 | `.env.vercel.example` | Variables de referencia |
 
@@ -81,6 +81,7 @@ Copia [.env.vercel.example](.env.vercel.example) como guía. Mínimo en Vercel D
 | `APP_URL` | URL de producción (`https://entre-sabores.vercel.app`) |
 | `TRUSTED_PROXIES` | `*` detrás del proxy de Vercel |
 | `DB_*` | MySQL externo |
+| `DB_CONNECT_TIMEOUT` | Segundos para el handshake PDO (por defecto `5`; evita 504 si el host no responde) |
 | `REDIS_URL` o `REDIS_HOST` + credenciales | Solo si `SESSION_DRIVER=redis`; si falta, la app hace fallback a `file` |
 | `SESSION_DRIVER` | `file` al inicio; `redis` cuando Upstash esté listo |
 | `CACHE_STORE` | `file` al inicio; `redis` en producción madura |
@@ -207,12 +208,11 @@ Sin Pusher, la app funciona pero sin notificaciones en vivo.
 |---------|----------------|----------|
 | `No Output Directory named "dist"` | Vercel trata el repo como Vite estático; faltan `vercel.json` / `Dockerfile.vercel` en la rama desplegada | Subir esos archivos; Framework Preset → **Other**; Output Directory vacío |
 | Cron `* * * * *` rechazado | Plan Hobby: máx. un cron **diario** | Usar schedule diario en `vercel.json`; cola vía cron externo o Pro |
-| `Could not open input file: artisan` en build | `composer install` ejecuta scripts antes de copiar el código | `composer install --no-scripts`; `package:discover` en entrypoint con `APP_KEY` real |
-| Build falla en `package:discover` | `APP_KEY` placeholder inválida en imagen | No ejecutar artisan en build; discovery en arranque del contenedor |
+| `Could not open input file: artisan` en build | `composer install` ejecuta scripts antes de copiar el código | `composer install --no-scripts`; no correr artisan en el build |
 | **500** `ArgumentCountError` en `Manager::createDriver()` | `APP_MAINTENANCE_DRIVER` o `BROADCAST_CONNECTION` vacíos en Vercel | Definir `APP_MAINTENANCE_DRIVER=file`; no dejar variables en blanco |
 | **500** en `/` | `APP_KEY` vacía, Redis/MySQL mal configurados, o excepción Laravel | Revisar logs; definir `APP_KEY`; usar `SESSION_DRIVER=file` hasta tener Upstash; probar `GET /up` |
-| **504** (300 s) | Entrypoint bloqueaba con `config:cache` / `migrate` antes de abrir HTTP | Entrypoint mínimo; no usar `VERCEL_RUN_MIGRATIONS=1` salvo BD lista |
-| 502 tras deploy | Servidor no escucha en `$PORT` | Caddyfile usa `:{$PORT:80}` |
+| **504** `FUNCTION_INVOCATION_TIMEOUT` (300 s) | El contenedor escala a cero (Hobby). Si el entrypoint corre `artisan` antes de escuchar en `$PORT`, Vercel no entrega la primera petición y espera hasta el timeout | Entrypoint solo crea dirs y `exec` FrankenPHP; Caddy `bind 0.0.0.0`; `DB_CONNECT_TIMEOUT=5` para no colgar en MySQL |
+| 502 tras deploy | Servidor no escucha en `$PORT` | Caddyfile usa `:{$PORT:80}` y `bind 0.0.0.0` |
 | Assets sin estilo | Build sin `VITE_*` | Definir variables en Vercel antes del build |
 | Sesión se pierde | `SESSION_DRIVER=file` | Usar `redis` |
 | Cola no avanza | Sin cron o `CRON_SECRET` mal | Revisar crons en dashboard y logs |

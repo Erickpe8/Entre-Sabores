@@ -161,6 +161,7 @@
             "app/Http/Controllers/Auth/NewPasswordController.php",
             "app/Http/Controllers/Auth/PasswordController.php",
             "app/Http/Controllers/Auth/PasswordResetLinkController.php",
+            "app/Http/Controllers/Auth/RegisterCountryHintController.php",
             "app/Http/Controllers/Auth/RegisteredUserController.php",
             "app/Http/Controllers/Auth/VerifyEmailController.php",
             "app/Http/Requests/Auth/ConfirmPasswordRequest.php",
@@ -350,17 +351,30 @@
         "entrypoints": [
             "resources/views/welcome.blade.php",
             "resources/views/how-it-works.blade.php",
-            "resources/views/explore.blade.php"
+            "resources/views/explore.blade.php",
+            "resources/views/components/seo-head.blade.php",
+            "resources/views/seo/sitemap.blade.php",
+            "app/Http/Controllers/SeoController.php",
+            "config/seo.php",
+            "resources/js/marketing.js",
+            "tests/Feature/SeoTest.php"
         ],
         "dirs": [],
         "files": [
+            "app/Http/Controllers/SeoController.php",
+            "config/seo.php",
+            "resources/js/marketing.js",
+            "resources/views/components/seo-head.blade.php",
             "resources/views/explore.blade.php",
             "resources/views/how-it-works.blade.php",
             "resources/views/layouts/marketing.blade.php",
             "resources/views/layouts/partials/marketing-header.blade.php",
+            "resources/views/seo/sitemap.blade.php",
             "resources/views/welcome.blade.php"
         ],
-        "tests": []
+        "tests": [
+            "tests/Feature/SeoTest.php"
+        ]
     },
     "platform.observability": {
         "entrypoints": [
@@ -424,7 +438,17 @@
             "resources/js/ui/flashMessages.js",
             "resources/js/ui/mobileNav.js",
             "resources/js/ui/modals.js",
+            "resources/views/components/app/navbar.blade.php",
+            "resources/views/components/auth/card-header.blade.php",
+            "resources/views/components/ui/alert-stack.blade.php",
+            "resources/views/components/ui/alert.blade.php",
+            "resources/views/components/ui/app-logo.blade.php",
+            "resources/views/components/ui/badge.blade.php",
+            "resources/views/components/ui/community-social-proof.blade.php",
             "resources/views/components/ui/icon.blade.php",
+            "resources/views/components/ui/navbar-brand.blade.php",
+            "resources/views/components/ui/navbar-link.blade.php",
+            "resources/views/components/ui/navbar.blade.php",
             "resources/views/dashboard.blade.php",
             "resources/views/errors/partials/http-card.blade.php",
             "resources/views/layouts/app.blade.php",
